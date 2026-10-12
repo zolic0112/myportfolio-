@@ -1,36 +1,39 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 作品集網站
 
-## Getting Started
+Next.js + TypeScript + Tailwind CSS 打造的個人作品集,內建一個簡單的管理後台(`/admin`),可以直接在介面上新增、編輯、刪除作品,不需要改程式碼。
 
-First, run the development server:
+## 開發
 
 ```bash
+npm install
+cp .env.example .env   # 填入自己的 ADMIN_PASSWORD / ADMIN_SESSION_SECRET
+npm run prisma:migrate # 建立本機 SQLite 資料庫
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+開啟 http://localhost:3000 看前台,http://localhost:3000/admin 進管理後台(密碼就是 `.env` 裡的 `ADMIN_PASSWORD`)。
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 結構
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `src/app/` — 頁面與 API routes(App Router)
+- `src/components/` — 前台區塊(Nav、Hero、Projects、Skills、Contact、Footer)
+- `src/app/admin/` — 管理後台(登入頁 + 作品 CRUD 介面)
+- `src/app/api/projects/` — 作品的 REST API(GET 公開,POST/PUT/DELETE 需登入)
+- `src/lib/data.ts` — 個人資料(姓名、簡介、技能等靜態內容,直接編輯這個檔案)
+- `prisma/schema.prisma` — 作品(Project)的資料庫結構
+- `src/proxy.ts` — 保護 `/admin` 頁面與寫入類 API 的驗證邏輯
 
-## Learn More
+## 資料庫
 
-To learn more about Next.js, take a look at the following resources:
+本機開發用 SQLite(`prisma/dev.db`,已加入 `.gitignore`)。部署到 Vercel 等平台時:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. 準備一個雲端 Postgres(例如 Vercel Postgres、Neon、Supabase)
+2. 把 `prisma/schema.prisma` 的 `datasource.provider` 改成 `"postgresql"`
+3. 設定環境變數 `DATABASE_URL` 指向該雲端資料庫
+4. 執行 `npx prisma migrate deploy`
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Prisma 的 Client API 不會因為換資料庫而改變,應用程式程式碼不需要更動。
 
-## Deploy on Vercel
+## 管理後台驗證
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+目前是「單一密碼」模式:設定 `ADMIN_PASSWORD` 後即可登入,`ADMIN_SESSION_SECRET` 用來簽署 session cookie,請用 `openssl rand -hex 32` 產生一個夠長的隨機字串。

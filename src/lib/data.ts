@@ -11,34 +11,8 @@ export const profile = {
   },
 };
 
-export type Project = {
-  slug: string;
-  title: string;
-  description: string;
-  tags: string[];
-  link?: string;
-  repo?: string;
-  image?: string;
-};
-
-export const projects: Project[] = [
-  {
-    slug: "project-one",
-    title: "專案一",
-    description: "在這裡簡短描述這個專案解決的問題與你的角色。",
-    tags: ["Next.js", "TypeScript", "Tailwind"],
-    link: "",
-    repo: "",
-  },
-  {
-    slug: "project-two",
-    title: "專案二",
-    description: "在這裡簡短描述這個專案解決的問題與你的角色。",
-    tags: ["React", "Node.js"],
-    link: "",
-    repo: "",
-  },
-];
+// Project content now lives in the database (see prisma/schema.prisma) and
+// is managed via /admin, not here.
 
 export type SkillGroup = {
   category: string;

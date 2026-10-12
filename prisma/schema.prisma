@@ -1,0 +1,24 @@
+// Dev uses SQLite. For Vercel production, switch provider to "postgresql"
+// and point DATABASE_URL at a hosted Postgres (Vercel Postgres / Neon / etc).
+// Prisma's query API doesn't change, so no app code needs to change.
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Project {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  tags        String // comma-separated; SQLite has no native array type
+  link        String?
+  repo        String?
+  image       String?
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
