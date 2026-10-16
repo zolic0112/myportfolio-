@@ -1,0 +1,76 @@
+@import "tailwindcss";
+
+/* Theme tokens. Components only use these variables, so adding a theme is
+   just adding another [data-theme] block here and its name in store.ts. */
+:root,
+[data-theme="minimal"] {
+  --bg: #ffffff;
+  --fg: #171717;
+  --muted: #71717a;
+  --card: #ffffff;
+  --border: rgb(0 0 0 / 0.1);
+  --accent: #171717;
+  --font-display: var(--font-geist-sans);
+}
+
+[data-theme="night"] {
+  --bg: #0b1020;
+  --fg: #e6e9f5;
+  --muted: #8a93b2;
+  --card: #141b33;
+  --border: rgb(255 255 255 / 0.12);
+  --accent: #7c9cff;
+  --font-display: var(--font-geist-sans);
+}
+
+[data-theme="retro"] {
+  --bg: #f4e9d0;
+  --fg: #2b1d0e;
+  --muted: #7a6040;
+  --card: #fff6e0;
+  --border: #2b1d0e;
+  --accent: #e2552e;
+  --font-display: var(--font-geist-mono);
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-card: var(--card);
+  --color-border: var(--border);
+  --color-accent: var(--accent);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-display);
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+}
+
+/* Theme switch effect: the new theme wipes in as an expanding circle. */
+::view-transition-new(root) {
+  animation: theme-reveal 600ms ease-out;
+}
+::view-transition-old(root) {
+  animation: none;
+}
+@keyframes theme-reveal {
+  from { clip-path: circle(0% at 100% 100%); }
+  to { clip-path: circle(150% at 100% 100%); }
+}
+
+@keyframes pet-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+.pet-idle {
+  animation: pet-bob 2.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pet-idle { animation: none; }
+  ::view-transition-new(root) { animation: none; }
+}
