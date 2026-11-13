@@ -23,11 +23,11 @@ export default function GameOverlay() {
     <div
       role="dialog"
       aria-label={entry.title}
-      className="fixed inset-0 z-[90] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-[56] flex items-center justify-center bg-black/60 p-4"
       onClick={closeGame}
     >
       <div
-        className="relative h-[min(80vh,600px)] w-[min(90vw,800px)] overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--card)] text-[var(--fg)] shadow-2xl"
+        className="skin-panel relative h-[min(80vh,600px)] w-[min(90vw,800px)] overflow-hidden text-fg"
         onClick={(e) => e.stopPropagation()}
       >
         <button

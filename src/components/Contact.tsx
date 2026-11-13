@@ -2,15 +2,17 @@ type Props = { email: string; links: readonly { label: string; url: string | nul
 
 export default function Contact({ email, links }: Props) {
   return (
-    <section id="contact" className="mx-auto max-w-5xl px-6 py-16">
-      <h2 className="font-display text-2xl font-semibold tracking-tight">聯絡我</h2>
-      <div className="mt-6 flex flex-wrap gap-4 text-sm font-medium">
+    <section id="contact" className="mx-auto max-w-6xl scroll-mt-24 px-4 pb-28 pt-8 sm:px-6">
+      <h2 className="skin-h2 text-3xl sm:text-4xl">聯絡</h2>
+      <div className="mt-6 flex flex-wrap gap-3 text-sm">
         {email && (
-          <a href={`mailto:${email}`} className="underline underline-offset-4">{email}</a>
+          <a href={`mailto:${email}`} className="skin-btn ghost">{email}</a>
         )}
         {links.map((l) =>
           l.url ? (
-            <a key={l.url} href={l.url} target="_blank" rel="noopener noreferrer">{l.label}</a>
+            <a key={l.url} href={l.url} target="_blank" rel="noopener noreferrer" className="skin-btn ghost">
+              {l.label} ↗
+            </a>
           ) : null,
         )}
       </div>

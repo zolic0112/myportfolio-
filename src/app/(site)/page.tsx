@@ -1,5 +1,6 @@
 import Hero from "@/components/Hero";
-import WorksGrid from "@/components/WorksGrid";
+import Bento from "@/components/Bento";
+import WorksBrowser from "@/components/WorksBrowser";
 import Contact from "@/components/Contact";
 import { getProfile, getWorks } from "@/lib/content";
 
@@ -8,7 +9,8 @@ export default async function Home() {
   return (
     <>
       <Hero name={profile.name} title={profile.title} tagline={profile.tagline} />
-      <WorksGrid works={works} />
+      <Bento works={works} />
+      <WorksBrowser works={works} />
       <Contact email={profile.email} links={profile.links} />
     </>
   );
