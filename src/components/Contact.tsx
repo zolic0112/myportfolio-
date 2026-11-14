@@ -1,9 +1,11 @@
+import { T, UI } from "@/lib/i18n";
+
 type Props = { email: string; links: readonly { label: string; url: string | null }[] };
 
 export default function Contact({ email, links }: Props) {
   return (
     <section id="contact" className="mx-auto max-w-6xl scroll-mt-24 px-4 pb-28 pt-8 sm:px-6">
-      <h2 className="skin-h2 text-3xl sm:text-4xl">聯絡</h2>
+      <h2 className="skin-h2 text-3xl sm:text-4xl"><T v={UI.contact} /></h2>
       <div className="mt-6 flex flex-wrap gap-3 text-sm">
         {email && (
           <a href={`mailto:${email}`} className="skin-btn ghost">{email}</a>

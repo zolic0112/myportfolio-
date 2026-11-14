@@ -10,6 +10,31 @@ const storage =
       } as const)
     : ({ kind: "local" } as const);
 
+// Translations live next to the Chinese source. `npm run translate` fills the
+// empty ones by machine; tick "已校對" once a human has checked a language so
+// the script never overwrites it.
+const workTranslation = (lang: string) =>
+  fields.object(
+    {
+      title: fields.text({ label: "標題" }),
+      summary: fields.text({ label: "簡介", multiline: true }),
+      role: fields.text({ label: "角色" }),
+      body: fields.text({ label: "內文(純文字,空行分段)", multiline: true }),
+      reviewed: fields.checkbox({ label: "已校對(沒勾 = 機翻未校對)" }),
+    },
+    { label: lang },
+  );
+
+const profileTranslation = (lang: string) =>
+  fields.object(
+    {
+      title: fields.text({ label: "職稱" }),
+      tagline: fields.text({ label: "一句話介紹", multiline: true }),
+      reviewed: fields.checkbox({ label: "已校對(沒勾 = 機翻未校對)" }),
+    },
+    { label: lang },
+  );
+
 export default config({
   storage,
   ui: { brand: { name: "Portfolio" } },
@@ -32,6 +57,14 @@ export default config({
             description: "Brain rot 面的假叉叉會隨機開其中一個(新分頁)",
             itemLabel: (p) => p.fields.label.value,
           },
+        ),
+        i18n: fields.object(
+          {
+            en: profileTranslation("English"),
+            ja: profileTranslation("日本語"),
+            es: profileTranslation("Español"),
+          },
+          { label: "翻譯", description: "留空會顯示中文。npm run translate 會自動填沒校對過的欄位" },
         ),
         sponsorUrl: fields.url({
           label: "贊助連結(Ko-fi / Buy Me a Coffee / PayPal)",
@@ -120,6 +153,14 @@ export default config({
         }),
         liveUrl: fields.url({ label: "外部連結(選填)" }),
         repoUrl: fields.url({ label: "原始碼(選填)" }),
+        i18n: fields.object(
+          {
+            en: workTranslation("English"),
+            ja: workTranslation("日本語"),
+            es: workTranslation("Español"),
+          },
+          { label: "翻譯", description: "留空會顯示中文。npm run translate 會自動填沒校對過的欄位" },
+        ),
         body: fields.markdoc({ label: "內文" }),
       },
     }),

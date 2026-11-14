@@ -2,6 +2,7 @@
 
 import { Suspense, useEffect } from "react";
 import { games } from "@/games/registry";
+import { T, UI } from "@/lib/i18n";
 import { useInteractive } from "./store";
 
 export default function GameOverlay() {
@@ -37,7 +38,7 @@ export default function GameOverlay() {
         >
           ✕
         </button>
-        <Suspense fallback={<p className="p-6 text-sm opacity-60">載入中…</p>}>
+        <Suspense fallback={<p className="p-6 text-sm opacity-60"><T v={UI.loading} /></p>}>
           <Game onExit={closeGame} />
         </Suspense>
       </div>

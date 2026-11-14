@@ -1,10 +1,11 @@
 import type { Category } from "./content";
+import { UI, type L } from "./i18n";
 
-export const CATEGORY_LABEL: Record<Category, string> = {
-  game: "遊戲",
-  interactive: "互動",
-  video: "影像",
-  graphic: "平面",
+export const CATEGORY_LABEL: Record<Category, L> = {
+  game: UI.game,
+  interactive: UI.interactive,
+  video: UI.video,
+  graphic: UI.graphic,
 };
 
 // Deterministic placeholder art for works without a cover, so the grid still

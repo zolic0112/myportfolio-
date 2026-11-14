@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { WorkCard as Work } from "@/lib/content";
+import { T, UI } from "@/lib/i18n";
 import { CATEGORY_LABEL, placeholderHue } from "@/lib/labels";
 
 type Props = { work: Work; size?: "lg" | "md"; glass?: boolean; className?: string };
@@ -15,7 +16,7 @@ export default function WorkCard({ work, size = "md", glass, className = "" }: P
       className={`skin-card group flex flex-col ${glass ? "glass" : ""} ${work.rotOnly ? "rot-only" : ""} ${className}`}
     >
       <div className="skin-titlebar">
-        <span className="t">{work.title}.exe</span>
+        <span className="t"><T v={work.title} />.exe</span>
         <span className="win-btn" aria-hidden>_</span>
         <span className="win-btn" aria-hidden>□</span>
         <span className="win-btn" aria-hidden>×</span>
@@ -32,18 +33,18 @@ export default function WorkCard({ work, size = "md", glass, className = "" }: P
           />
         ) : (
           <div className="ph" style={{ "--h": placeholderHue(work.slug) } as React.CSSProperties}>
-            <span>{work.title}</span>
+            <span><T v={work.title} /></span>
           </div>
         )}
       </div>
       <div className={size === "lg" ? "p-6 sm:p-8" : "p-5"}>
         <p className="skin-meta">
-          {CATEGORY_LABEL[work.category]}
+          <T v={CATEGORY_LABEL[work.category]} />
           {work.year ? ` · ${work.year}` : ""}
-          {work.playable ? " · ▶ 可玩" : ""}
+          {work.playable && <> · ▶ <T v={UI.playable} /></>}
         </p>
-        <h3 className={`skin-card-title mt-2 ${size === "lg" ? "sm:text-3xl" : ""}`}>{work.title}</h3>
-        <p className="mt-2 line-clamp-2 text-sm text-muted">{work.summary}</p>
+        <h3 className={`skin-card-title mt-2 ${size === "lg" ? "sm:text-3xl" : ""}`}><T v={work.title} /></h3>
+        <p className="mt-2 line-clamp-2 text-sm text-muted"><T v={work.summary} /></p>
       </div>
     </Link>
   );

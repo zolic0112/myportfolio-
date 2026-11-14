@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { games } from "@/games/registry";
 import { useInteractive, useJunkOn } from "@/interactive/store";
+import { T, UI, type L } from "@/lib/i18n";
 import { placeholderHue } from "@/lib/labels";
 import AdGate from "./AdGate";
 
@@ -14,7 +15,7 @@ type Embed =
 
 type Props = {
   slug: string;
-  title: string;
+  title: L;
   cover: string | null;
   video: string;
   gallery: string[];
@@ -54,12 +55,12 @@ export default function WorkMedia({ slug, title, cover, video, gallery, embed, m
 
   let stage: React.ReactNode;
   if (started && playable && embed.discriminant === "iframe") {
-    stage = <iframe src={embed.value} title={title} allow="fullscreen; autoplay; gamepad" className="absolute inset-0 h-full w-full" />;
+    stage = <iframe src={embed.value} title={title.en} allow="fullscreen; autoplay; gamepad" className="absolute inset-0 h-full w-full" />;
   } else if (started && video) {
     const v = videoSrc(video);
     stage =
       v.kind === "iframe" ? (
-        <iframe src={v.src} title={title} allow="autoplay; fullscreen; picture-in-picture" allowFullScreen className="absolute inset-0 h-full w-full" />
+        <iframe src={v.src} title={title.en} allow="autoplay; fullscreen; picture-in-picture" allowFullScreen className="absolute inset-0 h-full w-full" />
       ) : (
         <video src={v.src} controls autoPlay playsInline className="absolute inset-0 h-full w-full bg-black" />
       );
@@ -72,13 +73,13 @@ export default function WorkMedia({ slug, title, cover, video, gallery, embed, m
           <Image src={gallery[0]} alt="" fill priority className="object-cover" sizes="(min-width: 1024px) 66vw, 100vw" />
         ) : (
           <div className="ph" style={{ "--h": placeholderHue(slug) } as React.CSSProperties}>
-            <span>{title}</span>
+            <span><T v={title} /></span>
           </div>
         )}
         {hasPlayer && (
           <div className="absolute inset-0 z-[2] grid place-items-center">
             <button className="skin-btn" onClick={start}>
-              {playable ? "▶ 開始玩" : "▶ 播放"}
+              <T v={playable ? UI.play : UI.watch} />
             </button>
           </div>
         )}
@@ -90,7 +91,7 @@ export default function WorkMedia({ slug, title, cover, video, gallery, embed, m
     <div className="grid gap-3">
       <div className="skin-panel overflow-hidden">
         <div className="skin-titlebar">
-          <span className="t">{title} — 媒體播放程式</span>
+          <span className="t"><T v={title} /> — 媒體播放程式</span>
           <span className="win-btn" aria-hidden>_</span>
           <span className="win-btn" aria-hidden>□</span>
           <span className="win-btn" aria-hidden>×</span>
@@ -109,7 +110,7 @@ export default function WorkMedia({ slug, title, cover, video, gallery, embed, m
       </div>
       {blockedOnMobile && (
         <p className="text-sm text-muted">
-          這件作品在手機上無法遊玩{video ? ",上面是示範影片" : ""},請用電腦開啟。
+          <T v={UI.noMobile} /> {video && <T v={UI.demoVideo} />}
         </p>
       )}
       {gallery.length > 0 && <Gallery images={gallery} />}

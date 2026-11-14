@@ -3,7 +3,8 @@ import Markdoc from "@markdoc/markdoc";
 import { notFound } from "next/navigation";
 import WorkMedia from "@/components/WorkMedia";
 import WorkCard from "@/components/WorkCard";
-import { getWorks, reader } from "@/lib/content";
+import { getWorks, pick, reader } from "@/lib/content";
+import { HTML_LANG, LANGS, T, UI, withFallback } from "@/lib/i18n";
 import { CATEGORY_LABEL } from "@/lib/labels";
 
 export async function generateStaticParams() {
@@ -14,7 +15,10 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: PageProps<"/works/[slug]">) {
   const { slug } = await params;
   const work = await reader.collections.works.read(slug);
-  return { title: work?.title, description: work?.summary };
+  return {
+    title: work?.i18n.en.title || work?.title,
+    description: work?.i18n.en.summary || work?.summary,
+  };
 }
 
 export default async function WorkPage({ params }: PageProps<"/works/[slug]">) {
@@ -25,23 +29,32 @@ export default async function WorkPage({ params }: PageProps<"/works/[slug]">) {
   const { node } = await work.body();
   const content = Markdoc.renderers.react(Markdoc.transform(node), React);
   const others = all.filter((w) => w.slug !== slug).slice(0, 6);
-  const meta = [CATEGORY_LABEL[work.category], work.year, work.role].filter(Boolean).join(" · ");
+  const title = withFallback(work.title, pick(work.i18n, "title"));
+  const summary = withFallback(work.summary, pick(work.i18n, "summary"));
+  const role = withFallback(work.role, pick(work.i18n, "role"));
+  // Translated bodies are plain text (blank line = new paragraph); languages
+  // without one fall back to the Chinese Markdoc body.
+  const bodies = pick(work.i18n, "body");
 
   return (
     <div className="mx-auto grid max-w-6xl gap-10 px-4 py-10 sm:px-6 lg:grid-cols-[1fr_320px]">
       <article className="min-w-0">
         <WorkMedia
           slug={slug}
-          title={work.title}
+          title={title}
           cover={work.cover ?? null}
           video={work.video}
           gallery={work.gallery.filter((g): g is string => Boolean(g))}
           embed={work.embed}
           mobilePlayable={work.mobilePlayable}
         />
-        <p className="skin-meta mt-8">{meta}</p>
-        <h1 className="skin-h1 mt-3 text-5xl sm:text-6xl">{work.title}</h1>
-        <p className="skin-lede mt-4 text-lg leading-8">{work.summary}</p>
+        <p className="skin-meta mt-8">
+          <T v={CATEGORY_LABEL[work.category]} />
+          {work.year ? ` · ${work.year}` : ""}
+          {work.role && <> · <T v={role} /></>}
+        </p>
+        <h1 className="skin-h1 mt-3 text-5xl sm:text-6xl"><T v={title} /></h1>
+        <p className="skin-lede mt-4 text-lg leading-8"><T v={summary} /></p>
         {work.tags.length > 0 && (
           <ul className="mt-5 flex flex-wrap gap-2">
             {work.tags.map((tag) => (
@@ -51,14 +64,24 @@ export default async function WorkPage({ params }: PageProps<"/works/[slug]">) {
         )}
         {(work.liveUrl || work.repoUrl) && (
           <div className="mt-6 flex gap-3 text-sm">
-            {work.liveUrl && <a href={work.liveUrl} target="_blank" rel="noopener noreferrer" className="skin-btn ghost">外部連結 ↗</a>}
-            {work.repoUrl && <a href={work.repoUrl} target="_blank" rel="noopener noreferrer" className="skin-btn ghost">原始碼 ↗</a>}
+            {work.liveUrl && <a href={work.liveUrl} target="_blank" rel="noopener noreferrer" className="skin-btn ghost"><T v={UI.external} /> ↗</a>}
+            {work.repoUrl && <a href={work.repoUrl} target="_blank" rel="noopener noreferrer" className="skin-btn ghost"><T v={UI.source} /> ↗</a>}
           </div>
         )}
-        <div className="skin-prose mt-10">{content}</div>
+        {LANGS.map((l) => {
+          const text = l === "zh" ? "" : bodies[l];
+          // Chinese block also serves every language that has no translation.
+          if (l !== "zh" && !text) return null;
+          const serves = l === "zh" ? LANGS.filter((x) => x === "zh" || !bodies[x]) : [l];
+          return serves.map((s) => (
+            <div key={`${l}-${s}`} data-l={s} lang={HTML_LANG[l]} className="skin-prose mt-10">
+              {l === "zh" ? content : text.split(/\n\s*\n/).map((para, i) => <p key={i}>{para}</p>)}
+            </div>
+          ));
+        })}
       </article>
       <aside aria-label="其他作品" className="grid content-start gap-4">
-        <h2 className="skin-eyebrow">其他作品</h2>
+        <h2 className="skin-eyebrow"><T v={UI.otherWorks} /></h2>
         {others.map((w) => (
           <WorkCard key={w.slug} work={w} />
         ))}

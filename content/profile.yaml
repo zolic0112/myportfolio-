@@ -5,4 +5,17 @@ email: you@example.com
 links:
   - label: GitHub
     url: https://github.com/zolic0112
-sponsorUrl:
+sponsorUrl: null
+i18n:
+  en:
+    title: Interaction designer
+    tagline: I make interfaces that move, play, and answer back.
+    reviewed: false
+  ja:
+    title: インタラクションデザイナー
+    tagline: 動いて、遊べて、応えてくれるインターフェースを作っています。
+    reviewed: false
+  es:
+    title: Diseñador de interacción
+    tagline: Hago interfaces que se mueven, juegan y te responden.
+    reviewed: false

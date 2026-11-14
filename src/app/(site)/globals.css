@@ -74,6 +74,58 @@ body {
   display: none !important;
 }
 
+/* ---------- languages: every translated string is in the DOM once per
+   language; show only the one matching <html data-lang> ---------- */
+html[data-lang="zh"] [data-l]:not([data-l="zh"]),
+html[data-lang="en"] [data-l]:not([data-l="en"]),
+html[data-lang="ja"] [data-l]:not([data-l="ja"]),
+html[data-lang="es"] [data-l]:not([data-l="es"]) {
+  display: none !important;
+}
+.lang-switch {
+  display: inline-flex;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.lang-switch button {
+  padding: 3px 9px;
+  font-family: var(--font-mono-face);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+.lang-switch button:hover {
+  color: var(--fg);
+}
+html[data-lang="zh"] .lang-switch [data-set="zh"],
+html[data-lang="en"] .lang-switch [data-set="en"],
+html[data-lang="ja"] .lang-switch [data-set="ja"],
+html[data-lang="es"] .lang-switch [data-set="es"] {
+  background: var(--accent);
+  color: var(--bg);
+}
+[data-persona="rot"] .lang-switch {
+  border-radius: 0;
+  border: 2px inset #fff;
+  background: #fff;
+}
+[data-persona="rot"] .lang-switch button {
+  font-family: var(--font-body);
+  color: #0000ee;
+  text-decoration: underline;
+}
+html[data-persona="rot"] .lang-switch button[data-set] {
+  letter-spacing: 0;
+}
+html[data-persona="rot"][data-lang="zh"] .lang-switch [data-set="zh"],
+html[data-persona="rot"][data-lang="en"] .lang-switch [data-set="en"],
+html[data-persona="rot"][data-lang="ja"] .lang-switch [data-set="ja"],
+html[data-persona="rot"][data-lang="es"] .lang-switch [data-set="es"] {
+  background: #000080;
+  color: #fff;
+}
+
 /* ---------- cool: space backdrop with slight parallax ---------- */
 
 .starfield {

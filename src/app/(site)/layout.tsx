@@ -5,6 +5,7 @@ import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
 import InteractiveLayer from "@/interactive/InteractiveLayer";
 import { getProfile } from "@/lib/content";
+import { LANG_SCRIPT } from "@/lib/i18n";
 
 const inter = Inter({ variable: "--font-inter", subsets: ["latin"] });
 const serif = Instrument_Serif({ variable: "--font-serif", subsets: ["latin"], weight: "400" });
@@ -12,7 +13,7 @@ const mono = JetBrains_Mono({ variable: "--font-mono-face", subsets: ["latin"] }
 
 export async function generateMetadata(): Promise<Metadata> {
   const profile = await getProfile();
-  return { title: `${profile.name} | 作品集`, description: profile.tagline };
+  return { title: `${profile.name} | 作品集`, description: profile.tagline.en };
 }
 
 export default async function SiteLayout({ children }: LayoutProps<"/">) {
@@ -21,11 +22,15 @@ export default async function SiteLayout({ children }: LayoutProps<"/">) {
   return (
     // Every visit starts on the cool persona; the dog decides the rest.
     <html
-      lang="zh-Hant"
+      lang="en"
+      data-lang="en"
       data-persona="cool"
+      suppressHydrationWarning
       className={`${inter.variable} ${serif.variable} ${mono.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">
+        {/* Pick the language before first paint (see lib/i18n). */}
+        <script dangerouslySetInnerHTML={{ __html: LANG_SCRIPT }} />
         <div className="starfield" aria-hidden>
           <i />
           <i />
