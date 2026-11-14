@@ -61,3 +61,9 @@ export async function getWorks(): Promise<WorkCard[]> {
       hasVideo: Boolean(entry.video),
     }));
 }
+
+/** Curated brain rot shorts for the Reels popup ("be your own algorithm"). */
+export async function getReels(): Promise<string[]> {
+  const r = await reader.singletons.reels.read();
+  return (r?.videos ?? []).filter((u): u is string => Boolean(u));
+}

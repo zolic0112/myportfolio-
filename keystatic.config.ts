@@ -72,6 +72,21 @@ export default config({
         }),
       },
     }),
+    reels: singleton({
+      label: "Brain rot 短影音清單",
+      path: "content/reels",
+      schema: {
+        videos: fields.array(
+          fields.url({ label: "YouTube Shorts 網址" }),
+          {
+            label: "影片",
+            description:
+              "Reels 彈窗會隨機從這裡開始、上下滑逐支播放。清單是空的就不會出現這個彈窗。影片被刪會自動跳下一支,但請定期檢查。注意版權。",
+            itemLabel: (p) => p.value ?? "",
+          },
+        ),
+      },
+    }),
   },
   collections: {
     works: collection({

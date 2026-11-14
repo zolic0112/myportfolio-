@@ -4,7 +4,7 @@ import "./globals.css";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
 import InteractiveLayer from "@/interactive/InteractiveLayer";
-import { getProfile } from "@/lib/content";
+import { getProfile, getReels } from "@/lib/content";
 import { LANG_SCRIPT } from "@/lib/i18n";
 
 const inter = Inter({ variable: "--font-inter", subsets: ["latin"] });
@@ -17,7 +17,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function SiteLayout({ children }: LayoutProps<"/">) {
-  const profile = await getProfile();
+  const [profile, reels] = await Promise.all([getProfile(), getReels()]);
   const links = profile.links.map((l) => l.url).filter((u): u is string => Boolean(u));
   return (
     // Every visit starts on the cool persona; the dog decides the rest.
@@ -44,7 +44,7 @@ export default async function SiteLayout({ children }: LayoutProps<"/">) {
         </div>
         <main className="flex-1">{children}</main>
         <Footer name={profile.name} />
-        <InteractiveLayer links={links} sponsorUrl={profile.sponsorUrl} />
+        <InteractiveLayer links={links} reels={reels} sponsorUrl={profile.sponsorUrl} />
       </body>
     </html>
   );

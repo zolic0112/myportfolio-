@@ -855,6 +855,66 @@ html.grabbing * {
   filter: drop-shadow(2px 2px 0 #000);
 }
 
+.popup-reels {
+  width: min(300px, calc(100vw - 32px));
+}
+.popup-reels .popup-body {
+  padding: 3px;
+}
+.reels {
+  position: relative;
+  aspect-ratio: 9 / 16;
+  max-height: 62vh;
+  width: 100%;
+  background: #000;
+  overflow: hidden;
+}
+.reels iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+.reels-touch {
+  position: absolute;
+  inset: 0;
+  touch-action: none;
+  cursor: ns-resize;
+}
+.reels-nav {
+  position: absolute;
+  left: 6px;
+  bottom: 6px;
+  display: grid;
+  gap: 4px;
+}
+.reels-side {
+  position: absolute;
+  right: 6px;
+  bottom: 12px;
+  display: grid;
+  gap: 12px;
+  color: #fff;
+  font: 700 11px/1.2 Arial, sans-serif;
+  text-align: center;
+  text-shadow: 0 1px 2px #000;
+  pointer-events: none;
+}
+@media (max-width: 640px) {
+  /* Nearly full screen on phones; the cage and escape door still sit above. */
+  .popup-reels {
+    left: 8px !important;
+    top: 72px !important;
+    width: calc(100vw - 16px);
+  }
+  .reels {
+    aspect-ratio: auto;
+    height: calc(100dvh - 190px);
+    max-height: none;
+  }
+}
+
 .clippy {
   position: fixed;
   right: 140px;

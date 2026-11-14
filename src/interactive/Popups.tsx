@@ -2,13 +2,14 @@
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { sound } from "./sound";
+import { MiniGame, Reels } from "./PopupExtras";
 import { useInteractive, useJunkOn, type Popup, type PopupKind } from "./store";
 
 // Junk popup system (brief §5). Most popups close in one click; a few make
 // you work for it. Fake close buttons open one of the profile links in a new
 // tab, like real junk ads, so the portfolio itself never goes away.
 
-type Props = { links: string[] };
+type Props = { links: string[]; reels: string[] };
 
 const WEIGHTS: [PopupKind, number][] = [
   ["prize", 2],
@@ -17,10 +18,16 @@ const WEIGHTS: [PopupKind, number][] = [
   ["visitor", 1],
   ["multix", 1],
   ["premium", 1],
+  ["game", 1.5],
+  ["reels", 1.5],
 ];
+// At most one of each of these at a time.
+const SINGLE: PopupKind[] = ["premium", "game", "reels"];
 
-function pickKind(open: Popup[]): PopupKind {
-  const pool = WEIGHTS.filter(([k]) => k !== "premium" || !open.some((p) => p.kind === "premium"));
+function pickKind(open: Popup[], hasReels: boolean): PopupKind {
+  const pool = WEIGHTS.filter(
+    ([k]) => (k !== "reels" || hasReels) && !(SINGLE.includes(k) && open.some((p) => p.kind === k)),
+  );
   let r = Math.random() * pool.reduce((s, [, w]) => s + w, 0);
   for (const [k, w] of pool) if ((r -= w) <= 0) return k;
   return "prize";
@@ -28,12 +35,13 @@ function pickKind(open: Popup[]): PopupKind {
 
 // Random spot that keeps clear of the cage (bottom-right) and the escape
 // door (bottom-left), so neither is ever covered.
-function spot() {
+function spot(kind?: PopupKind) {
   const w = Math.min(320, innerWidth - 32);
-  const h = 230;
+  // Reels is a tall 9:16 window; everything else is roughly this high.
+  const h = kind === "reels" ? Math.min(innerHeight * 0.62, 540) + 34 : 230;
   for (let i = 0; i < 12; i++) {
     const x = 16 + Math.random() * Math.max(0, innerWidth - w - 32);
-    const y = 80 + Math.random() * Math.max(0, innerHeight - h - 100);
+    const y = 80 + Math.random() * Math.max(0, innerHeight - h - 92);
     const hitsCage = x + w > innerWidth - 190 && y + h > innerHeight - 220;
     const hitsDoor = x < 230 && y + h > innerHeight - 70;
     if (!hitsCage && !hitsDoor) return { x, y };
@@ -48,7 +56,7 @@ function useFakeLink(links: string[]) {
   };
 }
 
-export default function Popups({ links }: Props) {
+export default function Popups({ links, reels }: Props) {
   const junk = useJunkOn();
   const popups = useInteractive((s) => s.popups);
   const phase = useInteractive((s) => s.phase);
@@ -63,21 +71,22 @@ export default function Popups({ links }: Props) {
     const spawn = () => {
       const open = useInteractive.getState().popups;
       if (open.length < max) {
-        addPopup({ kind: pickKind(open), ...spot() });
+        const kind = pickKind(open, reels.length > 0);
+        addPopup({ kind, ...spot(kind) });
         sound.play("ding");
       }
       timer = setTimeout(spawn, (coarse ? 10000 : 5000) + Math.random() * (coarse ? 6000 : 5000));
     };
     timer = setTimeout(spawn, 1300);
     return () => clearTimeout(timer);
-  }, [junk, addPopup]);
+  }, [junk, addPopup, reels.length]);
 
   const sucking = phase === "returning";
 
   return (
     <>
       {popups.map((p) => (
-        <PopupWindow key={p.id} p={p} links={links} sucked={sucking} />
+        <PopupWindow key={p.id} p={p} links={links} reels={reels} sucked={sucking} />
       ))}
       <Clippy />
     </>
@@ -87,10 +96,12 @@ export default function Popups({ links }: Props) {
 function PopupWindow({
   p,
   links,
+  reels,
   sucked,
 }: {
   p: Popup;
   links: string[];
+  reels: string[];
   sucked: boolean;
 }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -120,11 +131,18 @@ function PopupWindow({
     setDodges((d) => d + 1);
     setXOff(-(60 + Math.random() * 160));
   };
+  const [nag, setNag] = useState(false);
   const onX = (e: React.MouseEvent) => {
+    // Mini-game popups only close by winning.
+    if (p.kind === "game") {
+      sound.play("error");
+      setNag(true);
+      return;
+    }
     const touch = (e.nativeEvent as PointerEvent).pointerType === "touch";
     if (touch && dodges < maxDodges) {
       setDodges((d) => d + 1);
-      setPos(spot());
+      setPos(spot(p.kind));
       return;
     }
     done();
@@ -137,6 +155,8 @@ function PopupWindow({
     visitor: "★ 特別通知 ★",
     multix: "廣告 廣告 廣告",
     premium: "💎 升級 Premium!!!",
+    game: nag ? "不行!!先玩完!!" : "🎮 玩完才能關",
+    reels: "📱 短影音 — 再滑一下就好",
   };
 
   return (
@@ -144,7 +164,7 @@ function PopupWindow({
       ref={ref}
       role="dialog"
       aria-label={title[p.kind]}
-      className={`popup ${sucked ? "sucked" : ""}`}
+      className={`popup ${p.kind === "reels" ? "popup-reels" : ""} ${sucked ? "sucked" : ""}`}
       style={{ left: pos.x, top: pos.y, zIndex: 45 + (p.id % 9) }}
     >
       <div className="skin-titlebar" data-perch>
@@ -162,7 +182,13 @@ function PopupWindow({
         </button>
       </div>
       <div className="popup-body">
-        <Body kind={p.kind} done={done} fake={fake} openPremium={() => { openPremium(); done(); }} />
+        {p.kind === "game" ? (
+          <MiniGame done={done} />
+        ) : p.kind === "reels" ? (
+          <Reels urls={reels} />
+        ) : (
+          <Body kind={p.kind} done={done} fake={fake} openPremium={() => { openPremium(); done(); }} />
+        )}
       </div>
     </div>
   );
@@ -174,7 +200,7 @@ function Body({
   fake,
   openPremium,
 }: {
-  kind: PopupKind;
+  kind: Exclude<PopupKind, "game" | "reels">;
   done: () => void;
   fake: () => void;
   openPremium: () => void;

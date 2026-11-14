@@ -15,9 +15,12 @@ import { useInteractive } from "./store";
 // page navigations instead of remounting.
 export default function InteractiveLayer({
   links,
+  reels,
   sponsorUrl,
 }: {
   links: string[];
+  /** Hand-curated short video URLs for the Reels popup. */
+  reels: string[];
   sponsorUrl: string | null;
 }) {
   const hydrate = useInteractive((s) => s.hydrate);
@@ -25,7 +28,7 @@ export default function InteractiveLayer({
   return (
     <>
       <Ambient />
-      <Popups links={links} />
+      <Popups links={links} reels={reels} />
       <PremiumModal sponsorUrl={sponsorUrl} />
       <GameOverlay />
       <CageBack />

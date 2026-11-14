@@ -33,9 +33,12 @@ src/interactive/            互動層(在 layout 掛一次,換頁不會重來)
   SpaceDog.tsx / Cage.tsx   狗與籠子的 React 外殼
   FxLayer.tsx               彩紙、亂彈 emoji、彩虹游標尾巴、吸回籠子
   Popups.tsx                垃圾彈窗排程與各種彈窗、迴紋針小幫手
+  PopupExtras.tsx           小遊戲型彈窗(抓狗 / 驗證碼)、Reels 型彈窗
   Hatch.tsx                 「我放棄 😭」與靜音鈕(陽春 HTML)
   PremiumModal.tsx          惡搞訂閱頁(信任制,存在 localStorage)
   sound.ts                  WebAudio 合成音效,無版權素材
+src/lib/i18n.tsx            四語:UI 字串、<T> 元件、語言偵測 script
+scripts/translate.mjs       把 content/ 裡缺的翻譯補上
 src/games/                  站內小遊戲(React 元件,依需求載入)
 public/games/               獨立建置的遊戲,用 iframe 嵌入
 ```
@@ -59,13 +62,29 @@ public/games/               獨立建置的遊戲,用 iframe 嵌入
 
 個人資料的「贊助連結」會用在 Premium 方案按鈕。
 
+### 四語(中 / 英 / 日 / 西)
+
+- 沒有語言路由:每段要翻的文字在 DOM 裡各語言一份,由 `<html data-lang>` 決定顯示哪一份。`layout.tsx` 裡的 inline script 在第一次繪製前決定語言(記住的選擇 → 瀏覽器語言 → 英文),所以不會閃,頁面也維持靜態。導覽列有手動切換鈕。
+- 只翻正經內容(導覽、功能 UI、作品標題與說明)。Brain rot 垃圾刻意不翻。UI 字串在 `src/lib/i18n.tsx`。
+- 作品與個人資料在後台各有「翻譯」欄位(English / 日本語 / Español),留空就顯示中文。每個語言有「已校對」勾選。
+- **自動翻譯**:新增或修改作品後執行
+
+  ```bash
+  ANTHROPIC_API_KEY=... npm run translate
+  ```
+
+  會把還沒校對、還空著的欄位用小模型翻好寫回 `content/`(`--force` 重翻所有未校對的,`--dry` 只列出缺什麼)。已校對的語言不會被動到。翻譯引擎是 `scripts/translate.mjs` 裡的一個函式,要換模型改那裡或設 `TRANSLATE_MODEL`。
+
+### Reels 彈窗
+
+後台的「Brain rot 短影音清單」填 YouTube Shorts 網址才會出現(清單是空的就不會跳)。一次只載入當前一支,上下滑 / 滾輪 / ▲▼ 切換,影片失效或播完自動跳下一支。
+
 ## 還沒做(對照 Brief)
 
-- 四語(中英日西)與上傳時自動翻譯
-- 小遊戲型、Reels 型彈窗
-- 撞籠子以外的籠內躁動細節、衝出籠子/被吸回的專屬動作、爬牆
+- 儲存作品時「自動」觸發翻譯(目前要手動跑 `npm run translate`;線上後台可以接 GitHub Action)
 - 籠子正式造型(目前是程式畫的暫代版)
-- 上線用素材(迷因圖、音效、短影音清單)
+- 寵物更細的表演:衝出籠子/被吸回的專屬動作、爬牆
+- 上線用素材(迷因圖、音效、短影音清單)與實際作品內容
 
 ## 部署(Vercel)
 
