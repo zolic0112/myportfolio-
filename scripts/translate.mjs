@@ -1,50 +1,51 @@
 #!/usr/bin/env node
 // Fill in missing translations (English, Japanese, Spanish) for everything in
-// content/, from the Chinese source. Run after adding or editing works:
+// content/, from the Chinese source. Runs automatically in GitHub Actions
+// whenever content changes (.github/workflows/translate.yml), or by hand:
 //
-//   ANTHROPIC_API_KEY=... npm run translate            only empty fields
-//   ANTHROPIC_API_KEY=... npm run translate -- --force  redo all unreviewed
-//   npm run translate -- --dry                          just list what's missing
+//   npm run translate              only empty fields
+//   npm run translate -- --force   redo every unreviewed translation
+//   npm run translate -- --dry     just list what's missing
 //
 // A language marked "已校對" (reviewed: true) in the CMS is never touched.
 // The site only ever reads the saved text, so layout is unaffected.
 //
-// The engine is one small function (translate()) calling a lightweight model;
-// swap it if you pick a different one. TRANSLATE_MODEL overrides the model.
+// Engine: M2M100 (418M, MIT licence), an open model that runs locally through
+// transformers.js. No API key, no cost. The first run downloads the model
+// (a few hundred MB) into node_modules/.cache. To try another engine, replace
+// translateText() below; TRANSLATE_MODEL overrides the model id.
 
 import fs from "node:fs";
 import path from "node:path";
 import * as yaml from "js-yaml";
 
-const LANGS = { en: "English", ja: "Japanese", es: "Spanish (neutral, international)" };
-const MODEL = process.env.TRANSLATE_MODEL || "claude-haiku-5-5";
+const LANGS = ["en", "ja", "es"];
+const MODEL = process.env.TRANSLATE_MODEL || "Xenova/m2m100_418M";
 const args = new Set(process.argv.slice(2));
 const DRY = args.has("--dry");
 const FORCE = args.has("--force");
 const root = path.resolve(import.meta.dirname, "..", "content");
 
-async function translate(source) {
-  const key = process.env.ANTHROPIC_API_KEY;
-  if (!key) throw new Error("Set ANTHROPIC_API_KEY (or run with --dry).");
-  const res = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: { "content-type": "application/json", "x-api-key": key, "anthropic-version": "2023-06-01" },
-    body: JSON.stringify({
-      model: MODEL,
-      max_tokens: 4000,
-      system:
-        "You translate short portfolio copy from Traditional Chinese. Keep it concise and natural, " +
-        "keep proper nouns, product names and code as they are, keep paragraph breaks, and do not add anything. " +
-        `Reply with JSON only, shaped {${Object.keys(LANGS).map((l) => `"${l}": {…same keys as the input…}`).join(", ")}}. ` +
-        `Languages: ${Object.entries(LANGS).map(([k, v]) => `${k} = ${v}`).join("; ")}.`,
-      messages: [{ role: "user", content: JSON.stringify(source, null, 2) }],
-    }),
-  });
-  if (!res.ok) throw new Error(`Translation API ${res.status}: ${await res.text()}`);
-  const text = (await res.json()).content.map((c) => c.text ?? "").join("");
-  const json = text.slice(text.indexOf("{"), text.lastIndexOf("}") + 1);
-  return JSON.parse(json);
+let pipe;
+/** Translate one piece of Chinese text. Paragraphs go through one at a time. */
+async function translateText(text, lang) {
+  if (!pipe) {
+    console.log(`Loading ${MODEL}…`);
+    const { pipeline } = await import("@huggingface/transformers");
+    pipe = await pipeline("translation", MODEL, { dtype: "q8" });
+  }
+  const out = [];
+  for (const para of text.split(/\n\s*\n/)) {
+    const line = para.replace(/\s*\n\s*/g, " ").trim();
+    if (!line) continue;
+    const [r] = await pipe(line, { src_lang: "zh", tgt_lang: lang, max_new_tokens: 400 });
+    out.push(r.translation_text.trim());
+  }
+  return out.join("\n\n");
 }
+
+/** Latin-only text (names like "Click Rush") is kept as is. */
+const needsTranslation = (s) => /[\u3400-\u9fff]/.test(s);
 
 // Markdoc → plain paragraphs (translated bodies are stored as plain text).
 const plain = (md) =>
@@ -59,7 +60,7 @@ const plain = (md) =>
 async function fillEntry(name, data, source) {
   data.i18n ??= {};
   const todo = {};
-  for (const lang of Object.keys(LANGS)) {
+  for (const lang of LANGS) {
     const t = (data.i18n[lang] ??= {});
     if (t.reviewed) continue;
     const missing = Object.keys(source).filter((k) => source[k] && (FORCE || !t[k]));
@@ -69,10 +70,11 @@ async function fillEntry(name, data, source) {
   if (!langs.length) return 0;
   console.log(`${name}: ${langs.map((l) => `${l} (${todo[l].join(", ")})`).join("; ")}`);
   if (DRY) return 0;
-  const wanted = [...new Set(langs.flatMap((l) => todo[l]))];
-  const out = await translate(Object.fromEntries(wanted.map((k) => [k, source[k]])));
   for (const lang of langs) {
-    for (const k of todo[lang]) if (out[lang]?.[k]) data.i18n[lang][k] = String(out[lang][k]).trim();
+    for (const k of todo[lang]) {
+      const src = String(source[k]);
+      data.i18n[lang][k] = needsTranslation(src) ? await translateText(src, lang) : src;
+    }
     data.i18n[lang].reviewed = false;
   }
   return langs.length;

@@ -60,20 +60,25 @@ public/games/               獨立建置的遊戲,用 iframe 嵌入
 
 標題、簡介、類別(遊戲/互動/影像/平面)、年份、角色、封面、圖片集、影片網址(YouTube/Vimeo/mp4)、可玩內容(站內遊戲或 iframe)、手機可玩、首頁代表作(bento)、隱藏款(只在 brain rot 面出現)。
 
-個人資料的「贊助連結」會用在 Premium 方案按鈕。
 
 ### 四語(中 / 英 / 日 / 西)
 
 - 沒有語言路由:每段要翻的文字在 DOM 裡各語言一份,由 `<html data-lang>` 決定顯示哪一份。`layout.tsx` 裡的 inline script 在第一次繪製前決定語言(記住的選擇 → 瀏覽器語言 → 英文),所以不會閃,頁面也維持靜態。導覽列有手動切換鈕。
 - 只翻正經內容(導覽、功能 UI、作品標題與說明)。Brain rot 垃圾刻意不翻。UI 字串在 `src/lib/i18n.tsx`。
 - 作品與個人資料在後台各有「翻譯」欄位(English / 日本語 / Español),留空就顯示中文。每個語言有「已校對」勾選。
-- **自動翻譯**:新增或修改作品後執行
+- **自動翻譯**:內容一有變動(例如在線上後台存檔),`.github/workflows/translate.yml` 會在 GitHub 的主機上跑開源模型 M2M100(MIT 授權),把還沒校對、還空著的欄位翻好再 commit 回來。不需要金鑰,也不用錢。只在預設分支上執行。已校對的語言不會被動到。
+
+  本機也可以手動跑(第一次會下載幾百 MB 的模型):
 
   ```bash
-  ANTHROPIC_API_KEY=... npm run translate
+  npm run translate
   ```
 
-  會把還沒校對、還空著的欄位用小模型翻好寫回 `content/`(`--force` 重翻所有未校對的,`--dry` 只列出缺什麼)。已校對的語言不會被動到。翻譯引擎是 `scripts/translate.mjs` 裡的一個函式,要換模型改那裡或設 `TRANSLATE_MODEL`。
+  `--force` 重翻所有未校對的,`--dry` 只列出缺什麼。M2M100 的品質只算堪用,口語和專有名詞常翻錯,翻完請到後台檢查並勾「已校對」。要換引擎改 `scripts/translate.mjs` 的 `translateText()`,或設 `TRANSLATE_MODEL`。
+
+### 贊助(Premium 訂閱頁)
+
+後台個人資料有兩個連結:國際(Ko-fi)與台灣(綠界)。訂閱頁會列出有填的那幾個讓訪客選;信任制,不驗證付款。
 
 ### Reels 彈窗
 
@@ -81,7 +86,6 @@ public/games/               獨立建置的遊戲,用 iframe 嵌入
 
 ## 還沒做(對照 Brief)
 
-- 儲存作品時「自動」觸發翻譯(目前要手動跑 `npm run translate`;線上後台可以接 GitHub Action)
 - 籠子正式造型(目前是程式畫的暫代版)
 - 寵物更細的表演:衝出籠子/被吸回的專屬動作、爬牆
 - 上線用素材(迷因圖、音效、短影音清單)與實際作品內容

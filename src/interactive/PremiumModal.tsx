@@ -12,17 +12,20 @@ const PLANS = [
   { id: "ultra", name: "Premium Ultra Max Pro", price: "☕ ×2", perks: ["內容跟 Premium 一樣", "但你會覺得自己比較有錢", "狗"] },
 ] as const;
 
-export default function PremiumModal({ sponsorUrl }: { sponsorUrl: string | null }) {
+/** Where the money goes: Ko-fi for international visitors, ECPay for Taiwan. */
+export type Sponsor = { intl: string | null; tw: string | null };
+
+export default function PremiumModal({ sponsor }: { sponsor: Sponsor }) {
   const open = useInteractive((s) => s.premiumOpen);
   // Mounted fresh on every open, so it always starts at the first step.
-  return open ? <Modal sponsorUrl={sponsorUrl} /> : null;
+  return open ? <Modal sponsor={sponsor} /> : null;
 }
 
-function Modal({ sponsorUrl }: { sponsorUrl: string | null }) {
+function Modal({ sponsor }: { sponsor: Sponsor }) {
   const premium = useInteractive((s) => s.premium);
   const close = useInteractive((s) => s.closePremium);
   const subscribe = useInteractive((s) => s.subscribe);
-  const [step, setStep] = useState<"plans" | "paid" | "thanks">(premium ? "thanks" : "plans");
+  const [step, setStep] = useState<"plans" | "pay" | "paid" | "thanks">(premium ? "thanks" : "plans");
 
   useEffect(() => {
     if (step !== "thanks") return;
@@ -32,7 +35,10 @@ function Modal({ sponsorUrl }: { sponsorUrl: string | null }) {
 
   const choose = (id: string) => {
     if (id === "free") return close();
-    if (sponsorUrl) window.open(sponsorUrl, "_blank", "noopener,noreferrer");
+    setStep(sponsor.intl || sponsor.tw ? "pay" : "paid");
+  };
+  const pay = (url: string) => {
+    window.open(url, "_blank", "noopener,noreferrer");
     setStep("paid");
   };
   const done = () => {
@@ -72,10 +78,24 @@ function Modal({ sponsorUrl }: { sponsorUrl: string | null }) {
               </div>
             </>
           )}
+          {step === "pay" && (
+            <div className="grid gap-3 text-center">
+              <p className="text-lg font-bold">選一個付款方式 ☕</p>
+              <div className="flex flex-wrap justify-center gap-2">
+                {sponsor.intl && (
+                  <button className="win-button" onClick={() => pay(sponsor.intl!)}>🌏 International — Ko-fi</button>
+                )}
+                {sponsor.tw && (
+                  <button className="win-button" onClick={() => pay(sponsor.tw!)}>🇹🇼 台灣 — 綠界</button>
+                )}
+              </div>
+              <button className="text-[11px] underline" onClick={() => setStep("paid")}>我不想付錢</button>
+            </div>
+          )}
           {step === "paid" && (
             <div className="grid gap-3 text-center">
               <p className="text-lg font-bold">付好了嗎?(信任制,我們不會檢查)</p>
-              {!sponsorUrl && <p className="text-xs">(作者還沒設定贊助連結,所以你也付不了)</p>}
+              {!sponsor.intl && !sponsor.tw && <p className="text-xs">(作者還沒設定贊助連結,所以你也付不了)</p>}
               <div className="flex flex-wrap justify-center gap-2">
                 <button className="win-button" onClick={done}>付好了 ✅</button>
                 <button className="win-button" onClick={done}>其實沒付,但我想要免廣告</button>

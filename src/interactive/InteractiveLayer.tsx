@@ -7,7 +7,7 @@ import FxLayer from "./FxLayer";
 import GameOverlay from "./GameOverlay";
 import Hatch from "./Hatch";
 import Popups from "./Popups";
-import PremiumModal from "./PremiumModal";
+import PremiumModal, { type Sponsor } from "./PremiumModal";
 import SpaceDog from "./SpaceDog";
 import { useInteractive } from "./store";
 
@@ -16,12 +16,12 @@ import { useInteractive } from "./store";
 export default function InteractiveLayer({
   links,
   reels,
-  sponsorUrl,
+  sponsor,
 }: {
   links: string[];
   /** Hand-curated short video URLs for the Reels popup. */
   reels: string[];
-  sponsorUrl: string | null;
+  sponsor: Sponsor;
 }) {
   const hydrate = useInteractive((s) => s.hydrate);
   useEffect(hydrate, [hydrate]);
@@ -29,7 +29,7 @@ export default function InteractiveLayer({
     <>
       <Ambient />
       <Popups links={links} reels={reels} />
-      <PremiumModal sponsorUrl={sponsorUrl} />
+      <PremiumModal sponsor={sponsor} />
       <GameOverlay />
       <CageBack />
       <SpaceDog />

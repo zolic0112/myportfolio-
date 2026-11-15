@@ -44,7 +44,7 @@ export default async function SiteLayout({ children }: LayoutProps<"/">) {
         </div>
         <main className="flex-1">{children}</main>
         <Footer name={profile.name} />
-        <InteractiveLayer links={links} reels={reels} sponsorUrl={profile.sponsorUrl} />
+        <InteractiveLayer links={links} reels={reels} sponsor={profile.sponsor} />
       </body>
     </html>
   );

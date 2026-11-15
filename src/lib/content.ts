@@ -12,7 +12,7 @@ export async function getProfile() {
     tagline: withFallback(profile?.tagline ?? "", pick(profile?.i18n, "tagline")),
     email: profile?.email ?? "",
     links: profile?.links ?? [],
-    sponsorUrl: profile?.sponsorUrl ?? null,
+    sponsor: { intl: profile?.sponsorUrl ?? null, tw: profile?.sponsorUrlTw ?? null },
   };
 }
 

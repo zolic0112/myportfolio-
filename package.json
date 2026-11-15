@@ -19,6 +19,7 @@
     "zustand": "^5.0.15"
   },
   "devDependencies": {
+    "@huggingface/transformers": "^4.3.2",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",

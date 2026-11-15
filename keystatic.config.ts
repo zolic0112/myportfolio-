@@ -67,8 +67,12 @@ export default config({
           { label: "翻譯", description: "留空會顯示中文。npm run translate 會自動填沒校對過的欄位" },
         ),
         sponsorUrl: fields.url({
-          label: "贊助連結(Ko-fi / Buy Me a Coffee / PayPal)",
-          description: "Brain rot 面的 Premium 方案按鈕會開這個網址",
+          label: "贊助連結:國際(Ko-fi)",
+          description: "Brain rot 面 Premium 訂閱頁的「國際」付款按鈕",
+        }),
+        sponsorUrlTw: fields.url({
+          label: "贊助連結:台灣(綠界 ECPay)",
+          description: "Premium 訂閱頁的「台灣」付款按鈕。兩個都留空的話,訂閱頁會說還沒設定",
         }),
       },
     }),
