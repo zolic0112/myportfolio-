@@ -11,11 +11,13 @@ import { on, useInteractive } from "./store";
 type P = {
   x: number; y: number; vx: number; vy: number;
   life: number; max: number; size: number;
-  kind: "confetti" | "emoji" | "trail";
+  kind: "confetti" | "emoji" | "trail" | "runner";
   color: string; glyph?: string; rot: number; vr: number;
 };
 
 const COLORS = ["#ff2bd6", "#00f5ff", "#fff200", "#39ff14", "#ff3b30", "#7c63db", "#ffa033"];
+// The annoying little web pets that patrol the bottom edge.
+const RUNNERS = ["🐈", "🦆", "🐢", "🐛", "🐀", "🦀", "🐓"];
 const EMOJI = ["💀", "😭", "🔥", "🤡", "💯", "🗿", "😂", "🚨", "👁️", "🍔"];
 
 export default function FxLayer() {
@@ -33,7 +35,7 @@ export default function FxLayer() {
     let DPR = 1;
 
     const resize = () => {
-      DPR = Math.min(2, devicePixelRatio || 1);
+      DPR = coarse ? 1 : Math.min(2, devicePixelRatio || 1);
       cv.width = innerWidth * DPR;
       cv.height = innerHeight * DPR;
     };
@@ -80,6 +82,18 @@ export default function FxLayer() {
       wake();
     };
 
+    const runners = (n: number) => {
+      for (let i = 0; i < n; i++) {
+        ps.push({
+          x: Math.random() * innerWidth, y: 0,
+          vx: (Math.random() < 0.5 ? -1 : 1) * (35 + Math.random() * 110), vy: 0,
+          life: Math.random() * 10, max: Infinity, size: 20 + Math.random() * 10,
+          kind: "runner", color: "", glyph: RUNNERS[(Math.random() * RUNNERS.length) | 0], rot: 0, vr: 0,
+        });
+      }
+      wake();
+    };
+
     let hue = 0;
     const onMove = (e: PointerEvent) => {
       if (useInteractive.getState().persona !== "rot" || reduce || sink) return;
@@ -115,6 +129,11 @@ export default function FxLayer() {
           p.x += p.vx * dt;
           p.y += p.vy * dt;
           p.rot += p.vr * dt;
+        } else if (p.kind === "runner") {
+          p.x += p.vx * dt;
+          if (p.x < 14 || p.x > innerWidth - 14) p.vx = -p.vx;
+          p.x = Math.min(innerWidth - 14, Math.max(14, p.x));
+          p.y = innerHeight - p.size * 0.55 - Math.abs(Math.sin(p.life * 9)) * 5;
         } else if (p.kind === "emoji") {
           p.x += p.vx * dt;
           p.y += p.vy * dt;
@@ -129,7 +148,17 @@ export default function FxLayer() {
         }
         const fade = p.max === Infinity ? 1 : Math.max(0, 1 - p.life / p.max);
         ctx.globalAlpha = fade;
-        if (p.kind === "emoji") {
+        if (p.kind === "runner") {
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          // Emoji animals face left; flip when walking right.
+          if (p.vx > 0) ctx.scale(-1, 1);
+          ctx.font = `${p.size}px serif`;
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillText(p.glyph!, 0, 0);
+          ctx.restore();
+        } else if (p.kind === "emoji") {
           ctx.save();
           ctx.translate(p.x, p.y);
           ctx.rotate(Math.sin(p.rot) * 0.4);
@@ -170,6 +199,7 @@ export default function FxLayer() {
       setTimeout(() => {
         confetti(innerWidth / 2, innerHeight * 0.45, coarse ? 60 : 120, 2);
         bouncers(coarse ? 3 : 6);
+        runners(coarse ? 3 : 6);
       }, 260);
     });
     const offSuck = on("suck", () => {

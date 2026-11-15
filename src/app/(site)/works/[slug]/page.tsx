@@ -37,7 +37,15 @@ export default async function WorkPage({ params }: PageProps<"/works/[slug]">) {
   const bodies = pick(work.i18n, "body");
 
   return (
-    <div className="mx-auto grid max-w-6xl gap-10 px-4 py-10 sm:px-6 lg:grid-cols-[1fr_320px]">
+    <>
+    {work.rotOnly && (
+      // Hidden pieces only exist on the brain rot side, even by direct link.
+      <div className="cool-only mx-auto max-w-6xl px-4 py-32 text-center sm:px-6">
+        <p className="skin-eyebrow">404</p>
+        <p className="skin-h2 mt-4 text-3xl"><T v={UI.locked} /></p>
+      </div>
+    )}
+    <div className={`mx-auto grid max-w-6xl gap-10 px-4 py-10 sm:px-6 lg:grid-cols-[1fr_320px] ${work.rotOnly ? "rot-only" : ""}`}>
       <article className="min-w-0">
         <WorkMedia
           slug={slug}
@@ -87,5 +95,6 @@ export default async function WorkPage({ params }: PageProps<"/works/[slug]">) {
         ))}
       </aside>
     </div>
+    </>
   );
 }

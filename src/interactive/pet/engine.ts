@@ -167,6 +167,11 @@ export class SpaceDogEngine {
     const toLeft = this.x > innerWidth / 2;
     this.vx = (toLeft ? -1 : 1) * rand(380, 620);
     this.vy = this.reduce ? -300 : -1250;
+    if (!this.reduce) {
+      // Burst out: stretch tall and tumble once on the way up.
+      this.qv -= 7;
+      this.thv += (toLeft ? -1 : 1) * 14;
+    }
     this.stamina = 1;
     this.tired = false;
     this.hit.style.pointerEvents = "auto";

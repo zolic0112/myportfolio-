@@ -115,6 +115,7 @@ function PopupWindow({
     el.style.setProperty("--dy", `${cage.top + cage.height / 2 - (r.top + r.height / 2)}px`);
   }, [sucked]);
   const close = useInteractive((s) => s.closePopup);
+  const addPopup = useInteractive((s) => s.addPopup);
   const openPremium = useInteractive((s) => s.openPremium);
   const fake = useFakeLink(links);
   const [pos, setPos] = useState({ x: p.x, y: p.y });
@@ -143,6 +144,8 @@ function PopupWindow({
     if (touch && dodges < maxDodges) {
       setDodges((d) => d + 1);
       setPos(spot(p.kind));
+      // No hover on phones, so the hardest popup fights back by multiplying.
+      if (p.kind === "premium") addPopup({ kind: "visitor", ...spot() });
       return;
     }
     done();

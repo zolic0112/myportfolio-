@@ -12,7 +12,7 @@ export default function Nav({ name }: { name: string }) {
   return (
     <header className="skin-nav sticky top-0 z-40">
       <nav className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
-        <Link href="/" className="skin-brand">
+        <Link href="/" className="skin-brand whitespace-nowrap">
           {name}
         </Link>
         <ul className="flex flex-wrap items-center justify-end gap-x-5 gap-y-2 text-sm">

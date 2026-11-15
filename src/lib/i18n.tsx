@@ -50,6 +50,12 @@ export const UI = {
     ja: "作品はまだありません。",
     es: "Aún no hay obras.",
   },
+  locked: {
+    zh: "這件作品被關起來了。",
+    en: "This piece is locked away.",
+    ja: "この作品は閉じ込められています。",
+    es: "Esta obra está encerrada.",
+  },
   loading: { zh: "載入中…", en: "Loading…", ja: "読み込み中…", es: "Cargando…" },
 } satisfies Record<string, L>;
 
