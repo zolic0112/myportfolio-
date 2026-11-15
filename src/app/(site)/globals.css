@@ -17,7 +17,7 @@
   --border: rgb(220 224 236 / 0.14);
   --accent: #d4d7e1;
   --signal: #9a86ea;
-  --font-display: var(--font-serif);
+  --font-display: var(--font-serif), var(--font-serif-tc), "Songti TC", "Noto Serif CJK TC", serif;
   --font-body: var(--font-inter);
 
   --cage-in-1: #151827;
@@ -304,7 +304,8 @@ html[data-persona="rot"][data-lang="es"] .lang-switch [data-set="es"] {
 
 .skin-card {
   position: relative;
-  display: block;
+  display: flex;
+  flex-direction: column;
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: 20px;
@@ -1237,4 +1238,245 @@ html.frying body {
 }
 @keyframes hop {
   to { transform: translateY(-8px) rotate(8deg); }
+}
+
+/* ==========================================================================
+   Visual pass (after looking at real screenshots against the brief)
+   ========================================================================== */
+
+/* ---------- cool: deeper space ---------- */
+[data-persona="cool"] body {
+  background:
+    radial-gradient(120% 70% at 50% -10%, #171a33 0%, transparent 60%),
+    radial-gradient(70% 50% at 100% 110%, #1a1230 0%, transparent 65%),
+    #05060a;
+  background-attachment: fixed;
+}
+.starfield i:nth-child(1) {
+  background:
+    radial-gradient(1.2px 1.2px at 12% 22%, #fffd, transparent),
+    radial-gradient(1px 1px at 31% 61%, #fff9, transparent),
+    radial-gradient(1.4px 1.4px at 58% 14%, #fffc, transparent),
+    radial-gradient(1px 1px at 77% 43%, #fffa, transparent),
+    radial-gradient(1.2px 1.2px at 91% 19%, #fff9, transparent),
+    radial-gradient(1px 1px at 44% 83%, #fff8, transparent),
+    radial-gradient(1.3px 1.3px at 8% 74%, #fff9, transparent),
+    radial-gradient(1px 1px at 66% 92%, #fff8, transparent),
+    radial-gradient(1px 1px at 23% 47%, #fff7, transparent),
+    radial-gradient(1px 1px at 86% 78%, #fff7, transparent);
+  background-size: 420px 420px;
+}
+.starfield i:nth-child(2) {
+  background:
+    radial-gradient(2px 2px at 22% 38%, #fff, transparent),
+    radial-gradient(2px 2px at 83% 71%, #ffe9cf, transparent),
+    radial-gradient(2.4px 2.4px at 51% 52%, #c9c0ff, transparent),
+    radial-gradient(1.6px 1.6px at 68% 12%, #fffc, transparent);
+  background-size: 760px 760px;
+  filter: drop-shadow(0 0 3px #b9aaff);
+}
+.starfield i:nth-child(3) {
+  background:
+    radial-gradient(ellipse 55% 38% at 72% 4%, #3a2f7a66 0%, transparent 62%),
+    radial-gradient(ellipse 40% 30% at 12% 70%, #1b2a5a55 0%, transparent 70%),
+    radial-gradient(ellipse 30% 22% at 88% 88%, #5a2a1e33 0%, transparent 70%);
+}
+
+/* ---------- cool: editorial type ---------- */
+[data-persona="cool"] .skin-h1 {
+  font-weight: 300;
+  letter-spacing: 0.1em;
+  line-height: 1.08;
+}
+[data-persona="cool"] .skin-h2 {
+  font-weight: 300;
+  letter-spacing: 0.16em;
+}
+[data-persona="cool"] .skin-card-title {
+  font-weight: 300;
+  letter-spacing: 0.06em;
+}
+[data-persona="cool"] .skin-lede {
+  letter-spacing: 0.08em;
+  font-weight: 300;
+}
+[data-persona="cool"] .skin-eyebrow {
+  letter-spacing: 0.36em;
+}
+
+/* ---------- cool: glass that actually reads as glass ---------- */
+[data-persona="cool"] .skin-card,
+[data-persona="cool"] .skin-card.glass {
+  border-radius: 22px;
+  background:
+    linear-gradient(165deg, rgb(255 255 255 / 0.09) 0%, rgb(255 255 255 / 0.02) 38%, rgb(255 255 255 / 0.04) 100%) padding-box,
+    linear-gradient(#0a0c13, #0a0c13) padding-box,
+    linear-gradient(140deg, #f4f5f9 0%, #8a8e9d 12%, #30333f 32%, #a9adbb 50%, #2a2d37 68%, #dcdee6 90%, #666a79 100%) border-box;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.22),
+    inset 0 -1px 0 rgb(0 0 0 / 0.5),
+    0 30px 60px -30px rgb(0 0 0 / 0.9);
+}
+/* the diagonal "scratches" read as rendering glitches: keep only the top sheen */
+[data-persona="cool"] .skin-card::before {
+  opacity: 1;
+  background: linear-gradient(180deg, rgb(255 255 255 / 0.1), transparent 18%);
+}
+[data-persona="cool"] .skin-card:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.3),
+    inset 0 -1px 0 rgb(0 0 0 / 0.5),
+    0 40px 70px -30px rgb(0 0 0 / 0.95),
+    0 0 40px -12px rgb(154 134 234 / 0.35);
+}
+[data-persona="cool"] .skin-media {
+  background: #06070c;
+}
+[data-persona="cool"] .ph {
+  background:
+    radial-gradient(60% 80% at 30% 0%, hsl(var(--h) 70% 55% / 0.5), transparent 70%),
+    radial-gradient(50% 70% at 85% 100%, hsl(calc(var(--h) + 50) 60% 40% / 0.45), transparent 70%),
+    linear-gradient(180deg, #0a0c14, #05060a);
+}
+[data-persona="cool"] .ph::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 55%, #06070c 100%);
+}
+[data-persona="cool"] .ph span {
+  z-index: 1;
+  font-weight: 300;
+  letter-spacing: 0.1em;
+  color: rgb(255 255 255 / 0.28);
+}
+@media (pointer: coarse) {
+  [data-persona="cool"] .skin-card,
+  [data-persona="cool"] .skin-card.glass {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+
+/* ---------- cage: bigger, and on the cool side the dog sits in the dark ---------- */
+.cage-pos {
+  right: 28px;
+  bottom: 22px;
+  width: 148px;
+  height: 185px;
+}
+@media (max-width: 640px) {
+  .cage-pos {
+    right: 10px;
+    bottom: 10px;
+    width: 96px;
+    height: 120px;
+  }
+}
+.cage-glow {
+  fill: #7c63db;
+  opacity: 0.35;
+  filter: blur(6px);
+}
+[data-persona="cool"] .cage-front svg {
+  filter: drop-shadow(0 10px 18px rgb(0 0 0 / 0.8));
+}
+[data-persona="cool"] .cage-front:hover .cage-shade {
+  opacity: 0.6;
+}
+.cage-shade {
+  transition: opacity 0.6s;
+  pointer-events: none;
+}
+[data-persona="rot"] .cage-shade,
+.cage-front[data-open="1"] .cage-shade {
+  display: none;
+}
+[data-persona="rot"] .cage-glow {
+  fill: #000;
+  opacity: 0.5;
+  filter: none;
+}
+[data-persona="rot"] .cage-front svg {
+  filter: drop-shadow(3px 3px 0 #000);
+}
+.cage-tag {
+  left: -58px;
+  bottom: 44px;
+  font-size: 13px;
+  letter-spacing: 0.3em;
+  padding: 5px 8px 5px 12px;
+  font-family: var(--font-serif), var(--font-serif-tc), serif;
+}
+@media (max-width: 640px) {
+  .cage-tag {
+    left: -52px;
+    bottom: 26px;
+    font-size: 10px;
+  }
+}
+
+/* ---------- rot: fry the whole page, add the banner ads ---------- */
+[data-persona="rot"] body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  pointer-events: none;
+  opacity: 0.22;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.1' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+[data-persona="rot"] main {
+  filter: saturate(1.35) contrast(1.08);
+}
+[data-persona="rot"] .skin-media img,
+[data-persona="rot"] .skin-media .ph {
+  filter: saturate(4.5) contrast(2.1) brightness(1.15) hue-rotate(-18deg);
+  image-rendering: pixelated;
+}
+[data-persona="rot"] .ph {
+  background:
+    radial-gradient(60% 70% at 25% 20%, hsl(var(--h) 100% 50%), transparent 70%),
+    radial-gradient(50% 60% at 85% 90%, hsl(calc(var(--h) + 120) 100% 50%), transparent 70%),
+    repeating-linear-gradient(45deg, #fff200 0 14px, #ff00ff 14px 28px);
+}
+[data-persona="rot"] .ph span {
+  font: 400 2.4rem/1 Impact, "Arial Black", sans-serif;
+  color: #fff;
+  -webkit-text-stroke: 2px #000;
+  text-transform: uppercase;
+  letter-spacing: 0;
+}
+.junk-banners {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.jb {
+  flex: 1 1 220px;
+  padding: 10px 8px;
+  text-align: center;
+  font: 900 15px/1.1 "Arial Black", Impact, sans-serif;
+  border: 3px ridge #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.jb-green { background: #39ff14; color: #000; animation: blink 0.7s steps(2) infinite; }
+.jb-red { background: #ff0000; color: #fff200; animation: wobble 0.3s ease-in-out infinite alternate; }
+.jb-yellow { background: #fff200; color: #ff0000; border-style: dashed; border-color: #ff0000; }
+.jb-blue { background: #0000ee; color: #00f5ff; font-family: "Times New Roman", serif; text-decoration: underline; }
+@media (prefers-reduced-motion: reduce) {
+  .jb { animation: none; }
+}
+
+/* content must not read through the sticky nav */
+[data-persona="cool"] .skin-nav {
+  background: rgb(5 6 10 / 0.82);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
 }

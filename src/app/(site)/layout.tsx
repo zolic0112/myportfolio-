@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Instrument_Serif, JetBrains_Mono } from "next/font/google";
+import { Inter, Instrument_Serif, JetBrains_Mono, Noto_Serif_TC } from "next/font/google";
 import "./globals.css";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
@@ -9,6 +9,8 @@ import { LANG_SCRIPT } from "@/lib/i18n";
 
 const inter = Inter({ variable: "--font-inter", subsets: ["latin"] });
 const serif = Instrument_Serif({ variable: "--font-serif", subsets: ["latin"], weight: "400" });
+// CJK glyphs for the editorial headings (Instrument Serif is Latin only).
+const serifTc = Noto_Serif_TC({ variable: "--font-serif-tc", weight: ["300", "500"], preload: false });
 const mono = JetBrains_Mono({ variable: "--font-mono-face", subsets: ["latin"] });
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -26,7 +28,7 @@ export default async function SiteLayout({ children }: LayoutProps<"/">) {
       data-lang="en"
       data-persona="cool"
       suppressHydrationWarning
-      className={`${inter.variable} ${serif.variable} ${mono.variable} h-full antialiased`}
+      className={`${inter.variable} ${serif.variable} ${serifTc.variable} ${mono.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">
         {/* Pick the language before first paint (see lib/i18n). */}

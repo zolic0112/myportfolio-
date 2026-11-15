@@ -35,6 +35,7 @@ export function CageBack() {
             <stop offset="1" stopColor="var(--cage-in-2)" />
           </radialGradient>
         </defs>
+        <ellipse cx="60" cy="146" rx="58" ry="7" className="cage-glow" />
         <path d={domePath} fill="url(#cage-dark)" />
       </svg>
     </div>
@@ -114,10 +115,22 @@ export function CageFront() {
             <stop offset=".5" stopColor="#fff" stopOpacity=".95" />
             <stop offset="1" stopColor="#fff" stopOpacity="0" />
           </linearGradient>
+          <radialGradient id="cage-shade" cx="50%" cy="62%" r="62%">
+            <stop offset="0" stopColor="#04050a" stopOpacity=".28" />
+            <stop offset=".55" stopColor="#04050a" stopOpacity=".62" />
+            <stop offset="1" stopColor="#04050a" stopOpacity=".94" />
+          </radialGradient>
+          <linearGradient id="cage-glass" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stopColor="#fff" stopOpacity=".2" />
+            <stop offset=".3" stopColor="#fff" stopOpacity="0" />
+          </linearGradient>
           <clipPath id="latch-clip">
             <rect x="80" y="82" width="14" height="10" rx="2" />
           </clipPath>
         </defs>
+        {/* cool side: the dog stays in the dark, only its glow reads */}
+        <path d={domePath} fill="url(#cage-shade)" className="cage-shade" />
+        <path d={domePath} fill="url(#cage-glass)" className="cage-shade" />
         <g className="cage-bars" stroke="url(#cage-metal)" fill="none">
           {/* hanging ring */}
           <circle cx="60" cy="5" r="4" />
