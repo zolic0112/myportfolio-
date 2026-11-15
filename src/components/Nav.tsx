@@ -11,20 +11,24 @@ export default function Nav({ name }: { name: string }) {
   const junk = useJunkOn();
   return (
     <header className="skin-nav sticky top-0 z-40">
-      <nav className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
-        <Link href="/" className="skin-brand whitespace-nowrap">
+      {/* Phones: brand + tools on the first row, page links on a second one,
+          so nothing wraps by accident whatever the language or name length. */}
+      <nav className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-5 gap-y-2 px-4 py-3 text-sm sm:flex-nowrap sm:px-6 sm:py-4">
+        <Link href="/" className="skin-brand min-w-0 flex-1 truncate">
           {name}
         </Link>
-        <ul className="flex flex-wrap items-center justify-end gap-x-5 gap-y-2 text-sm">
+        <ul className="order-last flex w-full items-center gap-x-5 sm:order-none sm:w-auto">
           <li><Link href="/#works"><T v={UI.works} /></Link></li>
           <li><Link href="/#contact"><T v={UI.contact} /></Link></li>
-          <li><LangSwitch /></li>
           {junk && (
-            <li className="rot-only">
-              <button className="win-button" onClick={openPremium}>💎 去除廣告</button>
+            <li className="rot-only ml-auto sm:ml-0">
+              <button className="win-button whitespace-nowrap" onClick={openPremium}>💎 去除廣告</button>
             </li>
           )}
-          {premium && <li className="rot-only font-bold">⭐ PREMIUM 會員</li>}
+          {premium && <li className="rot-only ml-auto whitespace-nowrap font-bold sm:ml-0">⭐ PREMIUM</li>}
+        </ul>
+        <ul className="flex shrink-0 items-center gap-x-3">
+          <li><LangSwitch /></li>
         </ul>
       </nav>
     </header>
