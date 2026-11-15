@@ -1,5 +1,7 @@
 "use client";
 
+import { useRef, useState } from "react";
+import { sound } from "./sound";
 import { emit, useInteractive } from "./store";
 
 // The cage floats in the same corner on both personas and is never covered
@@ -45,8 +47,43 @@ export function CageFront() {
   const release = useInteractive((s) => s.release);
   const open = phase === "escaping";
 
+  // Dragging the latch sideways opens the cage too (it follows the finger and
+  // lets go past the end of its slot); a plain tap or click still works.
+  const drag = useRef<{ x: number; id: number } | null>(null);
+  const opened = useRef(false);
+  const [slide, setSlide] = useState(0);
+  const SLOT = 12;
+
+  function onPointerDown(e: React.PointerEvent) {
+    if (phase !== "caged") return;
+    drag.current = { x: e.clientX, id: e.pointerId };
+    opened.current = false;
+  }
+  function onPointerMove(e: React.PointerEvent) {
+    const d = drag.current;
+    if (!d || d.id !== e.pointerId || phase !== "caged") return;
+    const dx = Math.abs(e.clientX - d.x);
+    setSlide(Math.min(SLOT, dx / 2.5));
+    if (dx > SLOT * 2.5) {
+      drag.current = null;
+      opened.current = true;
+      setSlide(0);
+      release();
+    }
+  }
+  function onPointerEnd() {
+    drag.current = null;
+    setSlide(0);
+  }
+
   function onClick(e: React.MouseEvent) {
+    if (opened.current) {
+      // The drag already opened it; swallow the click that follows.
+      opened.current = false;
+      return;
+    }
     if (phase === "caged") release();
+    else if (phase === "free" && e.detail !== 0) sound.play("error");
     // In brain rot the real exit is catching the dog. Keyboard users (no
     // pointer, so detail === 0) get a whistle that calls it back instead.
     else if (phase === "free" && e.detail === 0) emit("recall");
@@ -57,6 +94,10 @@ export function CageFront() {
       id="pet-cage"
       type="button"
       onClick={onClick}
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={onPointerEnd}
+      onPointerCancel={onPointerEnd}
       data-open={open ? "1" : ""}
       aria-label={persona === "cool" ? "籠子(請勿打開)" : "籠子:把狗抓回來放進去就能回到原本的網站"}
       className="cage-pos cage-front"
@@ -95,7 +136,8 @@ export function CageFront() {
           {BARS.filter((x) => x > DOOR[0] && x < DOOR[1]).map((x) => (
             <line key={x} x1={x} y1={DOME_Y + 4} x2={x} y2={BASE_Y - 2} />
           ))}
-          <rect x="80" y="82" width="14" height="10" rx="2" className="latch" />
+          <line x1="78" y1="87" x2="98" y2="87" className="thin" />
+          <rect x="80" y="82" width="14" height="10" rx="2" className="latch" transform={`translate(${-slide} 0)`} />
           <rect className="latch-sheen" x="70" y="80" width="8" height="14" fill="url(#cage-sheen)" stroke="none" clipPath="url(#latch-clip)" />
         </g>
         <rect x="8" y={BASE_Y} width="104" height="12" rx="3" className="cage-base" />

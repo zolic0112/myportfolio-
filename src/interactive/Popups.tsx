@@ -9,7 +9,7 @@ import { useInteractive, useJunkOn, type Popup, type PopupKind } from "./store";
 // you work for it. Fake close buttons open one of the profile links in a new
 // tab, like real junk ads, so the portfolio itself never goes away.
 
-type Props = { links: string[]; reels: string[] };
+type Props = { links: string[]; reels: string[]; memes: string[] };
 
 const WEIGHTS: [PopupKind, number][] = [
   ["prize", 2],
@@ -20,13 +20,17 @@ const WEIGHTS: [PopupKind, number][] = [
   ["premium", 1],
   ["game", 1.5],
   ["reels", 1.5],
+  ["meme", 2],
 ];
 // At most one of each of these at a time.
 const SINGLE: PopupKind[] = ["premium", "game", "reels"];
 
-function pickKind(open: Popup[], hasReels: boolean): PopupKind {
+function pickKind(open: Popup[], hasReels: boolean, hasMemes: boolean): PopupKind {
   const pool = WEIGHTS.filter(
-    ([k]) => (k !== "reels" || hasReels) && !(SINGLE.includes(k) && open.some((p) => p.kind === k)),
+    ([k]) =>
+      (k !== "reels" || hasReels) &&
+      (k !== "meme" || hasMemes) &&
+      !(SINGLE.includes(k) && open.some((p) => p.kind === k)),
   );
   let r = Math.random() * pool.reduce((s, [, w]) => s + w, 0);
   for (const [k, w] of pool) if ((r -= w) <= 0) return k;
@@ -56,7 +60,7 @@ function useFakeLink(links: string[]) {
   };
 }
 
-export default function Popups({ links, reels }: Props) {
+export default function Popups({ links, reels, memes }: Props) {
   const junk = useJunkOn();
   const popups = useInteractive((s) => s.popups);
   const phase = useInteractive((s) => s.phase);
@@ -71,7 +75,7 @@ export default function Popups({ links, reels }: Props) {
     const spawn = () => {
       const open = useInteractive.getState().popups;
       if (open.length < max) {
-        const kind = pickKind(open, reels.length > 0);
+        const kind = pickKind(open, reels.length > 0, memes.length > 0);
         addPopup({ kind, ...spot(kind) });
         sound.play("ding");
       }
@@ -79,14 +83,14 @@ export default function Popups({ links, reels }: Props) {
     };
     timer = setTimeout(spawn, 1300);
     return () => clearTimeout(timer);
-  }, [junk, addPopup, reels.length]);
+  }, [junk, addPopup, reels.length, memes.length]);
 
   const sucking = phase === "returning";
 
   return (
     <>
       {popups.map((p) => (
-        <PopupWindow key={p.id} p={p} links={links} reels={reels} sucked={sucking} />
+        <PopupWindow key={p.id} p={p} links={links} reels={reels} memes={memes} sucked={sucking} />
       ))}
       <Clippy />
     </>
@@ -97,11 +101,13 @@ function PopupWindow({
   p,
   links,
   reels,
+  memes,
   sucked,
 }: {
   p: Popup;
   links: string[];
   reels: string[];
+  memes: string[];
   sucked: boolean;
 }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -121,7 +127,17 @@ function PopupWindow({
   const [pos, setPos] = useState({ x: p.x, y: p.y });
   const [dodges, setDodges] = useState(0);
   const [xOff, setXOff] = useState(0);
-  const maxDodges = p.kind === "premium" ? 3 : p.kind === "prize" ? 1 : 0;
+  // Decided once per popup: how often its close button runs away, and (on
+  // touch) whether a big fake X sits where the thumb expects the real one.
+  const [traits] = useState(() => {
+    const plain = p.kind !== "game" && p.kind !== "reels";
+    return {
+      maxDodges: p.kind === "premium" ? 3 : p.kind === "prize" ? 1 : plain && Math.random() < 0.3 ? 1 : 0,
+      decoy: plain && matchMedia("(pointer: coarse)").matches && Math.random() < 0.4,
+      meme: memes.length ? memes[(Math.random() * memes.length) | 0] : "",
+    };
+  });
+  const maxDodges = traits.maxDodges;
 
   const done = () => close(p.id);
 
@@ -160,6 +176,7 @@ function PopupWindow({
     premium: "💎 升級 Premium!!!",
     game: nag ? "不行!!先玩完!!" : "🎮 玩完才能關",
     reels: "📱 短影音 — 再滑一下就好",
+    meme: "funny.jpg.exe",
   };
 
   return (
@@ -172,23 +189,43 @@ function PopupWindow({
     >
       <div className="skin-titlebar" data-perch>
         <span className="t">{title[p.kind]}</span>
-        <span className="win-btn" aria-hidden>_</span>
-        <span className="win-btn" aria-hidden>□</span>
-        <button
-          className="win-btn x-real x-dodge"
-          aria-label="關閉"
-          onPointerEnter={onXEnter}
-          onClick={onX}
-          style={{ transform: `translateX(${xOff}px)` }}
-        >
-          ×
-        </button>
+        {traits.decoy ? (
+          <>
+            {/* Phones: the real close hides on the left, a fat fake one waits for the thumb. */}
+            <button className="win-btn x-real" aria-label="關閉" onClick={onX} style={{ order: -1 }}>
+              ×
+            </button>
+            <button className="fake-x decoy" aria-label="關閉" onClick={() => { fake(); done(); }}>
+              ✕
+            </button>
+          </>
+        ) : (
+          <>
+            <span className="win-btn" aria-hidden>_</span>
+            <span className="win-btn" aria-hidden>□</span>
+            <button
+              className="win-btn x-real x-dodge"
+              aria-label="關閉"
+              onPointerEnter={onXEnter}
+              onClick={onX}
+              style={{ transform: `translateX(${xOff}px)` }}
+            >
+              ×
+            </button>
+          </>
+        )}
       </div>
       <div className="popup-body">
         {p.kind === "game" ? (
           <MiniGame done={done} />
         ) : p.kind === "reels" ? (
           <Reels urls={reels} />
+        ) : p.kind === "meme" ? (
+          // Your own brain rot memes, deep-fried by CSS.
+          <div className="skin-media meme">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={traits.meme} alt="" />
+          </div>
         ) : (
           <Body kind={p.kind} done={done} fake={fake} openPremium={() => { openPremium(); done(); }} />
         )}
@@ -203,7 +240,7 @@ function Body({
   fake,
   openPremium,
 }: {
-  kind: Exclude<PopupKind, "game" | "reels">;
+  kind: Exclude<PopupKind, "game" | "reels" | "meme">;
   done: () => void;
   fake: () => void;
   openPremium: () => void;

@@ -16,8 +16,13 @@ const storage =
 const workTranslation = (lang: string) =>
   fields.object(
     {
-      title: fields.text({ label: "標題" }),
-      summary: fields.text({ label: "簡介", multiline: true }),
+      title: fields.text({ label: "標題", validation: { length: { max: 60 } } }),
+      summary: fields.text({
+        label: "簡介",
+        multiline: true,
+        description: "西文通常最長,盡量精簡",
+        validation: { length: { max: 180 } },
+      }),
       role: fields.text({ label: "角色" }),
       body: fields.text({ label: "內文(純文字,空行分段)", multiline: true }),
       reviewed: fields.checkbox({ label: "已校對(沒勾 = 機翻未校對)" }),
@@ -77,7 +82,7 @@ export default config({
       },
     }),
     reels: singleton({
-      label: "Brain rot 短影音清單",
+      label: "Brain rot 素材(短影音、迷因圖)",
       path: "content/reels",
       schema: {
         videos: fields.array(
@@ -87,6 +92,17 @@ export default config({
             description:
               "Reels 彈窗會隨機從這裡開始、上下滑逐支播放。清單是空的就不會出現這個彈窗。影片被刪會自動跳下一支,但請定期檢查。注意版權。",
             itemLabel: (p) => p.value ?? "",
+          },
+        ),
+        memes: fields.array(
+          fields.image({
+            label: "迷因圖",
+            directory: "public/images/memes",
+            publicPath: "/images/memes/",
+          }),
+          {
+            label: "迷因圖",
+            description: "會出現在迷因彈窗裡,網站會自動加上 deep-fried 效果。清單是空的就不會出現。注意版權。",
           },
         ),
       },
@@ -101,7 +117,12 @@ export default config({
       columns: ["title", "category", "year"],
       schema: {
         title: fields.slug({ name: { label: "標題" } }),
-        summary: fields.text({ label: "簡介", multiline: true }),
+        summary: fields.text({
+          label: "簡介",
+          multiline: true,
+          description: "卡片上最多顯示兩行。建議 60 字內",
+          validation: { length: { max: 120 } },
+        }),
         category: fields.select({
           label: "類別",
           options: [

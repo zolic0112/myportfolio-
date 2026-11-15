@@ -19,6 +19,7 @@ export type PopupKind =
   | "multix"
   | "premium"
   | "game"
+  | "meme"
   | "reels";
 
 export type Popup = { id: number; kind: PopupKind; x: number; y: number };

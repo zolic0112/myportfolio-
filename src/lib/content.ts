@@ -62,8 +62,9 @@ export async function getWorks(): Promise<WorkCard[]> {
     }));
 }
 
-/** Curated brain rot shorts for the Reels popup ("be your own algorithm"). */
-export async function getReels(): Promise<string[]> {
+/** Hand-curated brain rot material: shorts for the Reels popup, images for the meme popup. */
+export async function getJunk() {
   const r = await reader.singletons.reels.read();
-  return (r?.videos ?? []).filter((u): u is string => Boolean(u));
+  const keep = (xs?: readonly (string | null)[]) => (xs ?? []).filter((u): u is string => Boolean(u));
+  return { reels: keep(r?.videos), memes: keep(r?.memes) };
 }

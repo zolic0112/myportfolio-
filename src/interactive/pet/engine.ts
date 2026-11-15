@@ -24,6 +24,8 @@ export type EngineCallbacks = {
   /** Visitor let go of the dog close enough to the cage: start the rot → cool switch. */
   onCaptured: () => void;
   onGrab: (grabbing: boolean) => void;
+  /** Dog made a noise on its own: a bark while roaming, a whine when worn out. */
+  onVoice: (kind: "bark" | "whine") => void;
 };
 
 type Mode = "caged" | "free" | "sucking";
@@ -90,6 +92,12 @@ export class SpaceDogEngine {
   private tired = false;
   private fleeing = false;
   private magnet = false;
+  /** 0 = standing, 1 = sitting down (eased). Sits when it rests on a perch. */
+  private sit = 0;
+  private sitting = false;
+  private nextBark = 6;
+  /** Mouth-open amount while barking, decays to 0. */
+  private yap = 0;
 
   // cage
   private idle = 0;
@@ -217,6 +225,7 @@ export class SpaceDogEngine {
       return;
     }
     this.grab = true;
+    this.setBehind(false);
     this.airborne = false;
     this.surface = null;
     this.wanderTarget = null;
@@ -312,6 +321,9 @@ export class SpaceDogEngine {
     this.vx = (tx - this.x) / T;
     this.vy = vy;
     this.surface = null;
+    // Sometimes it ducks *behind* the page on the way, so you only glimpse it
+    // through the gaps between cards before it pops out on the next one.
+    this.setBehind(!this.fleeing && Math.random() < 0.35);
     return true;
   }
 
@@ -419,10 +431,18 @@ export class SpaceDogEngine {
 
   private startSuck() {
     this.mode = "sucking";
+    this.setBehind(false);
     this.suck = { t: 0, x: this.x, y: this.y, s: this.S };
     this.setMagnet(false);
     this.hit.style.pointerEvents = "none";
     this.cb.onCaptured();
+  }
+
+  private behind = false;
+  private setBehind(on: boolean) {
+    if (on === this.behind) return;
+    this.behind = on;
+    this.cv.style.zIndex = on ? "-1" : "";
   }
 
   private setMagnet(on: boolean) {
@@ -467,6 +487,7 @@ export class SpaceDogEngine {
           if (crossed && inside && (!land || s.top < land.top)) land = s;
         }
         if (land) {
+          this.setBehind(false);
           const hard = this.vy > 1100;
           this.qv += Math.min(this.vy, 1400) * 0.0042;
           this.y = land.top - FOOT_DROP * this.S;
@@ -479,6 +500,11 @@ export class SpaceDogEngine {
           else {
             this.wanderTarget = null;
             this.wait = this.tired ? rand(1.2, 3) : rand(0.5, 2.2);
+            // Reached a spot: often sit for a while, legs dangling off a title bar.
+            if (!this.tired && land.el !== "floor" && Math.random() < 0.6) {
+              this.sitting = true;
+              this.wait = rand(2.5, 6);
+            }
           }
         }
       }
@@ -507,8 +533,10 @@ export class SpaceDogEngine {
     // Only a hovering mouse chases. On touch, failed grabs drain stamina instead.
     const near = this.ptr.mouse && d < R && !this.reduce;
 
+    const wasTired = this.tired;
     if (near && !this.tired) {
       this.fleeing = true;
+      this.sitting = false;
       this.stamina -= 0.17 * dt;
     } else {
       if (!near) this.fleeing = false;
@@ -519,10 +547,19 @@ export class SpaceDogEngine {
       this.tired = true;
       this.fleeing = false;
     } else if (this.tired && this.stamina > 0.6) this.tired = false;
+    if (this.tired && !wasTired) this.cb.onVoice("whine");
 
     if (this.reduce) return;
+    // Barks at nothing in particular every so often.
+    if (this.time > this.nextBark && !this.tired) {
+      this.nextBark = this.time + rand(9, 20);
+      this.yap = 1;
+      this.qv -= 1.2;
+      this.cb.onVoice("bark");
+    }
     this.wait -= dt;
     if (this.wait > 0) return;
+    this.sitting = false;
     const hw = this.halfW();
 
     if (this.fleeing) {
@@ -541,6 +578,10 @@ export class SpaceDogEngine {
   }
 
   private updateSprings(dt: number) {
+    const sitT = this.sitting && !this.airborne && !this.grab && this.mode === "free" ? 1 : 0;
+    this.sit += (sitT - this.sit) * Math.min(1, dt * 9);
+    if (this.airborne || this.grab) this.sitting = false;
+    this.yap = Math.max(0, this.yap - dt * 3.5);
     if (this.mode !== "free") this.pvx += ((this.airborne ? this.vx : 0) - this.pvx) * Math.min(1, dt * 18);
     const thT = this.grab ? clamp(this.pvx * 0.0016, -1, 1) : 0;
     this.thv += ((thT - this.th) * (this.grab ? 70 : 120) - this.thv * (this.grab ? 5 : 12)) * dt;
@@ -580,6 +621,22 @@ export class SpaceDogEngine {
     z("armR").r = -4 - Math.sin(t * 2.4) * 3 - flail * (70 + Math.sin(t * 19 + 1.3) * 28) - hopS * 24;
     z("legL").r = flail * Math.sin(t * 16) * 26 + hopS * 14;
     z("legR").r = -flail * Math.sin(t * 16) * 26 - hopS * 14;
+    if (this.sit > 0.01) {
+      // Sit: body drops onto the surface, legs swing out and dangle a little.
+      const s = this.sit;
+      const drop = 62 * s;
+      P.body.y += drop;
+      P.legL.y = P.legR.y = drop;
+      P.legL.r += s * (74 + Math.sin(t * 2.1) * 5);
+      P.legR.r -= s * (74 + Math.sin(t * 2.1 + 1) * 5);
+      P.armL.r += s * 10;
+      P.armR.r -= s * 10;
+    }
+    if (this.yap > 0) {
+      P.head.r -= this.yap * 9;
+      P.head.y -= this.yap * 6;
+      P.ear.r -= this.yap * 18;
+    }
 
     // Eyes follow the cursor; now and then the free dog glances at its cage.
     let lx = this.ptr.x;

@@ -22,6 +22,7 @@ export default function SpaceDog() {
       onDodge: () => sound.play("squeak"),
       onLand: (hard) => hard && sound.play("boing"),
       onCaptured: () => useInteractive.getState().capture(),
+      onVoice: (v) => sound.play(v),
       onGrab: (g) => document.documentElement.classList.toggle("grabbing", g),
     });
     const unsub = useInteractive.subscribe((s, prev) => {

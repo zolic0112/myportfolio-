@@ -29,7 +29,7 @@ function Modal({ sponsor }: { sponsor: Sponsor }) {
 
   useEffect(() => {
     if (step !== "thanks") return;
-    const id = setTimeout(close, 2800);
+    const id = setTimeout(close, 5200);
     return () => clearTimeout(id);
   }, [step, close]);
 
@@ -53,7 +53,7 @@ function Modal({ sponsor }: { sponsor: Sponsor }) {
       className="fixed inset-0 z-[55] grid place-items-center overflow-y-auto bg-black/60 p-4"
       onClick={close}
     >
-      <div className="popup !static w-[min(760px,100%)] !animate-none" onClick={(e) => e.stopPropagation()}>
+      <div className="popup !static !w-[min(760px,100%)] !animate-none" onClick={(e) => e.stopPropagation()}>
         <div className="skin-titlebar">
           <span className="t">💎 Space Dog Premium — 訂閱方案</span>
           <button className="win-btn" onClick={close} aria-label="關閉">×</button>
@@ -103,7 +103,21 @@ function Modal({ sponsor }: { sponsor: Sponsor }) {
             </div>
           )}
           {step === "thanks" && (
-            <p className="wordart py-8 text-center" style={{ fontSize: 40 }}>感謝訂閱 🎉</p>
+            <div className="thanks">
+              <div className="thanks-rays" aria-hidden />
+              <p className="wordart thanks-title">感謝訂閱 🎉</p>
+              <div className="thanks-card">
+                <span className="thanks-dog" aria-hidden>🐶</span>
+                <div>
+                  <b>SPACE DOG PREMIUM</b>
+                  <br />
+                  MEMBER No. 000001
+                  <br />
+                  <small>有效期限:永遠(存在這個瀏覽器裡)</small>
+                </div>
+              </div>
+              <p className="thanks-note">彈窗已全部消失 ✨ 你現在是很有錢的人 ✨</p>
+            </div>
           )}
         </div>
       </div>

@@ -16,11 +16,14 @@ import { useInteractive } from "./store";
 export default function InteractiveLayer({
   links,
   reels,
+  memes,
   sponsor,
 }: {
   links: string[];
   /** Hand-curated short video URLs for the Reels popup. */
   reels: string[];
+  /** Meme images for the meme popup. */
+  memes: string[];
   sponsor: Sponsor;
 }) {
   const hydrate = useInteractive((s) => s.hydrate);
@@ -28,7 +31,7 @@ export default function InteractiveLayer({
   return (
     <>
       <Ambient />
-      <Popups links={links} reels={reels} />
+      <Popups links={links} reels={reels} memes={memes} />
       <PremiumModal sponsor={sponsor} />
       <GameOverlay />
       <CageBack />
