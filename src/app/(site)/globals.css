@@ -2047,3 +2047,25 @@ html[data-persona="cool"][data-lang="ja"] .skin-card-title {
   font-weight: 300;
   color: rgb(255 255 255 / 0.78);
 }
+
+/* ---------- TEMP comparison: medium-weight headings (?type=medium) ---------- */
+html[data-persona="cool"][data-type="medium"] .skin-h1 {
+  font-weight: 500;
+  letter-spacing: -0.035em;
+}
+html[data-persona="cool"][data-type="medium"] .skin-h2,
+html[data-persona="cool"][data-type="medium"] .skin-card-title {
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+html[data-persona="cool"][data-type="medium"] .ph span {
+  font-weight: 500;
+}
+html[data-persona="cool"][data-type="medium"][data-lang="zh"] .skin-h1,
+html[data-persona="cool"][data-type="medium"][data-lang="ja"] .skin-h1,
+html[data-persona="cool"][data-type="medium"][data-lang="zh"] .skin-h2,
+html[data-persona="cool"][data-type="medium"][data-lang="ja"] .skin-h2,
+html[data-persona="cool"][data-type="medium"][data-lang="zh"] .skin-card-title,
+html[data-persona="cool"][data-type="medium"][data-lang="ja"] .skin-card-title {
+  letter-spacing: 0;
+}

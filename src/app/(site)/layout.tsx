@@ -11,7 +11,7 @@ import { LANG_SCRIPT } from "@/lib/i18n";
 const grotesk = Space_Grotesk({ variable: "--font-grotesk", subsets: ["latin"], weight: ["300", "400", "500"] });
 const serif = Instrument_Serif({ variable: "--font-serif", subsets: ["latin"], weight: "400", style: ["normal", "italic"] });
 // CJK glyphs for the thin display headings (Space Grotesk is Latin only).
-const sansTc = Noto_Sans_TC({ variable: "--font-sans-tc", weight: ["200", "300", "400"], preload: false });
+const sansTc = Noto_Sans_TC({ variable: "--font-sans-tc", weight: ["200", "300", "400", "500"], preload: false });
 const mono = IBM_Plex_Mono({ variable: "--font-mono-face", subsets: ["latin"], weight: ["300", "400", "500"] });
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -34,6 +34,8 @@ export default async function SiteLayout({ children }: LayoutProps<"/">) {
       <body className="flex min-h-full flex-col">
         {/* Pick the language before first paint (see lib/i18n). */}
         <script dangerouslySetInnerHTML={{ __html: LANG_SCRIPT }} />
+        {/* TEMP, for comparing heading weights: add ?type=medium to the URL. Remove once decided. */}
+        <script dangerouslySetInnerHTML={{ __html: `if(/[?&]type=medium/.test(location.search))document.documentElement.setAttribute("data-type","medium")` }} />
         <div className="starfield" aria-hidden>
           <i />
           <i />
