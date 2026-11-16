@@ -18,7 +18,7 @@
   --accent: #d4d7e1;
   --signal: #9a86ea;
   --font-display: var(--font-serif), var(--font-serif-tc), "Songti TC", "Noto Serif CJK TC", serif;
-  --font-body: var(--font-inter);
+  --font-body: var(--font-grotesk), "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
 
   --cage-in-1: #151827;
   --cage-in-2: #05060a;
@@ -1479,4 +1479,271 @@ html.frying body {
   background: rgb(5 6 10 / 0.82);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
+}
+
+/* ==========================================================================
+   Cool side, second pass: the Ultimate Speed Test language.
+   Pure black, a live shader starfield, floating glass chrome, mono labels,
+   capsule controls. The brushed-silver edge stays, drawn as a masked ring so
+   the glass behind it can be truly see-through.
+   ========================================================================== */
+
+[data-persona="cool"] body {
+  background: #000;
+  font-weight: 300;
+}
+.star-gl {
+  position: absolute;
+  inset: 40px; /* .starfield bleeds 40px for the CSS parallax */
+  width: calc(100% - 80px);
+  height: calc(100% - 80px);
+  opacity: 0;
+  transition: opacity 1.2s;
+}
+.star-gl[data-on="1"] {
+  opacity: 1;
+}
+.grain {
+  opacity: 0.045;
+}
+
+/* ---------- glass + silver ring ---------- */
+[data-persona="cool"] .skin-card,
+[data-persona="cool"] .skin-card.glass,
+[data-persona="cool"] .skin-panel,
+[data-persona="cool"] .skin-nav nav {
+  position: relative;
+  border: 0;
+  border-radius: 24px;
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 0.1), transparent 22%),
+    linear-gradient(160deg, rgb(255 255 255 / 0.085) 0%, rgb(255 255 255 / 0.02) 45%, rgb(255 255 255 / 0.05) 100%),
+    rgb(10 11 16 / 0.42);
+  backdrop-filter: blur(22px) saturate(1.5);
+  -webkit-backdrop-filter: blur(22px) saturate(1.5);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.18),
+    inset 0 -24px 40px -30px rgb(255 255 255 / 0.07),
+    0 30px 70px -34px rgb(0 0 0 / 0.95);
+}
+[data-persona="cool"] .skin-card::before,
+[data-persona="cool"] .skin-panel::before,
+[data-persona="cool"] .skin-nav nav::before,
+[data-persona="cool"] .skin-chip::before,
+[data-persona="cool"] .skin-btn.ghost::before,
+[data-persona="cool"] .lang-switch::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  padding: 1px;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 1;
+  background: linear-gradient(140deg, #f6f7fa 0%, #9da1b0 10%, #33363f 30%, #b4b8c4 50%, #2a2d36 68%, #e2e4eb 90%, #6b6f7d 100%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+}
+[data-persona="cool"] .skin-card:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.28),
+    inset 0 -24px 40px -30px rgb(255 255 255 / 0.1),
+    0 40px 80px -34px #000,
+    0 0 50px -14px rgb(154 134 234 / 0.4);
+}
+[data-persona="cool"] .skin-media {
+  background: rgb(0 0 0 / 0.35);
+}
+/* placeholder covers: tinted glass, the stars still show through */
+[data-persona="cool"] .ph {
+  background:
+    radial-gradient(60% 80% at 30% 0%, hsl(var(--h) 70% 55% / 0.4), transparent 70%),
+    radial-gradient(50% 70% at 85% 100%, hsl(calc(var(--h) + 50) 60% 40% / 0.32), transparent 70%);
+}
+[data-persona="cool"] .ph::after {
+  background: linear-gradient(180deg, transparent 60%, rgb(0 0 0 / 0.35) 100%);
+}
+@media (pointer: coarse) {
+  /* backdrop blur is the expensive part on phones: keep it for the nav only */
+  [data-persona="cool"] .skin-card,
+  [data-persona="cool"] .skin-card.glass,
+  [data-persona="cool"] .skin-panel {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background:
+      linear-gradient(180deg, rgb(255 255 255 / 0.1), transparent 22%),
+      linear-gradient(160deg, rgb(255 255 255 / 0.085) 0%, rgb(255 255 255 / 0.02) 45%, rgb(255 255 255 / 0.05) 100%),
+      rgb(10 11 16 / 0.72);
+  }
+}
+
+/* ---------- floating chrome ---------- */
+[data-persona="cool"] .skin-nav {
+  background: none;
+  border: 0;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  padding: 12px 12px 0;
+}
+[data-persona="cool"] .skin-nav nav {
+  border-radius: 999px;
+  padding-block: 10px;
+  padding-inline: 22px 12px;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.18), 0 20px 40px -24px #000;
+}
+@media (max-width: 639px) {
+  [data-persona="cool"] .skin-nav nav {
+    border-radius: 22px;
+    padding-inline: 16px 10px;
+  }
+}
+[data-persona="cool"] .skin-nav a {
+  font-family: var(--font-mono-face);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+[data-persona="cool"] .skin-brand {
+  font-family: var(--font-mono-face), var(--font-serif-tc), monospace;
+  font-size: 12px !important;
+  font-weight: 500;
+  letter-spacing: 0.24em !important;
+}
+.brand-sub {
+  color: var(--muted);
+  font-weight: 300;
+}
+[data-persona="cool"] .lang-switch {
+  position: relative;
+  border: 0;
+  padding: 3px;
+  background: rgb(255 255 255 / 0.04);
+}
+[data-persona="cool"] .lang-switch button {
+  border-radius: 999px;
+  padding: 4px 10px;
+  letter-spacing: 0.14em;
+}
+html[data-persona="cool"][data-lang="zh"] .lang-switch [data-set="zh"],
+html[data-persona="cool"][data-lang="en"] .lang-switch [data-set="en"],
+html[data-persona="cool"][data-lang="ja"] .lang-switch [data-set="ja"],
+html[data-persona="cool"][data-lang="es"] .lang-switch [data-set="es"] {
+  color: #05060a;
+  background: linear-gradient(180deg, #fafbfc, #b4b8c4);
+  box-shadow: inset 0 1px 0 #fff;
+}
+
+/* ---------- labels, capsules, chips ---------- */
+[data-persona="cool"] .skin-eyebrow::before {
+  content: "// ";
+  opacity: 0.55;
+}
+[data-persona="cool"] .skin-eyebrow,
+[data-persona="cool"] .skin-meta {
+  font-weight: 400;
+  letter-spacing: 0.26em;
+}
+[data-persona="cool"] .skin-h1 em,
+[data-persona="cool"] .skin-h2 em {
+  font-style: italic;
+}
+[data-persona="cool"] .skin-chip,
+[data-persona="cool"] .skin-btn.ghost {
+  position: relative;
+  border: 0;
+  background: rgb(255 255 255 / 0.05);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.14);
+  font-family: var(--font-mono-face), var(--font-body);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+[data-persona="cool"] .skin-chip {
+  padding: 9px 18px;
+}
+[data-persona="cool"] .skin-chip::before {
+  opacity: 0.55;
+}
+[data-persona="cool"] .skin-chip:hover,
+[data-persona="cool"] .skin-btn.ghost:hover {
+  background: rgb(255 255 255 / 0.1);
+}
+[data-persona="cool"] .skin-chip[aria-pressed="true"] {
+  color: #05060a;
+  background: linear-gradient(180deg, #fafbfc, #b4b8c4);
+  box-shadow: inset 0 1px 0 #fff, 0 8px 24px -8px rgb(255 255 255 / 0.35);
+}
+[data-persona="cool"] .skin-btn {
+  font-family: var(--font-mono-face), var(--font-body);
+  font-size: 12px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  padding: 14px 28px;
+  background: linear-gradient(180deg, #ffffff, #c9ccd6 55%, #9a9eac);
+  box-shadow: inset 0 1px 0 #fff, inset 0 -1px 0 rgb(0 0 0 / 0.25), 0 10px 40px -10px rgb(255 255 255 / 0.35);
+}
+[data-persona="cool"] .skin-btn.ghost {
+  color: var(--fg);
+  padding: 13px 24px;
+}
+[data-persona="cool"] .skin-tag {
+  font-family: var(--font-mono-face), var(--font-body);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  background: rgb(255 255 255 / 0.04);
+}
+[data-persona="cool"] .skin-footer {
+  border: 0;
+  font-family: var(--font-mono-face), monospace;
+  letter-spacing: 0.3em;
+}
+
+/* ---------- status line ---------- */
+.status-bar {
+  position: fixed;
+  left: 24px;
+  bottom: 20px;
+  z-index: 35;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font: 400 10px/1 var(--font-mono-face), monospace;
+  letter-spacing: 0.26em;
+  color: var(--muted);
+  pointer-events: none;
+}
+.live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #ffa033;
+  box-shadow: 0 0 10px #ffa033;
+  animation: live 2.4s ease-in-out infinite;
+}
+@keyframes live {
+  50% { opacity: 0.35; }
+}
+@media (max-width: 767px), (prefers-reduced-motion: reduce) {
+  .status-bar { display: none; }
+}
+
+/* The starfield sits at z-index -1: the body must not paint over it. */
+[data-persona="cool"] {
+  --bg: #000;
+}
+[data-persona="cool"] body {
+  background: transparent;
+}
+[data-persona="cool"] .skin-nav nav {
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 0.1), transparent 40%),
+    rgb(8 9 13 / 0.66);
+}
+@media (max-width: 639px) {
+  .brand-sub {
+    display: none;
+  }
 }

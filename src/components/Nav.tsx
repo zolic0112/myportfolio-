@@ -16,6 +16,7 @@ export default function Nav({ name }: { name: string }) {
       <nav className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-5 gap-y-2 px-4 py-3 text-sm sm:flex-nowrap sm:px-6 sm:py-4">
         <Link href="/" className="skin-brand min-w-0 flex-1 truncate">
           {name}
+          <span className="brand-sub cool-only"> / PORTFOLIO</span>
         </Link>
         <ul className="order-last flex w-full items-center gap-x-5 sm:order-none sm:w-auto">
           <li><Link href="/#works"><T v={UI.works} /></Link></li>
