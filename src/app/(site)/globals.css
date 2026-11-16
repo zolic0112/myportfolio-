@@ -17,7 +17,7 @@
   --border: rgb(220 224 236 / 0.14);
   --accent: #d4d7e1;
   --signal: #9a86ea;
-  --font-display: var(--font-serif), var(--font-serif-tc), "Songti TC", "Noto Serif CJK TC", serif;
+  --font-display: var(--font-serif), var(--font-sans-tc), "Songti TC", "Noto Serif CJK TC", serif;
   --font-body: var(--font-grotesk), "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
 
   --cage-in-1: #151827;
@@ -1409,7 +1409,7 @@ html.frying body {
   font-size: 13px;
   letter-spacing: 0.3em;
   padding: 5px 8px 5px 12px;
-  font-family: var(--font-serif), var(--font-serif-tc), serif;
+  font-family: var(--font-serif), var(--font-sans-tc), serif;
 }
 @media (max-width: 640px) {
   .cage-tag {
@@ -1606,7 +1606,7 @@ html.frying body {
   text-transform: uppercase;
 }
 [data-persona="cool"] .skin-brand {
-  font-family: var(--font-mono-face), var(--font-serif-tc), monospace;
+  font-family: var(--font-mono-face), var(--font-sans-tc), monospace;
   font-size: 12px !important;
   font-weight: 500;
   letter-spacing: 0.24em !important;
@@ -1980,4 +1980,70 @@ html[data-persona="cool"][data-lang="es"] .lang-switch [data-set="es"] {
 }
 .metric-row {
   margin-bottom: 22px;
+}
+
+/* ==========================================================================
+   Cool side, fourth pass: type. Thin grotesque display (as in Ultimate Speed
+   Test), set the way current Apple / Tesla product pages do it: plain white,
+   tight tracking on big Latin, no gradients or emboss on text, generous air,
+   one muted grey for secondary copy.
+   ========================================================================== */
+[data-persona="cool"] {
+  --font-display: var(--font-grotesk), var(--font-sans-tc), "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif;
+  --font-body: var(--font-grotesk), var(--font-sans-tc), "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif;
+}
+[data-persona="cool"] .skin-h1,
+[data-persona="cool"] .skin-h2 {
+  font-family: var(--font-display);
+  background: none;
+  -webkit-background-clip: border-box;
+  background-clip: border-box;
+  color: #fff;
+  filter: none;
+}
+[data-persona="cool"] .skin-h1 {
+  font-weight: 200;
+  letter-spacing: -0.03em;
+  line-height: 1.02;
+}
+[data-persona="cool"] .skin-h2 {
+  font-weight: 300;
+  letter-spacing: -0.02em;
+}
+[data-persona="cool"] .skin-card-title {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+[data-persona="cool"] .skin-lede {
+  font-weight: 300;
+  letter-spacing: 0;
+  color: rgb(255 255 255 / 0.6);
+}
+/* CJK does not take negative tracking: open it up a touch instead */
+html[data-persona="cool"][data-lang="zh"] .skin-h1,
+html[data-persona="cool"][data-lang="ja"] .skin-h1 {
+  letter-spacing: 0.02em;
+  line-height: 1.12;
+}
+html[data-persona="cool"][data-lang="zh"] .skin-h2,
+html[data-persona="cool"][data-lang="ja"] .skin-h2,
+html[data-persona="cool"][data-lang="zh"] .skin-card-title,
+html[data-persona="cool"][data-lang="ja"] .skin-card-title {
+  letter-spacing: 0.02em;
+}
+[data-persona="cool"] .ph span {
+  font-family: var(--font-display);
+  font-weight: 200;
+  letter-spacing: -0.02em;
+  color: rgb(255 255 255 / 0.22);
+}
+.cage-tag {
+  font-family: var(--font-mono-face), var(--font-sans-tc), monospace;
+  font-size: 10px;
+  letter-spacing: 0.3em;
+}
+[data-persona="cool"] .skin-prose {
+  font-weight: 300;
+  color: rgb(255 255 255 / 0.78);
 }

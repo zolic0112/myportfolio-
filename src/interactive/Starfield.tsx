@@ -3,9 +3,11 @@
 import { useEffect, useRef } from "react";
 import { useInteractive } from "./store";
 
-// Cool-side backdrop: the three-layer shader starfield from Ultimate Speed
-// Test (same hash, same cosine palette), drifting slowly, leaning toward the
-// pointer and sliding with the scroll position for depth. Falls back to the
+// Cool-side backdrop: a procedural night sky. Stars live on grids measured in
+// CSS pixels (so they stay pin-sharp at any screen size), with power-law
+// brightness, a soft bloom and faint diffraction spikes on the brightest, four
+// parallax depths that lean toward the pointer and slide with the scroll, and
+// a barely-there band of dust. Falls back to the
 // CSS stars underneath when WebGL2 is missing. Sleeps on the rot side and in
 // hidden tabs; draws a single still frame under reduced motion.
 
@@ -14,45 +16,98 @@ precision highp float;
 out vec4 O;
 uniform float time;
 uniform vec2 resolution;
+uniform float dpr;
 uniform vec2 touch;
 uniform float scroll;
-#define hue(a) (.6+.6*cos(6.3*(a)+vec3(0,83,21)))
-float hash12(vec2 p){
+
+float hash(vec2 p){
   vec3 p3 = fract(vec3(p.xyx) * .1031);
   p3 += dot(p3, p3.yzx + 33.33);
   return fract((p3.x + p3.y) * p3.z);
 }
-vec3 starfield(vec2 uv, float brightness, float warmMix){
-  vec3 col = vec3(0);
-  vec2 pull = touch * 0.06;
-  for (float L = 0.; L < 3.; L++){
-    float scale = 2.0 + L * 2.2;
-    vec2 p = uv * scale + vec2(time * 0.004 * (L+1.), time * 0.003) + pull * (0.6 + L*0.4);
-    p.y += scroll * (0.25 + L * 0.2);
-    vec2 cell = floor(p);
-    vec2 fcel = fract(p);
-    float r = hash12(cell);
-    if (r < 0.72) continue;
-    vec2 starPos = vec2(hash12(cell + 1.3), hash12(cell + 7.7));
-    float d = length(fcel - starPos);
-    float size = 0.012 + (r - 0.72) * 0.03;
-    float tw = 0.7 + 0.3 * sin(time * 0.6 + r * 40.);
-    float s = smoothstep(size, 0.0, d) * tw;
-    float halo = smoothstep(size * 6., 0.0, d) * 0.12;
-    vec3 tint = hue(r * 2.1 + L * 0.13 + time * 0.02);
-    tint = mix(tint, vec3(1.0), warmMix);
-    col += (s + halo) * tint * brightness * (0.5 + 0.5 / (L + 1.));
-  }
-  return col;
+vec2 hash2(vec2 p){
+  vec3 p3 = fract(vec3(p.xyx) * vec3(.1031, .1030, .0973));
+  p3 += dot(p3, p3.yzx + 33.33);
+  return fract((p3.xx + p3.yz) * p3.zy);
+}
+float noise(vec2 p){
+  vec2 i = floor(p), f = fract(p);
+  f = f * f * (3. - 2. * f);
+  return mix(mix(hash(i), hash(i + vec2(1, 0)), f.x),
+             mix(hash(i + vec2(0, 1)), hash(i + vec2(1, 1)), f.x), f.y);
+}
+float fbm(vec2 p){
+  float a = .5, v = 0.;
+  for (int i = 0; i < 4; i++){ v += a * noise(p); p = p * 2.03 + 17.; a *= .5; }
+  return v;
+}
+// Black-body-ish tint: most stars near white, a few cool blue, a few warm.
+vec3 starTint(float t){
+  vec3 cool = vec3(.72, .82, 1.), warm = vec3(1., .82, .64);
+  return mix(mix(cool, vec3(1.), smoothstep(0., .45, t)), warm, smoothstep(.72, 1., t));
+}
+// Integer hash (PCG): the float hash above is fine for noise but lines stars
+// up in visible columns when it is fed neighbouring cell ids.
+uvec3 pcg3(uvec3 v){
+  v = v * 1664525u + 1013904223u;
+  v.x += v.y * v.z; v.y += v.z * v.x; v.z += v.x * v.y;
+  v ^= v >> 16u;
+  v.x += v.y * v.z; v.y += v.z * v.x; v.z += v.x * v.y;
+  return v;
+}
+vec3 cellRand(vec2 id, float seed){
+  uvec3 u = pcg3(uvec3(ivec3(int(id.x), int(id.y), int(seed))));
+  return vec3(u) / 4294967295.;
+}
+// One layer of stars on a grid measured in CSS pixels, so a star is the same
+// size on a phone and on a 4K monitor: a bigger screen shows more sky, not
+// bigger dots. Brightness follows a steep power law (many faint, few bright).
+vec3 layer(vec2 px, float cell, float density, float gain, float seed){
+  vec2 g = px / cell;
+  vec2 id = floor(g);
+  vec2 f = fract(g);
+  vec3 r1 = cellRand(id, seed);
+  if (r1.z > density) return vec3(0);
+  vec3 r2v = cellRand(id, seed + 57.);
+  vec2 pos = .18 + .64 * r1.xy;
+  vec2 d = (f - pos) * cell;                 // distance in CSS px
+  float r2 = dot(d, d);
+  float mag = pow(r2v.x, 9.);                // power-law magnitude
+  float b = gain * (.22 + 2.8 * mag);
+  float tw = .82 + .18 * sin(time * (.6 + 1.8 * r2v.y) + r1.z * 60.);
+  float core = exp(-r2 / (.5 + 1.4 * mag));        // sub-2px core
+  float halo = mag * mag * 6. / (r2 + 14.);        // soft bloom, bright stars only
+  halo *= smoothstep(cell * .18, 0., sqrt(r2));    // stays inside its cell
+  // faint 4-point diffraction spikes on the very brightest
+  float sp = smoothstep(.6, 1., mag) * .7;
+  float spikes = sp * (exp(-abs(d.x) * .12 - abs(d.y) * 1.8) + exp(-abs(d.y) * .12 - abs(d.x) * 1.8)) * .5;
+  return starTint(r2v.z) * b * tw * (core + halo + spikes);
 }
 void main(){
-  float s = min(resolution.x, resolution.y);
-  vec2 uv = (gl_FragCoord.xy - .5 * resolution) / s;
-  vec3 col = starfield(uv, 0.95, 0.55);
-  // a breath of the palette high up, so the black has somewhere to fall from
-  col += hue(time * 0.01 + 0.62) * 0.045 * exp(-length(uv - vec2(0.35, 0.75)) * 2.2);
-  float vig = smoothstep(1.35, 0.25, length(uv));
-  col *= 0.45 + 0.55 * vig;
+  vec2 px = gl_FragCoord.xy / dpr;
+  vec2 size = resolution / dpr;
+  vec2 c = px - .5 * size;
+  vec2 uv = c / max(size.x, size.y);
+  vec3 col = vec3(0);
+  // four depths: far = dense, faint, almost still; near = sparse, bright, drifts
+  for (float L = 0.; L < 4.; L++){
+    float depth = (L + 1.) / 4.;
+    vec2 shift = vec2(time * 1.2, time * .5) * depth
+               + touch * 14. * depth
+               + vec2(0., scroll * 120. * depth);
+    float cell = mix(26., 120., depth);
+    col += layer(px + shift, cell, mix(.5, .22, depth), mix(.35, 1., depth), L * 13. + 1.);
+  }
+  // a thin band of dust: two fbm octaves of very dark colour, not a "nebula"
+  vec2 q = uv * vec2(1.6, 2.6) + vec2(time * .004, scroll * .05) + touch * .01;
+  float band = exp(-pow((uv.y - uv.x * .35 + .08) * 3.2, 2.));
+  float n = fbm(q * 2.2 + fbm(q * 1.3) * .9);
+  vec3 dust = mix(vec3(.10, .13, .30), vec3(.30, .14, .26), fbm(q + 9.));
+  col += dust * smoothstep(.38, .85, n) * band * .22;
+  col += vec3(.045, .05, .085) * band * .5;
+  float vig = smoothstep(.95, .2, length(uv));
+  col *= .55 + .45 * vig;
+  col += (hash(gl_FragCoord.xy + fract(time)) - .5) / 255.;   // dither the gradients
   O = vec4(col, 1);
 }`;
 
@@ -91,12 +146,15 @@ export default function Starfield() {
     const uRes = gl.getUniformLocation(prog, "resolution");
     const uTouch = gl.getUniformLocation(prog, "touch");
     const uScroll = gl.getUniformLocation(prog, "scroll");
+    const uDpr = gl.getUniformLocation(prog, "dpr");
+    let dpr = 1;
     cv.dataset.on = "1";
 
     const coarse = matchMedia("(pointer: coarse)").matches;
     const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
     const resize = () => {
-      const dpr = Math.min(coarse ? 1 : 1.5, devicePixelRatio || 1);
+      // Stars are ~1 CSS px: render at device resolution or they smear.
+      dpr = Math.min(2, devicePixelRatio || 1);
       cv.width = Math.round(cv.clientWidth * dpr);
       cv.height = Math.round(cv.clientHeight * dpr);
       gl.viewport(0, 0, cv.width, cv.height);
@@ -118,7 +176,8 @@ export default function Starfield() {
       gl!.uniform1f(uTime, now / 1000);
       gl!.uniform2f(uRes, cv.width, cv.height);
       gl!.uniform2f(uTouch, x, y);
-      gl!.uniform1f(uScroll, sc * 0.35);
+      gl!.uniform1f(uScroll, sc);
+      gl!.uniform1f(uDpr, dpr);
       gl!.drawArrays(gl!.TRIANGLES, 0, 3);
     }
     const loop = (now: number) => {

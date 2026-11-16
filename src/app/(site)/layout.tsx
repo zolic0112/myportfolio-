@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Space_Grotesk, Instrument_Serif, IBM_Plex_Mono, Noto_Serif_TC } from "next/font/google";
+import { Space_Grotesk, Instrument_Serif, IBM_Plex_Mono, Noto_Sans_TC } from "next/font/google";
 import "./globals.css";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
@@ -10,8 +10,8 @@ import { LANG_SCRIPT } from "@/lib/i18n";
 
 const grotesk = Space_Grotesk({ variable: "--font-grotesk", subsets: ["latin"], weight: ["300", "400", "500"] });
 const serif = Instrument_Serif({ variable: "--font-serif", subsets: ["latin"], weight: "400", style: ["normal", "italic"] });
-// CJK glyphs for the editorial headings (Instrument Serif is Latin only).
-const serifTc = Noto_Serif_TC({ variable: "--font-serif-tc", weight: ["300", "500"], preload: false });
+// CJK glyphs for the thin display headings (Space Grotesk is Latin only).
+const sansTc = Noto_Sans_TC({ variable: "--font-sans-tc", weight: ["200", "300", "400"], preload: false });
 const mono = IBM_Plex_Mono({ variable: "--font-mono-face", subsets: ["latin"], weight: ["300", "400", "500"] });
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -29,7 +29,7 @@ export default async function SiteLayout({ children }: LayoutProps<"/">) {
       data-lang="en"
       data-persona="cool"
       suppressHydrationWarning
-      className={`${grotesk.variable} ${serif.variable} ${serifTc.variable} ${mono.variable} h-full antialiased`}
+      className={`${grotesk.variable} ${serif.variable} ${sansTc.variable} ${mono.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">
         {/* Pick the language before first paint (see lib/i18n). */}
@@ -45,7 +45,6 @@ export default async function SiteLayout({ children }: LayoutProps<"/">) {
           <span className="live-dot" />
           <span>CONTAINMENT · STABLE</span>
         </div>
-        <div className="grain cool-only" aria-hidden />
         <Nav name={profile.name} />
         <div className="marquee rot-only" aria-hidden>
           <span>
