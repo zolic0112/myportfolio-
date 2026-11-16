@@ -56,7 +56,26 @@ export default async function WorkPage({ params }: PageProps<"/works/[slug]">) {
           embed={work.embed}
           mobilePlayable={work.mobilePlayable}
         />
-        <p className="skin-meta mt-8">
+        {/* cool side: the facts as instrument chips (label over value) */}
+        <dl className="metric-row cool-only mt-8">
+          <div className="metric-chip">
+            <dt><T v={UI.metaCategory} /></dt>
+            <dd><T v={CATEGORY_LABEL[work.category]} /></dd>
+          </div>
+          {work.year ? (
+            <div className="metric-chip">
+              <dt><T v={UI.metaYear} /></dt>
+              <dd className="num">{work.year}</dd>
+            </div>
+          ) : null}
+          {work.role && (
+            <div className="metric-chip">
+              <dt><T v={UI.metaRole} /></dt>
+              <dd><T v={role} /></dd>
+            </div>
+          )}
+        </dl>
+        <p className="skin-meta rot-only mt-8">
           <T v={CATEGORY_LABEL[work.category]} />
           {work.year ? ` · ${work.year}` : ""}
           {work.role && <> · <T v={role} /></>}
