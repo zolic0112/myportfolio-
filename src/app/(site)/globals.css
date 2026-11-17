@@ -2321,3 +2321,8 @@ html[data-persona="cool"][data-lang="ja"] .skin-card-title {
 [data-persona="cool"] .skin-tag {
   background: none;
 }
+
+/* the status line needs a real margin to sit in */
+@media (max-width: 1599px) {
+  .status-bar { display: none; }
+}
