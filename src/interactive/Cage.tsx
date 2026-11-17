@@ -28,6 +28,8 @@ const domePath = `M14,${DOME_Y} A46,36 0 0 1 106,${DOME_Y} L106,${BASE_Y} L14,${
 export function CageBack() {
   return (
     <div className="cage-pos cage-back" aria-hidden>
+      {/* cool side: frosts whatever is behind the jar (the dog is in front of this) */}
+      <div className="cage-frost" />
       <svg viewBox="0 0 120 150">
         <defs>
           <radialGradient id="cage-dark" cx="50%" cy="70%" r="70%">
@@ -105,7 +107,9 @@ export function CageFront() {
     >
       <svg viewBox="0 0 120 150" aria-hidden>
         <defs>
-          <linearGradient id="cage-metal" x1="0" x2="1">
+          {/* user-space units: a vertical bar has a zero-width box, and a
+              bounding-box gradient on it would not paint at all */}
+          <linearGradient id="cage-metal" gradientUnits="userSpaceOnUse" x1="8" y1="0" x2="112" y2="0">
             <stop offset="0" stopColor="var(--cage-bar-1)" />
             <stop offset=".5" stopColor="var(--cage-bar-2)" />
             <stop offset="1" stopColor="var(--cage-bar-1)" />
@@ -124,6 +128,20 @@ export function CageFront() {
             <stop offset="0" stopColor="#fff" stopOpacity=".2" />
             <stop offset=".3" stopColor="#fff" stopOpacity="0" />
           </linearGradient>
+          <linearGradient id="cage-ring" gradientUnits="userSpaceOnUse" x1="14" y1="8" x2="106" y2="144">
+            <stop offset="0" stopColor="#f6f7fa" />
+            <stop offset=".1" stopColor="#9da1b0" />
+            <stop offset=".3" stopColor="#3a3d48" />
+            <stop offset=".5" stopColor="#b4b8c4" />
+            <stop offset=".68" stopColor="#30333d" />
+            <stop offset=".9" stopColor="#e2e4eb" />
+            <stop offset="1" stopColor="#6b6f7d" />
+          </linearGradient>
+          <linearGradient id="cage-pane" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stopColor="#fff" stopOpacity=".16" />
+            <stop offset=".25" stopColor="#fff" stopOpacity=".03" />
+            <stop offset="1" stopColor="#fff" stopOpacity=".07" />
+          </linearGradient>
           <clipPath id="latch-clip">
             <rect x="80" y="82" width="14" height="10" rx="2" />
           </clipPath>
@@ -131,6 +149,12 @@ export function CageFront() {
         {/* cool side: the dog stays in the dark, only its glow reads */}
         <path d={domePath} fill="url(#cage-shade)" className="cage-shade" />
         <path d={domePath} fill="url(#cage-glass)" className="cage-shade" />
+        {/* cool side: the jar itself, glass with the brushed-silver ring */}
+        <g className="cage-jar">
+          <path d={domePath} fill="url(#cage-pane)" />
+          <path d={domePath} fill="none" stroke="url(#cage-ring)" strokeWidth="1.2" />
+          <path d={`M21,${DOME_Y + 40} L21,${DOME_Y} A39,30 0 0 1 44,17`} className="cage-spec" />
+        </g>
         <g className="cage-bars" stroke="url(#cage-metal)" fill="none">
           {/* hanging ring */}
           <circle cx="60" cy="5" r="4" />
@@ -154,6 +178,7 @@ export function CageFront() {
           <rect className="latch-sheen" x="70" y="80" width="8" height="14" fill="url(#cage-sheen)" stroke="none" clipPath="url(#latch-clip)" />
         </g>
         <rect x="8" y={BASE_Y} width="104" height="12" rx="3" className="cage-base" />
+        <rect x="8.6" y={BASE_Y + 0.6} width="102.8" height="10.8" rx="5.4" className="cage-base-ring" />
       </svg>
       <span className="cage-tag cool-only" aria-hidden>請勿打開。</span>
       <span className="cage-note rot-only" aria-hidden>請把我抓回來 🥺</span>

@@ -2049,3 +2049,141 @@ html[data-persona="cool"][data-lang="ja"] .skin-card-title {
   font-weight: 300;
   color: rgb(255 255 255 / 0.78);
 }
+
+/* ==========================================================================
+   Cool side, fifth pass: depth instead of contrast.
+   The sky is deep indigo with light in it (see Starfield), so text comes off
+   pure white, and the cage becomes a glass jar with the same silver ring as
+   the cards.
+   ========================================================================== */
+[data-persona="cool"] {
+  --bg: #0a0c15;
+  --fg: #dfe3ee;
+  --fg-strong: #eceef6;
+  --muted: rgb(214 221 240 / 0.58);
+}
+[data-persona="cool"] .skin-h1,
+[data-persona="cool"] .skin-h2 {
+  color: var(--fg-strong);
+}
+[data-persona="cool"] .skin-card-title {
+  color: var(--fg-strong);
+}
+[data-persona="cool"] .skin-lede {
+  color: rgb(214 221 240 / 0.64);
+}
+[data-persona="cool"] .skin-prose {
+  color: rgb(222 227 240 / 0.8);
+}
+[data-persona="cool"] .skin-card,
+[data-persona="cool"] .skin-card.glass,
+[data-persona="cool"] .skin-panel {
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.16),
+    inset 0 -24px 40px -30px rgb(255 255 255 / 0.07),
+    0 30px 70px -34px rgb(2 4 14 / 0.8);
+}
+
+/* ---------- cage: glass jar ---------- */
+.cage-frost,
+.cage-jar,
+.cage-base-ring {
+  display: none;
+}
+[data-persona="cool"] .cage-frost {
+  display: block;
+  position: absolute;
+  left: 11.67%;
+  top: 5.33%;
+  width: 76.67%;
+  height: 82.67%;
+  border-radius: 50% 50% 3px 3px / 29% 29% 2px 2px;
+  background: rgb(20 22 32 / 0.5);
+  backdrop-filter: blur(14px) saturate(1.6);
+  -webkit-backdrop-filter: blur(14px) saturate(1.6);
+}
+[data-persona="cool"] .cage-back svg path {
+  opacity: 0.35; /* the frost does the darkening now */
+}
+[data-persona="cool"] .cage-jar,
+[data-persona="cool"] .cage-base-ring {
+  display: inline;
+}
+.cage-spec {
+  fill: none;
+  stroke: #fff;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  opacity: 0.38;
+  filter: blur(0.6px);
+}
+/* bars become faint ribs behind the glass; the door keeps a clear edge */
+[data-persona="cool"] .cage-bars {
+  stroke: url(#cage-ring);
+  stroke-width: 0.7;
+  opacity: 0.4;
+}
+[data-persona="cool"] .cage-bars > circle,
+[data-persona="cool"] .cage-bars > line:first-of-type {
+  opacity: 1;
+}
+[data-persona="cool"] .cage-door {
+  stroke: url(#cage-ring);
+  stroke-width: 1;
+}
+[data-persona="cool"] .cage-door line {
+  stroke-width: 0.6;
+  opacity: 0.45;
+}
+[data-persona="cool"] .cage-door rect:first-child {
+  fill: rgb(255 255 255 / 0.035);
+}
+[data-persona="cool"] .latch {
+  fill: rgb(255 255 255 / 0.86);
+  stroke: none;
+  rx: 5px;
+  filter: drop-shadow(0 0 4px rgb(255 255 255 / 0.5));
+}
+[data-persona="cool"] .cage-base {
+  fill: rgb(28 28 36 / 0.78);
+  rx: 6px;
+}
+.cage-base-ring {
+  fill: none;
+  stroke: url(#cage-ring);
+  stroke-width: 1.2;
+}
+[data-persona="cool"] .cage-front svg {
+  filter: drop-shadow(0 14px 22px rgb(2 4 14 / 0.7));
+}
+[data-persona="cool"] .cage-shade {
+  opacity: 0.8;
+}
+[data-persona="cool"] .cage-front:hover .cage-shade {
+  opacity: 0.45;
+}
+/* the tag is a small glass capsule, like the capability pills */
+.cage-tag {
+  left: -74px;
+  bottom: 52px;
+  padding: 7px 12px 7px 14px;
+  border: 0;
+  border-radius: 999px;
+  color: rgb(255 255 255 / 0.72);
+  background: rgb(28 28 36 / 0.6);
+  backdrop-filter: blur(16px) saturate(1.6);
+  -webkit-backdrop-filter: blur(16px) saturate(1.6);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.16), 0 10px 24px -12px rgb(2 4 14 / 0.8);
+  transform: none;
+}
+.cage-tag::after {
+  display: none;
+}
+@media (max-width: 640px) {
+  .cage-tag {
+    left: -58px;
+    bottom: 30px;
+    padding: 5px 9px 5px 11px;
+    font-size: 9px;
+  }
+}

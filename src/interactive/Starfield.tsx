@@ -6,8 +6,9 @@ import { useInteractive } from "./store";
 // Cool-side backdrop: a procedural night sky. Stars live on grids measured in
 // CSS pixels (so they stay pin-sharp at any screen size), with power-law
 // brightness, a soft bloom and faint diffraction spikes on the brightest, four
-// parallax depths that lean toward the pointer and slide with the scroll, and
-// a barely-there band of dust. Falls back to the
+// parallax depths that lean with the pointer and slide with the scroll, three
+// sheets of dust between them and a few defocused specks in front, over deep
+// indigo rather than black. Falls back to the
 // CSS stars underneath when WebGL2 is missing. Sleeps on the rot side and in
 // hidden tabs; draws a single still frame under reduced motion.
 
@@ -83,30 +84,54 @@ vec3 layer(vec2 px, float cell, float density, float gain, float seed){
   float spikes = sp * (exp(-abs(d.x) * .12 - abs(d.y) * 1.8) + exp(-abs(d.y) * .12 - abs(d.x) * 1.8)) * .5;
   return starTint(r2v.z) * b * tw * (core + halo + spikes);
 }
+vec3 bokeh(vec2 px){
+  float cell = 380.;
+  vec2 g = px / cell;
+  vec2 id = floor(g);
+  vec3 r1 = cellRand(id, 91.);
+  if (r1.z > .4) return vec3(0);
+  vec3 r2v = cellRand(id, 147.);
+  float d = length((fract(g) - (.25 + .5 * r1.xy)) * cell);
+  float rad = mix(7., 24., r2v.x);
+  float disc = smoothstep(rad, rad * .7, d) * (.75 + .25 * smoothstep(rad * .5, rad * .95, d));
+  return starTint(r2v.z) * disc * (.018 + .03 * r2v.y);
+}
 void main(){
   vec2 px = gl_FragCoord.xy / dpr;
   vec2 size = resolution / dpr;
   vec2 c = px - .5 * size;
   vec2 uv = c / max(size.x, size.y);
-  vec3 col = vec3(0);
-  // four depths: far = dense, faint, almost still; near = sparse, bright, drifts
+  // Not a black void: deep indigo that lifts toward two far pools of light.
+  vec2 pf = uv + touch * .010 - vec2(0., scroll * .02);
+  vec3 col = mix(vec3(.016, .019, .036), vec3(.030, .035, .066), smoothstep(-.6, .6, uv.y + uv.x * .3));
+  vec2 pa = pf - vec2(-.30, .20), pb = pf - vec2(.36, -.22);
+  col += vec3(.085, .12, .29) * exp(-dot(pa, pa) * 5.5) * .38;
+  col += vec3(.24, .11, .27) * exp(-dot(pb, pb) * 4.5) * .24;
+  // three sheets of dust at different distances: they slide past one another
+  // with the pointer and the scroll, which is what reads as depth
+  for (float k = 0.; k < 3.; k++){
+    float d = (k + 1.) / 3.;
+    vec2 q = uv * mix(1.3, 2.4, d) + touch * mix(.008, .07, d)
+           - vec2(0., scroll * mix(.03, .26, d)) + vec2(time * .003 * d, 0.) + k * 7.3;
+    float n = fbm(q + fbm(q * 1.7 + 3.) * .8);
+    vec3 tint = mix(vec3(.09, .13, .33), vec3(.30, .14, .29), noise(q * .7 + 9. + k));
+    float m = smoothstep(.5, .92, n);
+    col += tint * m * m * mix(.42, .26, d);
+    col *= 1. - .22 * d * smoothstep(.5, .2, n);   // nearer sheets also cast dark lanes
+  }
+  // four depths of stars: far = dense, faint, almost still; near = sparse, bright
   for (float L = 0.; L < 4.; L++){
     float depth = (L + 1.) / 4.;
     vec2 shift = vec2(time * 1.2, time * .5) * depth
-               + touch * 14. * depth
-               + vec2(0., scroll * 120. * depth);
+               + touch * mix(4., 34., depth)
+               - vec2(0., scroll * mix(20., 220., depth));
     float cell = mix(26., 120., depth);
     col += layer(px + shift, cell, mix(.5, .22, depth), mix(.35, 1., depth), L * 13. + 1.);
   }
-  // a thin band of dust: two fbm octaves of very dark colour, not a "nebula"
-  vec2 q = uv * vec2(1.6, 2.6) + vec2(time * .004, scroll * .05) + touch * .01;
-  float band = exp(-pow((uv.y - uv.x * .35 + .08) * 3.2, 2.));
-  float n = fbm(q * 2.2 + fbm(q * 1.3) * .9);
-  vec3 dust = mix(vec3(.10, .13, .30), vec3(.30, .14, .26), fbm(q + 9.));
-  col += dust * smoothstep(.38, .85, n) * band * .22;
-  col += vec3(.045, .05, .085) * band * .5;
-  float vig = smoothstep(.95, .2, length(uv));
-  col *= .55 + .45 * vig;
+  // nearest of all: a few out-of-focus specks that move the most
+  col += bokeh(px + vec2(time * 3., time * 1.2) + touch * 70. - vec2(0., scroll * 460.));
+  float vig = smoothstep(1.0, .2, length(uv));
+  col *= .66 + .34 * vig;
   col += (hash(gl_FragCoord.xy + fract(time)) - .5) / 255.;   // dither the gradients
   O = vec4(col, 1);
 }`;
