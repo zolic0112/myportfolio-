@@ -14,7 +14,6 @@ export default function WorkCard({ work, size = "md", glass, className = "" }: P
       href={`/works/${work.slug}`}
       data-perch
       data-size={size}
-      style={{ "--h": placeholderHue(work.slug) } as React.CSSProperties}
       className={`skin-card group flex flex-col ${glass ? "glass" : ""} ${work.rotOnly ? "rot-only" : ""} ${className}`}
     >
       <div className="skin-titlebar">

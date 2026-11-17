@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 
-// Edge refraction for the two pieces of "real" glass (the header capsules and
-// the cage jar): the backdrop is bent near the rim, the way a thick pane does it.
+// Edge refraction for the two pieces of "real" glass (the nav capsule and the
+// cage jar): the backdrop is bent near the rim, the way a thick pane does it.
 // The only way to move backdrop pixels on the web is an SVG displacement
 // filter inside backdrop-filter, and only Chromium runs that. Everywhere else
 // (and on touch devices, to keep them cool) the plain frosted glass from the
@@ -11,11 +11,9 @@ import { useEffect, useState } from "react";
 
 type Lens = { id: string; w: number; h: number; map: string; blur: number; scale: number };
 
-const TARGETS: { id: string; selector: string; band: number; blur: number; scale: number }[] = [
-  { id: "lens-links", selector: ".nav-links", band: 11, blur: 7, scale: 40 },
-  { id: "lens-brand", selector: ".skin-brand", band: 11, blur: 7, scale: 40 },
-  { id: "lens-lang", selector: ".lang-switch", band: 11, blur: 7, scale: 40 },
-  { id: "lens-cage", selector: ".cage-frost", band: 14, blur: 5, scale: 38 },
+const TARGETS: { id: string; selector: string; band: number; blur: number; scale: number; tail: string }[] = [
+  { id: "lens-nav", selector: ".skin-nav nav", band: 16, blur: 7, scale: 46, tail: "saturate(190%) brightness(1.12)" },
+  { id: "lens-cage", selector: ".cage-frost", band: 14, blur: 5, scale: 38, tail: "saturate(170%)" },
 ];
 
 // Displacement map sized to the element: red falls left to right, green top to
@@ -54,10 +52,9 @@ export default function GlassLens() {
         const rx = cage ? w / 2 : Math.min(h / 2, parseFloat(getComputedStyle(el).borderTopLeftRadius) || 0);
         const ry = cage ? h * 0.29 : rx;
         next.push({ id: t.id, w, h, map: buildMap(w, h, rx, ry, t.band), blur: t.blur, scale: t.scale });
+        el.style.setProperty("backdrop-filter", `url(#${t.id}) ${t.tail}`);
       }
       setLenses(next);
-      // the stylesheet switches the filters on (cool side only) from this flag
-      document.documentElement.toggleAttribute("data-lens", next.length > 0);
     };
     measure();
     let timer = 0;
@@ -69,7 +66,7 @@ export default function GlassLens() {
     return () => {
       clearTimeout(timer);
       removeEventListener("resize", onResize);
-      document.documentElement.removeAttribute("data-lens");
+      for (const t of TARGETS) document.querySelector<HTMLElement>(t.selector)?.style.removeProperty("backdrop-filter");
     };
   }, []);
 
