@@ -22,6 +22,12 @@ export default function Parallax() {
     // live collections: they follow client-side navigation without re-querying
     const sets = LAYERS.map(([c, px]) => [document.getElementsByClassName(c), px] as const);
     let tx = 0, ty = 0, x = 0, y = 0, raf = 0, last = 0;
+    const REACH = 280; // px: the rim light's radius
+    let rects: DOMRect[] | null = null;
+    const lit = new Set<HTMLElement>();
+    const invalidate = () => {
+      rects = null;
+    };
 
     const apply = (clear: boolean) => {
       for (const [els, px] of sets) {
@@ -51,13 +57,28 @@ export default function Parallax() {
       if (useInteractive.getState().persona !== "cool") return;
       tx = (e.clientX / innerWidth) * 2 - 1;
       ty = (e.clientY / innerHeight) * 2 - 1;
+      // Rim light: only cards within reach of the light get repainted (every
+      // repaint re-blurs the glass behind them), and their boxes are measured
+      // once per scroll or resize instead of on every pointer move.
       const cards = sets[2][0];
+      if (!rects || rects.length !== cards.length) {
+        rects = [];
+        for (let i = 0; i < cards.length; i++) rects.push((cards[i] as HTMLElement).getBoundingClientRect());
+      }
       for (let i = 0; i < cards.length; i++) {
         const el = cards[i] as HTMLElement;
-        const r = el.getBoundingClientRect();
-        if (r.bottom < -200 || r.top > innerHeight + 200) continue;
-        el.style.setProperty("--mx", `${(e.clientX - r.left).toFixed(0)}px`);
-        el.style.setProperty("--my", `${(e.clientY - r.top).toFixed(0)}px`);
+        const r = rects[i];
+        const near = e.clientX > r.left - REACH && e.clientX < r.right + REACH && e.clientY > r.top - REACH && e.clientY < r.bottom + REACH;
+        if (!near && !lit.has(el)) continue;
+        if (near) {
+          lit.add(el);
+          el.style.setProperty("--mx", `${(e.clientX - r.left).toFixed(0)}px`);
+          el.style.setProperty("--my", `${(e.clientY - r.top).toFixed(0)}px`);
+        } else {
+          lit.delete(el);
+          el.style.removeProperty("--mx");
+          el.style.removeProperty("--my");
+        }
       }
       if (!raf) raf = requestAnimationFrame(tick);
     };
@@ -69,7 +90,11 @@ export default function Parallax() {
       apply(true);
     });
     addEventListener("pointermove", onMove, { passive: true });
+    addEventListener("scroll", invalidate, { passive: true });
+    addEventListener("resize", invalidate);
     return () => {
+      removeEventListener("scroll", invalidate);
+      removeEventListener("resize", invalidate);
       cancelAnimationFrame(raf);
       removeEventListener("pointermove", onMove);
       off();

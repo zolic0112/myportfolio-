@@ -12,7 +12,8 @@ import { useInteractive } from "./store";
 // CSS stars underneath when WebGL2 is missing. Sleeps on the rot side and in
 // hidden tabs; draws a single still frame under reduced motion.
 
-const FRAG = `#version 300 es
+// Shared header and helpers for both passes.
+const COMMON = `#version 300 es
 precision highp float;
 out vec4 O;
 uniform float time;
@@ -84,6 +85,13 @@ vec3 layer(vec2 px, float cell, float density, float gain, float seed){
   float spikes = sp * (exp(-abs(d.x) * .12 - abs(d.y) * 1.8) + exp(-abs(d.y) * .12 - abs(d.x) * 1.8)) * .5;
   return starTint(r2v.z) * b * tw * (core + halo + spikes);
 }
+`;
+
+// Pass 1, at quarter resolution: the sky itself (gradient, the two far pools
+// of light and three sheets of dust). It is all soft and low-frequency, so it
+// is computed on 1/16 of the pixels and stretched; this is where the cost was.
+// Stored x SKY_GAIN so the dim values keep their precision in an 8-bit target.
+const SKY_FRAG = COMMON + `
 void main(){
   vec2 px = gl_FragCoord.xy / dpr;
   vec2 size = resolution / dpr;
@@ -108,6 +116,19 @@ void main(){
     col += tint * m * m * mix(.30, .18, d);
     col *= 1. - .22 * d * smoothstep(.5, .2, n);   // nearer sheets also cast dark lanes
   }
+  O = vec4(clamp(col * 6., 0., 1.), 1);
+}`;
+
+// Pass 2, at full resolution: the stars (they must stay pin-sharp) over the
+// stretched sky, then vignette and dither.
+const STAR_FRAG = COMMON + `
+uniform sampler2D sky;
+void main(){
+  vec2 px = gl_FragCoord.xy / dpr;
+  vec2 size = resolution / dpr;
+  vec2 c = px - .5 * size;
+  vec2 uv = c / max(size.x, size.y);
+  vec3 col = texture(sky, gl_FragCoord.xy / resolution).rgb / 6.;
   // four depths of stars: far = dense, faint, almost still; near = sparse, bright
   for (float L = 0.; L < 4.; L++){
     float depth = (L + 1.) / 4.;
@@ -140,25 +161,34 @@ export default function Starfield() {
       gl.compileShader(sh);
       return gl.getShaderParameter(sh, gl.COMPILE_STATUS) ? sh : null;
     };
-    const vs = compile(gl.VERTEX_SHADER, VERT);
-    const fs = compile(gl.FRAGMENT_SHADER, FRAG);
-    if (!vs || !fs) return;
-    const prog = gl.createProgram()!;
-    gl.attachShader(prog, vs);
-    gl.attachShader(prog, fs);
-    gl.linkProgram(prog);
-    if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) return;
-    gl.useProgram(prog);
+    const link = (frag: string) => {
+      const vs = compile(gl.VERTEX_SHADER, VERT);
+      const fs = compile(gl.FRAGMENT_SHADER, frag);
+      if (!vs || !fs) return null;
+      const prog = gl.createProgram()!;
+      gl.attachShader(prog, vs);
+      gl.attachShader(prog, fs);
+      gl.bindAttribLocation(prog, 0, "p");
+      gl.linkProgram(prog);
+      if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) return null;
+      const u = (n: string) => gl.getUniformLocation(prog, n);
+      return { prog, time: u("time"), res: u("resolution"), touch: u("touch"), scroll: u("scroll"), dpr: u("dpr"), sky: u("sky") };
+    };
+    const skyP = link(SKY_FRAG);
+    const starP = link(STAR_FRAG);
+    if (!skyP || !starP) return;
     gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
-    const loc = gl.getAttribLocation(prog, "p");
-    gl.enableVertexAttribArray(loc);
-    gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
-    const uTime = gl.getUniformLocation(prog, "time");
-    const uRes = gl.getUniformLocation(prog, "resolution");
-    const uTouch = gl.getUniformLocation(prog, "touch");
-    const uScroll = gl.getUniformLocation(prog, "scroll");
-    const uDpr = gl.getUniformLocation(prog, "dpr");
+    gl.enableVertexAttribArray(0);
+    gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+
+    // Quarter-resolution target for the sky pass, sampled with linear filtering.
+    const skyTex = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, skyTex);
+    for (const [k, v] of [[gl.TEXTURE_MIN_FILTER, gl.LINEAR], [gl.TEXTURE_MAG_FILTER, gl.LINEAR], [gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE], [gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE]])
+      gl.texParameteri(gl.TEXTURE_2D, k, v);
+    const fbo = gl.createFramebuffer();
+    let skyW = 1, skyH = 1;
     let dpr = 1;
     cv.dataset.on = "1";
 
@@ -169,7 +199,13 @@ export default function Starfield() {
       dpr = Math.min(2, devicePixelRatio || 1);
       cv.width = Math.round(cv.clientWidth * dpr);
       cv.height = Math.round(cv.clientHeight * dpr);
-      gl.viewport(0, 0, cv.width, cv.height);
+      skyW = Math.max(1, Math.ceil(cv.width / (4 * dpr)));
+      skyH = Math.max(1, Math.ceil(cv.height / (4 * dpr)));
+      gl.bindTexture(gl.TEXTURE_2D, skyTex);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, skyW, skyH, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+      gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
+      gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, skyTex, 0);
+      gl.bindFramebuffer(gl.FRAMEBUFFER, null);
       if (!raf) draw(performance.now());
     };
 
@@ -185,16 +221,39 @@ export default function Starfield() {
       x += (tx - x) * 0.05;
       y += (ty - y) * 0.05;
       sc += (scrollY / Math.max(1, innerHeight) - sc) * 0.12;
-      gl!.uniform1f(uTime, now / 1000);
-      gl!.uniform2f(uRes, cv.width, cv.height);
-      gl!.uniform2f(uTouch, x, y);
-      gl!.uniform1f(uScroll, sc);
-      gl!.uniform1f(uDpr, dpr);
-      gl!.drawArrays(gl!.TRIANGLES, 0, 3);
+      const g = gl!;
+      const set = (P: NonNullable<typeof skyP>, w: number, h: number, d: number) => {
+        g.useProgram(P.prog);
+        g.uniform1f(P.time, now / 1000);
+        g.uniform2f(P.res, w, h);
+        g.uniform2f(P.touch, x, y);
+        g.uniform1f(P.scroll, sc);
+        g.uniform1f(P.dpr, d);
+      };
+      // sky: quarter size, in "CSS px / 4" units so the same maths lines up
+      g.bindFramebuffer(g.FRAMEBUFFER, fbo);
+      g.viewport(0, 0, skyW, skyH);
+      set(skyP!, skyW, skyH, 0.25);
+      g.drawArrays(g.TRIANGLES, 0, 3);
+      // stars over it, full size
+      g.bindFramebuffer(g.FRAMEBUFFER, null);
+      g.viewport(0, 0, cv.width, cv.height);
+      set(starP!, cv.width, cv.height, dpr);
+      g.activeTexture(g.TEXTURE0);
+      g.bindTexture(g.TEXTURE_2D, skyTex);
+      g.uniform1i(starP!.sky, 0);
+      g.drawArrays(g.TRIANGLES, 0, 3);
     }
+    // Full rate while something moves the sky (pointer easing or scroll),
+    // half rate when it only twinkles: the twinkle is slow enough not to show
+    // it, and every frame also makes the browser re-blur the glass above.
+    let lastDraw = 0;
     const loop = (now: number) => {
-      draw(now);
       raf = requestAnimationFrame(loop);
+      const moving = Math.abs(tx - x) + Math.abs(ty - y) > 0.002 || Math.abs(scrollY / Math.max(1, innerHeight) - sc) > 0.001;
+      if (!moving && now - lastDraw < 30) return;
+      lastDraw = now;
+      draw(now);
     };
     const sync = () => {
       const run = !reduce && !document.hidden && useInteractive.getState().persona === "cool";
