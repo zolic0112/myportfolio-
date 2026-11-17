@@ -8,6 +8,9 @@
      rot   Win95 / GeoCities / deep-fried, unlocked by letting the dog out
    ========================================================================== */
 
+:root {
+  --font-sans-tc: "Noto Sans TC";
+}
 :root,
 [data-persona="cool"] {
   --bg: #07080d;
