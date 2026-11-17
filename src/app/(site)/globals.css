@@ -249,8 +249,8 @@ html[data-persona="rot"][data-lang="es"] .lang-switch [data-set="es"] {
 .skin-nav {
   background: rgb(7 8 13 / 0.6);
   border-bottom: 1px solid var(--border);
-  backdrop-filter: blur(14px) saturate(140%);
   -webkit-backdrop-filter: blur(14px) saturate(140%);
+  backdrop-filter: blur(14px) saturate(140%);
 }
 .skin-nav a {
   color: var(--muted);
@@ -314,8 +314,8 @@ html[data-persona="rot"][data-lang="es"] .lang-switch [data-set="es"] {
 }
 .skin-card.glass {
   background: linear-gradient(160deg, rgb(255 255 255 / 0.07), rgb(255 255 255 / 0.015));
-  backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
 }
 /* pointer spotlight (set by Ambient.tsx) */
 .skin-card::after {
@@ -1312,8 +1312,8 @@ html.frying body {
     linear-gradient(165deg, rgb(255 255 255 / 0.09) 0%, rgb(255 255 255 / 0.02) 38%, rgb(255 255 255 / 0.04) 100%) padding-box,
     linear-gradient(#0a0c13, #0a0c13) padding-box,
     linear-gradient(140deg, #f4f5f9 0%, #8a8e9d 12%, #30333f 32%, #a9adbb 50%, #2a2d37 68%, #dcdee6 90%, #666a79 100%) border-box;
-  backdrop-filter: none;
   -webkit-backdrop-filter: none;
+  backdrop-filter: none;
   box-shadow:
     inset 0 1px 0 rgb(255 255 255 / 0.22),
     inset 0 -1px 0 rgb(0 0 0 / 0.5),
@@ -1356,8 +1356,8 @@ html.frying body {
 @media (pointer: coarse) {
   [data-persona="cool"] .skin-card,
   [data-persona="cool"] .skin-card.glass {
-    backdrop-filter: none;
     -webkit-backdrop-filter: none;
+    backdrop-filter: none;
   }
 }
 
@@ -1477,8 +1477,8 @@ html.frying body {
 /* content must not read through the sticky nav */
 [data-persona="cool"] .skin-nav {
   background: rgb(5 6 10 / 0.82);
-  backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
 }
 
 /* ==========================================================================
@@ -1519,8 +1519,8 @@ html.frying body {
     linear-gradient(180deg, rgb(255 255 255 / 0.1), transparent 22%),
     linear-gradient(160deg, rgb(255 255 255 / 0.085) 0%, rgb(255 255 255 / 0.02) 45%, rgb(255 255 255 / 0.05) 100%),
     rgb(10 11 16 / 0.42);
-  backdrop-filter: blur(22px) saturate(1.5);
   -webkit-backdrop-filter: blur(22px) saturate(1.5);
+  backdrop-filter: blur(22px) saturate(1.5);
   box-shadow:
     inset 0 1px 0 rgb(255 255 255 / 0.18),
     inset 0 -24px 40px -30px rgb(255 255 255 / 0.07),
@@ -1570,8 +1570,8 @@ html.frying body {
   [data-persona="cool"] .skin-card,
   [data-persona="cool"] .skin-card.glass,
   [data-persona="cool"] .skin-panel {
-    backdrop-filter: none;
     -webkit-backdrop-filter: none;
+    backdrop-filter: none;
     background:
       linear-gradient(180deg, rgb(255 255 255 / 0.1), transparent 22%),
       linear-gradient(160deg, rgb(255 255 255 / 0.085) 0%, rgb(255 255 255 / 0.02) 45%, rgb(255 255 255 / 0.05) 100%),
@@ -1583,8 +1583,8 @@ html.frying body {
 [data-persona="cool"] .skin-nav {
   background: none;
   border: 0;
-  backdrop-filter: none;
   -webkit-backdrop-filter: none;
+  backdrop-filter: none;
   padding: 12px 12px 0;
 }
 [data-persona="cool"] .skin-nav nav {
@@ -1769,8 +1769,8 @@ html[data-persona="cool"][data-lang="es"] .lang-switch [data-set="es"] {
 [data-persona="cool"] .skin-nav nav,
 .metric-chip {
   background: rgb(20 20 26 / 0.55);
-  backdrop-filter: blur(28px) saturate(160%);
   -webkit-backdrop-filter: blur(28px) saturate(160%);
+  backdrop-filter: blur(28px) saturate(160%);
   box-shadow:
     inset 0 1px 0 rgb(255 255 255 / 0.06),
     0 18px 50px rgb(0 0 0 / 0.45),
@@ -1789,8 +1789,8 @@ html[data-persona="cool"][data-lang="es"] .lang-switch [data-set="es"] {
 /* .v3-glass-strong for the bar that content scrolls under */
 [data-persona="cool"] .skin-nav nav {
   background: rgb(28 28 36 / 0.75);
-  backdrop-filter: blur(36px) saturate(160%);
   -webkit-backdrop-filter: blur(36px) saturate(160%);
+  backdrop-filter: blur(36px) saturate(160%);
 }
 @media (pointer: coarse) {
   [data-persona="cool"] .skin-card,
@@ -1798,8 +1798,8 @@ html[data-persona="cool"][data-lang="es"] .lang-switch [data-set="es"] {
   [data-persona="cool"] .skin-panel,
   .metric-chip {
     background: rgb(20 20 26 / 0.82);
-    backdrop-filter: none;
     -webkit-backdrop-filter: none;
+    backdrop-filter: none;
   }
 }
 
@@ -1861,8 +1861,8 @@ html[data-persona="cool"][data-lang="es"] .lang-switch [data-set="es"] {
   font-size: 11px;
   color: #fff;
   background: rgb(255 255 255 / 0.06);
-  backdrop-filter: blur(20px) saturate(140%);
   -webkit-backdrop-filter: blur(20px) saturate(140%);
+  backdrop-filter: blur(20px) saturate(140%);
   box-shadow: none;
   transition: background 0.2s, transform 0.25s var(--ease-spring);
 }
@@ -2099,8 +2099,8 @@ html[data-persona="cool"][data-lang="ja"] .skin-card-title {
   height: 82.67%;
   border-radius: 50% 50% 3px 3px / 29% 29% 2px 2px;
   background: rgb(20 22 32 / 0.5);
-  backdrop-filter: blur(14px) saturate(1.6);
   -webkit-backdrop-filter: blur(14px) saturate(1.6);
+  backdrop-filter: blur(14px) saturate(1.6);
 }
 [data-persona="cool"] .cage-back svg path {
   opacity: 0.35; /* the frost does the darkening now */
@@ -2171,8 +2171,8 @@ html[data-persona="cool"][data-lang="ja"] .skin-card-title {
   border-radius: 999px;
   color: rgb(255 255 255 / 0.72);
   background: rgb(28 28 36 / 0.6);
-  backdrop-filter: blur(16px) saturate(1.6);
   -webkit-backdrop-filter: blur(16px) saturate(1.6);
+  backdrop-filter: blur(16px) saturate(1.6);
   box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.16), 0 10px 24px -12px rgb(2 4 14 / 0.8);
   transform: none;
 }
@@ -2186,4 +2186,138 @@ html[data-persona="cool"][data-lang="ja"] .skin-card-title {
     padding: 5px 9px 5px 11px;
     font-size: 9px;
   }
+}
+
+/* ==========================================================================
+   Cool side, sixth pass: three materials instead of one.
+     1  bright glass   nav, language switch, ghost button, cage tag
+                       floats over content: strong blur, lit rim, lensing
+     2  dark frost     cards and panels: quieter, a hairline rim that lights
+                       up where the pointer is
+     3  bare           filter chips, metric chips, tags: a thin line or nothing
+   The brushed-silver ring is kept for the cage and the one large feature
+   card only, so it means something again.
+   ========================================================================== */
+[data-persona="cool"] {
+  /* fine grain, so frosted surfaces are not perfectly smooth */
+  --grain: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .055 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+  --rim-1: linear-gradient(140deg, rgb(255 255 255 / 0.75) 0%, rgb(255 255 255 / 0.16) 22%, rgb(255 255 255 / 0.04) 50%, rgb(255 255 255 / 0.1) 78%, rgb(255 255 255 / 0.4) 100%);
+  --rim-2: linear-gradient(140deg, rgb(255 255 255 / 0.3) 0%, rgb(255 255 255 / 0.07) 24%, rgb(255 255 255 / 0.03) 55%, rgb(255 255 255 / 0.14) 100%);
+  --silver: linear-gradient(140deg, #f6f7fa 0%, #9da1b0 10%, #33363f 30%, #b4b8c4 50%, #2a2d36 68%, #e2e4eb 90%, #6b6f7d 100%);
+}
+
+/* ---------- 1: bright glass ---------- */
+[data-persona="cool"] .skin-nav nav,
+[data-persona="cool"] .lang-switch,
+[data-persona="cool"] .skin-btn.ghost {
+  background:
+    var(--grain),
+    linear-gradient(180deg, rgb(255 255 255 / 0.13) 0%, rgb(255 255 255 / 0.03) 42%, rgb(255 255 255 / 0.07) 100%),
+    rgb(18 20 30 / 0.46);
+  -webkit-backdrop-filter: blur(22px) saturate(190%) brightness(1.12);
+  backdrop-filter: blur(22px) saturate(190%) brightness(1.12);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.3),
+    inset 0 -1px 0 rgb(255 255 255 / 0.07),
+    inset 0 0 22px rgb(255 255 255 / 0.035),
+    0 18px 44px -14px rgb(0 0 0 / 0.6);
+}
+[data-persona="cool"] .lang-switch,
+[data-persona="cool"] .skin-btn.ghost {
+  /* glass sitting on glass: no second blur, just a lighter pane */
+  background: linear-gradient(180deg, rgb(255 255 255 / 0.1), rgb(255 255 255 / 0.04));
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.2), inset 0 -1px 0 rgb(0 0 0 / 0.2);
+}
+[data-persona="cool"] .skin-btn.ghost {
+  -webkit-backdrop-filter: blur(18px) saturate(170%);
+  backdrop-filter: blur(18px) saturate(170%);
+}
+[data-persona="cool"] .skin-nav nav::before,
+[data-persona="cool"] .skin-btn.ghost::before {
+  background: var(--rim-1);
+}
+[data-persona="cool"] .lang-switch::before {
+  background: var(--rim-2);
+}
+
+/* ---------- 2: dark frost ---------- */
+[data-persona="cool"] .skin-card,
+[data-persona="cool"] .skin-card.glass,
+[data-persona="cool"] .skin-panel {
+  --mx: -400px;
+  --my: -400px;
+  background:
+    radial-gradient(420px circle at var(--mx) var(--my), rgb(255 255 255 / 0.055), transparent 65%),
+    var(--grain),
+    linear-gradient(168deg, rgb(255 255 255 / 0.075) 0%, rgb(255 255 255 / 0.012) 34%, rgb(255 255 255 / 0.03) 100%),
+    rgb(14 16 24 / 0.4);
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+  backdrop-filter: blur(18px) saturate(150%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.08),
+    0 34px 70px -34px rgb(0 0 0 / 0.7),
+    0 8px 20px -12px rgb(0 0 0 / 0.4);
+}
+[data-persona="cool"] .skin-card::before,
+[data-persona="cool"] .skin-panel::before {
+  background:
+    radial-gradient(260px circle at var(--mx) var(--my), rgb(255 255 255 / 0.95), transparent 70%),
+    var(--rim-2);
+}
+[data-persona="cool"] .skin-card:hover {
+  transform: translateY(-3px);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.14),
+    0 44px 80px -34px rgb(0 0 0 / 0.8),
+    0 0 70px -20px rgb(200 210 255 / 0.16);
+}
+/* the one feature card keeps the brushed silver */
+[data-persona="cool"] .skin-card[data-size="lg"]::before {
+  background:
+    radial-gradient(320px circle at var(--mx) var(--my), rgb(255 255 255 / 0.95), transparent 70%),
+    var(--silver);
+}
+@media (pointer: coarse) {
+  [data-persona="cool"] .skin-card,
+  [data-persona="cool"] .skin-card.glass,
+  [data-persona="cool"] .skin-panel {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background:
+      var(--grain),
+      linear-gradient(168deg, rgb(255 255 255 / 0.075) 0%, rgb(255 255 255 / 0.012) 34%, rgb(255 255 255 / 0.03) 100%),
+      rgb(14 16 24 / 0.78);
+  }
+}
+
+/* ---------- 3: bare ---------- */
+[data-persona="cool"] .skin-chip {
+  background: none;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.1);
+}
+[data-persona="cool"] .skin-chip::before {
+  display: none;
+}
+[data-persona="cool"] .skin-chip:hover {
+  background: rgb(255 255 255 / 0.05);
+}
+[data-persona="cool"] .skin-chip[aria-pressed="true"] {
+  background: rgb(255 255 255 / 0.1);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.22), inset 0 1px 0 rgb(255 255 255 / 0.25), 0 0 24px rgb(255 255 255 / 0.1);
+}
+.metric-chip {
+  background: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  box-shadow: none;
+  border: 0;
+  border-left: 1px solid rgb(255 255 255 / 0.14);
+  border-radius: 0;
+  padding: 2px 28px 2px 16px;
+  min-width: 120px;
+}
+[data-persona="cool"] .skin-tag {
+  background: none;
 }

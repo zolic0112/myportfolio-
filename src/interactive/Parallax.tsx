@@ -6,7 +6,9 @@ import { useInteractive } from "./store";
 // Cool side only: the page content leans a few pixels against the pointer,
 // the heading most, so it reads as floating in front of the sky. Uses the
 // standalone `translate` property so the cards' own hover transform still
-// works. Off for touch, reduced motion and the rot persona.
+// works. It also tells each card where the pointer is (--mx / --my, in the
+// card's own pixels) so the rim highlight can follow it like light on a glass
+// edge. Off for touch, reduced motion and the rot persona.
 
 const LAYERS: [className: string, px: number][] = [
   ["skin-h1", 12],
@@ -26,7 +28,12 @@ export default function Parallax() {
         for (let i = 0; i < els.length; i++) {
           // alternate cards sit at slightly different depths
           const d = px * (px === 5 && i % 2 ? 1.5 : 1);
-          (els[i] as HTMLElement).style.translate = clear ? "" : `${(-x * d).toFixed(2)}px ${(-y * d).toFixed(2)}px`;
+          const el = els[i] as HTMLElement;
+          el.style.translate = clear ? "" : `${(-x * d).toFixed(2)}px ${(-y * d).toFixed(2)}px`;
+          if (clear) {
+            el.style.removeProperty("--mx");
+            el.style.removeProperty("--my");
+          }
         }
       }
     };
@@ -44,6 +51,14 @@ export default function Parallax() {
       if (useInteractive.getState().persona !== "cool") return;
       tx = (e.clientX / innerWidth) * 2 - 1;
       ty = (e.clientY / innerHeight) * 2 - 1;
+      const cards = sets[2][0];
+      for (let i = 0; i < cards.length; i++) {
+        const el = cards[i] as HTMLElement;
+        const r = el.getBoundingClientRect();
+        if (r.bottom < -200 || r.top > innerHeight + 200) continue;
+        el.style.setProperty("--mx", `${(e.clientX - r.left).toFixed(0)}px`);
+        el.style.setProperty("--my", `${(e.clientY - r.top).toFixed(0)}px`);
+      }
       if (!raf) raf = requestAnimationFrame(tick);
     };
     const off = useInteractive.subscribe((s) => {
