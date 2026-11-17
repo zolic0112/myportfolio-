@@ -15,10 +15,11 @@ export default function Nav({ name }: { name: string }) {
           so nothing wraps by accident whatever the language or name length. */}
       <nav className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-5 gap-y-2 px-4 py-3 text-sm sm:flex-nowrap sm:px-6 sm:py-4">
         <Link href="/" className="skin-brand min-w-0 flex-1 truncate">
+          <span className="brand-mark cool-only" aria-hidden />
           {name}
           <span className="brand-sub cool-only"> / PORTFOLIO</span>
         </Link>
-        <ul className="order-last flex w-full items-center gap-x-5 sm:order-none sm:w-auto">
+        <ul className="nav-links order-last flex w-full items-center gap-x-5 sm:order-none sm:w-auto">
           <li><Link href="/#works"><T v={UI.works} /></Link></li>
           <li><Link href="/#contact"><T v={UI.contact} /></Link></li>
           {junk && (
@@ -28,7 +29,7 @@ export default function Nav({ name }: { name: string }) {
           )}
           {premium && <li className="rot-only ml-auto whitespace-nowrap font-bold sm:ml-0">⭐ PREMIUM</li>}
         </ul>
-        <ul className="flex shrink-0 items-center gap-x-3">
+        <ul className="nav-tools flex shrink-0 items-center gap-x-3">
           <li><LangSwitch /></li>
         </ul>
       </nav>
