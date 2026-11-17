@@ -7,7 +7,7 @@ import { useInteractive } from "./store";
 // CSS pixels (so they stay pin-sharp at any screen size), with power-law
 // brightness, a soft bloom and faint diffraction spikes on the brightest, four
 // parallax depths that lean with the pointer and slide with the scroll, three
-// sheets of dust between them and a few defocused specks in front, over deep
+// sheets of dust between them, over deep
 // indigo rather than black. Falls back to the
 // CSS stars underneath when WebGL2 is missing. Sleeps on the rot side and in
 // hidden tabs; draws a single still frame under reduced motion.
@@ -84,18 +84,6 @@ vec3 layer(vec2 px, float cell, float density, float gain, float seed){
   float spikes = sp * (exp(-abs(d.x) * .12 - abs(d.y) * 1.8) + exp(-abs(d.y) * .12 - abs(d.x) * 1.8)) * .5;
   return starTint(r2v.z) * b * tw * (core + halo + spikes);
 }
-vec3 bokeh(vec2 px){
-  float cell = 380.;
-  vec2 g = px / cell;
-  vec2 id = floor(g);
-  vec3 r1 = cellRand(id, 91.);
-  if (r1.z > .4) return vec3(0);
-  vec3 r2v = cellRand(id, 147.);
-  float d = length((fract(g) - (.25 + .5 * r1.xy)) * cell);
-  float rad = mix(7., 24., r2v.x);
-  float disc = smoothstep(rad, rad * .7, d) * (.75 + .25 * smoothstep(rad * .5, rad * .95, d));
-  return starTint(r2v.z) * disc * (.018 + .03 * r2v.y);
-}
 void main(){
   vec2 px = gl_FragCoord.xy / dpr;
   vec2 size = resolution / dpr;
@@ -129,8 +117,6 @@ void main(){
     float cell = mix(26., 120., depth);
     col += layer(px + shift, cell, mix(.5, .22, depth), mix(.35, 1., depth), L * 13. + 1.);
   }
-  // nearest of all: a few out-of-focus specks that move the most
-  col += bokeh(px + vec2(time * 3., time * 1.2) + touch * 70. - vec2(0., scroll * 460.));
   float vig = smoothstep(1.0, .2, length(uv));
   col *= .5 + .5 * vig;
   col += (hash(gl_FragCoord.xy + fract(time)) - .5) / 255.;   // dither the gradients
