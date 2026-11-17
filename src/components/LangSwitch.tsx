@@ -1,10 +1,16 @@
 "use client";
 
 import { HTML_LANG, LANG_KEY, LANG_LABEL, LANGS, type Lang } from "@/lib/i18n";
+import { withViewTransition } from "@/interactive/presence";
 
 // Manual language switch. The pressed state is styled from <html data-lang>
 // in CSS, so this needs no React state and never mismatches on hydration.
 function setLang(l: Lang) {
+  if (document.documentElement.getAttribute("data-lang") === l) return;
+  withViewTransition(() => applyLang(l), "vt-lang");
+}
+
+function applyLang(l: Lang) {
   document.documentElement.setAttribute("data-lang", l);
   document.documentElement.setAttribute("lang", HTML_LANG[l]);
   try {

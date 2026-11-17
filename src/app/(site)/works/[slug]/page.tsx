@@ -3,6 +3,7 @@ import Markdoc from "@markdoc/markdoc";
 import { notFound } from "next/navigation";
 import WorkMedia from "@/components/WorkMedia";
 import WorkCard from "@/components/WorkCard";
+import PageTransition from "@/components/PageTransition";
 import { getWorks, pick, reader } from "@/lib/content";
 import { HTML_LANG, LANGS, T, UI, withFallback } from "@/lib/i18n";
 import { CATEGORY_LABEL } from "@/lib/labels";
@@ -37,7 +38,7 @@ export default async function WorkPage({ params }: PageProps<"/works/[slug]">) {
   const bodies = pick(work.i18n, "body");
 
   return (
-    <>
+    <PageTransition>
     {work.rotOnly && (
       // Hidden pieces only exist on the brain rot side, even by direct link.
       <div className="cool-only mx-auto max-w-6xl px-4 py-32 text-center sm:px-6">
@@ -80,7 +81,7 @@ export default async function WorkPage({ params }: PageProps<"/works/[slug]">) {
           {work.year ? ` · ${work.year}` : ""}
           {work.role && <> · <T v={role} /></>}
         </p>
-        <h1 className="skin-h1 mt-3 text-5xl sm:text-6xl"><T v={title} /></h1>
+        <h1 className="skin-h1 work-title mt-3 text-5xl sm:text-6xl" data-vt="work-title" style={{ viewTransitionName: "work-title" }}><T v={title} /></h1>
         <p className="skin-lede mt-4 text-lg leading-8"><T v={summary} /></p>
         {work.tags.length > 0 && (
           <ul className="mt-5 flex flex-wrap gap-2">
@@ -114,6 +115,6 @@ export default async function WorkPage({ params }: PageProps<"/works/[slug]">) {
         ))}
       </aside>
     </div>
-    </>
+    </PageTransition>
   );
 }

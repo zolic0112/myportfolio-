@@ -2442,3 +2442,238 @@ html[data-persona="cool"][data-lang="es"] .lang-switch [data-set="es"] {
   -webkit-backdrop-filter: blur(6px) saturate(160%);
   backdrop-filter: blur(6px) saturate(160%);
 }
+
+/* ==========================================================================
+   Motion: nothing opens or closes in a single frame.
+     page changes   view transitions (React <ViewTransition>, see
+                    components/PageTransition): the clicked card's cover and
+                    title morph into the work page while the rest recedes
+     filters        cards slide to their new places, others fade
+     language       a short crossfade
+     modals         rise in with a blur, sink away (interactive/presence)
+     cards          fade up as they scroll into view
+   ========================================================================== */
+:root {
+  --m-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --m-in: cubic-bezier(0.55, 0, 0.75, 0.2);
+}
+
+/* ---------- page transitions ---------- */
+::view-transition {
+  pointer-events: none;
+}
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+}
+/* Fixed things stay put above the moving page. They only take a name while a
+   transition runs: a named element stops blurring what is behind it. */
+html:active-view-transition .skin-nav {
+  view-transition-name: site-header;
+}
+html:active-view-transition .cage-back {
+  view-transition-name: cage-back;
+}
+html:active-view-transition .pet-canvas {
+  view-transition-name: pet;
+}
+html:active-view-transition .fx-layer {
+  view-transition-name: fx;
+}
+html:active-view-transition #pet-cage {
+  view-transition-name: cage-front;
+}
+::view-transition-group(site-header),
+::view-transition-group(cage-back),
+::view-transition-group(pet),
+::view-transition-group(fx),
+::view-transition-group(cage-front),
+::view-transition-group(.keep) {
+  animation: none;
+}
+::view-transition-old(site-header),
+::view-transition-old(cage-back),
+::view-transition-old(pet),
+::view-transition-old(fx),
+::view-transition-old(cage-front),
+::view-transition-old(.keep) {
+  display: none;
+}
+::view-transition-new(site-header),
+::view-transition-new(cage-back),
+::view-transition-new(pet),
+::view-transition-new(fx),
+::view-transition-new(cage-front),
+::view-transition-new(.keep) {
+  animation: none;
+}
+::view-transition-group(.keep) { z-index: 45; }
+::view-transition-group(cage-back) { z-index: 60; }
+::view-transition-group(pet) { z-index: 70; }
+::view-transition-group(fx) { z-index: 75; }
+::view-transition-group(cage-front) { z-index: 80; }
+::view-transition-group(site-header) { z-index: 100; }
+
+/* forward: the old page recedes into the dark, the new one lifts toward you */
+::view-transition-old(.nav-forward) {
+  animation: 260ms var(--m-in) both vt-recede;
+}
+::view-transition-new(.nav-forward) {
+  animation: 560ms var(--m-out) 90ms both vt-arrive;
+}
+/* back: the reverse */
+::view-transition-old(.nav-back) {
+  animation: 240ms var(--m-in) both vt-sink;
+}
+::view-transition-new(.nav-back) {
+  animation: 560ms var(--m-out) 80ms both vt-surface;
+}
+@keyframes vt-recede {
+  to { opacity: 0; transform: scale(0.965); filter: blur(6px); }
+}
+@keyframes vt-arrive {
+  from { opacity: 0; transform: translateY(28px); filter: blur(8px); }
+}
+@keyframes vt-sink {
+  to { opacity: 0; transform: translateY(24px); filter: blur(6px); }
+}
+@keyframes vt-surface {
+  from { opacity: 0; transform: scale(1.03); filter: blur(8px); }
+}
+/* the card's cover and title travel into place */
+::view-transition-group(work-hero),
+::view-transition-group(work-title) {
+  z-index: 50;
+  animation-duration: 620ms;
+  animation-timing-function: var(--m-out);
+}
+::view-transition-image-pair(work-hero) {
+  animation: 620ms var(--m-out) both vt-soften;
+}
+::view-transition-old(work-hero),
+::view-transition-new(work-hero) {
+  /* keep the picture's proportions while the box changes shape */
+  height: 100%;
+  object-fit: cover;
+}
+::view-transition-old(work-title),
+::view-transition-new(work-title) {
+  height: 100%;
+  width: auto;
+  object-fit: contain;
+  object-position: left center;
+}
+@keyframes vt-soften {
+  35% { filter: blur(3px); }
+}
+/* so a title snapshot hugs its text and scales evenly */
+.skin-card-title,
+.work-title {
+  width: fit-content;
+  max-width: 100%;
+}
+
+/* ---------- filter changes ---------- */
+::view-transition-group(.wb-move) {
+  animation-duration: 520ms;
+  animation-timing-function: var(--m-out);
+}
+::view-transition-new(.wb-enter) {
+  animation: 460ms var(--m-out) 120ms both vt-arrive;
+}
+::view-transition-old(.wb-exit) {
+  animation: 200ms var(--m-in) both vt-recede;
+}
+
+/* ---------- language: a quick crossfade of the whole page ---------- */
+html.vt-lang::view-transition-old(root),
+html.vt-lang::view-transition-old(site-header) {
+  display: block;
+  animation: 200ms ease-out both vt-fade-out;
+}
+html.vt-lang::view-transition-new(root),
+html.vt-lang::view-transition-new(site-header) {
+  animation: 320ms var(--m-out) both vt-fade-in;
+}
+@keyframes vt-fade-out {
+  to { opacity: 0; filter: blur(2px); }
+}
+@keyframes vt-fade-in {
+  from { opacity: 0; filter: blur(2px); }
+}
+
+/* ---------- modals ---------- */
+.vt-backdrop[data-state="open"] {
+  animation: 260ms ease-out both vt-fade-in;
+}
+.vt-backdrop[data-state="closed"] {
+  animation: 200ms ease-in both vt-fade-out;
+  pointer-events: none;
+}
+.vt-sheet[data-state="open"] {
+  animation: 480ms var(--m-out) both vt-sheet-in;
+}
+.vt-sheet[data-state="closed"] {
+  animation: 200ms var(--m-in) both vt-sheet-out;
+}
+@keyframes vt-sheet-in {
+  from { opacity: 0; transform: translateY(18px) scale(0.94); filter: blur(10px); }
+}
+@keyframes vt-sheet-out {
+  to { opacity: 0; transform: translateY(10px) scale(0.96); filter: blur(6px); }
+}
+/* content swapped inside an open window (steps, gallery images) */
+.vt-step {
+  animation: 360ms var(--m-out) both vt-step-in;
+}
+@keyframes vt-step-in {
+  from { opacity: 0; transform: translateY(8px); filter: blur(4px); }
+}
+/* brain rot: windows keep their chunky Win95 pop, now both ways */
+[data-persona="rot"] .vt-sheet[data-state="open"] {
+  animation: popup-in 0.2s steps(3) both;
+}
+[data-persona="rot"] .vt-sheet[data-state="closed"],
+.popup.leaving {
+  animation: popup-out 0.16s steps(3) both;
+}
+@keyframes popup-out {
+  to { transform: scale(0.6); opacity: 0; }
+}
+.ad-gate {
+  animation: 240ms ease-out both vt-fade-in;
+}
+
+/* ---------- cool cards: fade up as they enter the viewport ---------- */
+@supports (animation-timeline: view()) {
+  [data-persona="cool"] .skin-card {
+    animation: card-reveal linear both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 55%;
+  }
+}
+@keyframes card-reveal {
+  from { opacity: 0; scale: 0.94; }
+}
+/* a press you can feel */
+[data-persona="cool"] .skin-card:active {
+  transform: translateY(-1px) scale(0.985);
+  transition-duration: 0.12s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*),
+  ::view-transition-image-pair(*) {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+  }
+  .vt-backdrop,
+  .vt-sheet,
+  .vt-step,
+  .popup.leaving,
+  [data-persona="cool"] .skin-card {
+    animation: none !important;
+  }
+}

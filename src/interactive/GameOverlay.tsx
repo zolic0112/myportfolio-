@@ -1,8 +1,9 @@
 "use client";
 
-import { Suspense, useEffect } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { games } from "@/games/registry";
 import { T, UI } from "@/lib/i18n";
+import { usePresence } from "./presence";
 import { useInteractive } from "./store";
 
 export default function GameOverlay() {
@@ -16,7 +17,11 @@ export default function GameOverlay() {
     return () => window.removeEventListener("keydown", onKey);
   }, [activeGame, closeGame]);
 
-  const entry = activeGame ? games[activeGame] : null;
+  // Remember the last game so the window can animate out after it is closed.
+  const [last, setLast] = useState(activeGame);
+  if (activeGame && activeGame !== last) setLast(activeGame);
+  const { mounted, state } = usePresence(Boolean(activeGame), 220);
+  const entry = mounted && last ? games[last] : null;
   if (!entry) return null;
   const Game = entry.component;
 
@@ -24,11 +29,13 @@ export default function GameOverlay() {
     <div
       role="dialog"
       aria-label={entry.title}
-      className="fixed inset-0 z-[56] flex items-center justify-center bg-black/60 p-4"
+      data-state={state}
+      className="vt-backdrop fixed inset-0 z-[56] flex items-center justify-center bg-black/60 p-4"
       onClick={closeGame}
     >
       <div
-        className="skin-panel relative h-[min(80vh,600px)] w-[min(90vw,800px)] overflow-hidden text-fg"
+        data-state={state}
+        className="vt-sheet skin-panel relative h-[min(80vh,600px)] w-[min(90vw,800px)] overflow-hidden text-fg"
         onClick={(e) => e.stopPropagation()}
       >
         <button

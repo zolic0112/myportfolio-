@@ -139,7 +139,15 @@ function PopupWindow({
   });
   const maxDodges = traits.maxDodges;
 
-  const done = () => close(p.id);
+  // Windows shrink away (in the same chunky steps they pop in with) before
+  // they are removed.
+  const [leaving, setLeaving] = useState(false);
+  const done = () => {
+    if (leaving) return;
+    setLeaving(true);
+    const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    setTimeout(() => close(p.id), reduce ? 0 : 160);
+  };
 
   // Cat-Mario close button: runs from a hovering mouse; on touch the whole
   // window jumps somewhere else instead.
@@ -184,8 +192,8 @@ function PopupWindow({
       ref={ref}
       role="dialog"
       aria-label={title[p.kind]}
-      className={`popup ${p.kind === "reels" ? "popup-reels" : ""} ${sucked ? "sucked" : ""}`}
-      style={{ left: pos.x, top: pos.y, zIndex: 45 + (p.id % 9) }}
+      className={`popup ${p.kind === "reels" ? "popup-reels" : ""} ${sucked ? "sucked" : ""} ${leaving ? "leaving" : ""}`}
+      style={{ left: pos.x, top: pos.y, zIndex: 45 + (p.id % 9), viewTransitionName: `popup-${p.id}`, viewTransitionClass: "keep" } as React.CSSProperties}
     >
       <div className="skin-titlebar" data-perch>
         <span className="t">{title[p.kind]}</span>

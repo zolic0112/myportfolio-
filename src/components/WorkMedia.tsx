@@ -7,6 +7,7 @@ import { useInteractive, useJunkOn } from "@/interactive/store";
 import { T, UI, type L } from "@/lib/i18n";
 import { placeholderHue } from "@/lib/labels";
 import AdGate from "./AdGate";
+import { usePresence } from "@/interactive/presence";
 
 type Embed =
   | { discriminant: "none"; value: null }
@@ -96,7 +97,7 @@ export default function WorkMedia({ slug, title, cover, video, gallery, embed, m
           <span className="win-btn" aria-hidden>□</span>
           <span className="win-btn" aria-hidden>×</span>
         </div>
-        <div className="skin-media relative aspect-video">
+        <div className="skin-media relative aspect-video" data-vt="work-hero" style={{ viewTransitionName: "work-hero" }}>
           {stage}
           {ad && (
             <AdGate
@@ -120,6 +121,9 @@ export default function WorkMedia({ slug, title, cover, video, gallery, embed, m
 
 function Gallery({ images }: { images: string[] }) {
   const [open, setOpen] = useState<number | null>(null);
+  const [shownIdx, setShownIdx] = useState(0);
+  if (open !== null && open !== shownIdx) setShownIdx(open);
+  const { mounted, state } = usePresence(open !== null, 220);
   useEffect(() => {
     if (open === null) return;
     const onKey = (e: KeyboardEvent) => {
@@ -139,10 +143,10 @@ function Gallery({ images }: { images: string[] }) {
           </button>
         ))}
       </div>
-      {open !== null && (
-        <div role="dialog" aria-label="圖片" className="fixed inset-0 z-[56] grid place-items-center bg-black/85 p-4" onClick={() => setOpen(null)}>
-          <div className="relative h-[85vh] w-full max-w-5xl">
-            <Image src={images[open]} alt={`圖 ${open + 1}`} fill className="object-contain" sizes="100vw" />
+      {mounted && (
+        <div role="dialog" aria-label="圖片" data-state={state} className="vt-backdrop fixed inset-0 z-[56] grid place-items-center bg-black/85 p-4" onClick={() => setOpen(null)}>
+          <div data-state={state} className="vt-sheet relative h-[85vh] w-full max-w-5xl">
+            <Image key={shownIdx} src={images[shownIdx]} alt={`圖 ${shownIdx + 1}`} fill className="vt-step object-contain" sizes="100vw" />
           </div>
         </div>
       )}

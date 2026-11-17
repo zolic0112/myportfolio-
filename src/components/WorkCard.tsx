@@ -12,6 +12,7 @@ export default function WorkCard({ work, size = "md", glass, className = "" }: P
   return (
     <Link
       href={`/works/${work.slug}`}
+      transitionTypes={["nav-forward"]}
       data-perch
       data-size={size}
       className={`skin-card group flex flex-col ${glass ? "glass" : ""} ${work.rotOnly ? "rot-only" : ""} ${className}`}

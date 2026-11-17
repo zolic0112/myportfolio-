@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePresence } from "./presence";
 import { useInteractive } from "./store";
 
 // Parody subscription page = "buy me a coffee". Trust based: whoever comes
@@ -17,11 +18,13 @@ export type Sponsor = { intl: string | null; tw: string | null };
 
 export default function PremiumModal({ sponsor }: { sponsor: Sponsor }) {
   const open = useInteractive((s) => s.premiumOpen);
-  // Mounted fresh on every open, so it always starts at the first step.
-  return open ? <Modal sponsor={sponsor} /> : null;
+  // Mounted fresh on every open, so it always starts at the first step; kept
+  // for a moment after closing so it can animate out.
+  const { mounted, state } = usePresence(open, 200);
+  return mounted ? <Modal sponsor={sponsor} state={state} /> : null;
 }
 
-function Modal({ sponsor }: { sponsor: Sponsor }) {
+function Modal({ sponsor, state }: { sponsor: Sponsor; state: "open" | "closed" }) {
   const premium = useInteractive((s) => s.premium);
   const close = useInteractive((s) => s.closePremium);
   const subscribe = useInteractive((s) => s.subscribe);
@@ -50,15 +53,16 @@ function Modal({ sponsor }: { sponsor: Sponsor }) {
     <div
       role="dialog"
       aria-label="Premium 訂閱"
-      className="fixed inset-0 z-[55] grid place-items-center overflow-y-auto bg-black/60 p-4"
+      data-state={state}
+      className="vt-backdrop fixed inset-0 z-[55] grid place-items-center overflow-y-auto bg-black/60 p-4"
       onClick={close}
     >
-      <div className="popup !static !w-[min(760px,100%)] !animate-none" onClick={(e) => e.stopPropagation()}>
+      <div data-state={state} className="vt-sheet popup !static !w-[min(760px,100%)]" onClick={(e) => e.stopPropagation()}>
         <div className="skin-titlebar">
           <span className="t">💎 Space Dog Premium — 訂閱方案</span>
           <button className="win-btn" onClick={close} aria-label="關閉">×</button>
         </div>
-        <div className="popup-body">
+        <div key={step} className="popup-body vt-step">
           {step === "plans" && (
             <>
               <p className="wordart text-center">訂閱即可免廣告</p>
