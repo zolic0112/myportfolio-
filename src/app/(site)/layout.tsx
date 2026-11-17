@@ -34,8 +34,6 @@ export default async function SiteLayout({ children }: LayoutProps<"/">) {
       <body className="flex min-h-full flex-col">
         {/* Pick the language before first paint (see lib/i18n). */}
         <script dangerouslySetInnerHTML={{ __html: LANG_SCRIPT }} />
-        {/* TEMP, for comparing heading weights: add ?type=medium to the URL. Remove once decided. */}
-        <script dangerouslySetInnerHTML={{ __html: `if(/[?&]type=medium/.test(location.search))document.documentElement.setAttribute("data-type","medium")` }} />
         <div className="starfield" aria-hidden>
           <i />
           <i />
