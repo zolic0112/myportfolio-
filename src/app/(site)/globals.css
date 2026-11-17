@@ -2057,7 +2057,7 @@ html[data-persona="cool"][data-lang="ja"] .skin-card-title {
    the cards.
    ========================================================================== */
 [data-persona="cool"] {
-  --bg: #0a0c15;
+  --bg: #05060b;
   --fg: #dfe3ee;
   --fg-strong: #eceef6;
   --muted: rgb(214 221 240 / 0.58);

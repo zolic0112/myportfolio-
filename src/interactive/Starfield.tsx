@@ -39,7 +39,7 @@ float noise(vec2 p){
 }
 float fbm(vec2 p){
   float a = .5, v = 0.;
-  for (int i = 0; i < 4; i++){ v += a * noise(p); p = p * 2.03 + 17.; a *= .5; }
+  for (int i = 0; i < 5; i++){ v += a * noise(p); p = p * 2.03 + 17.; a *= .5; }
   return v;
 }
 // Black-body-ish tint: most stars near white, a few cool blue, a few warm.
@@ -103,10 +103,10 @@ void main(){
   vec2 uv = c / max(size.x, size.y);
   // Not a black void: deep indigo that lifts toward two far pools of light.
   vec2 pf = uv + touch * .010 - vec2(0., scroll * .02);
-  vec3 col = mix(vec3(.016, .019, .036), vec3(.030, .035, .066), smoothstep(-.6, .6, uv.y + uv.x * .3));
+  vec3 col = mix(vec3(.006, .007, .013), vec3(.014, .016, .030), smoothstep(-.6, .6, uv.y + uv.x * .3));
   vec2 pa = pf - vec2(-.30, .20), pb = pf - vec2(.36, -.22);
-  col += vec3(.085, .12, .29) * exp(-dot(pa, pa) * 5.5) * .38;
-  col += vec3(.24, .11, .27) * exp(-dot(pb, pb) * 4.5) * .24;
+  col += vec3(.085, .12, .29) * exp(-dot(pa, pa) * 6.) * .17;
+  col += vec3(.24, .11, .27) * exp(-dot(pb, pb) * 5.) * .11;
   // three sheets of dust at different distances: they slide past one another
   // with the pointer and the scroll, which is what reads as depth
   for (float k = 0.; k < 3.; k++){
@@ -114,9 +114,10 @@ void main(){
     vec2 q = uv * mix(1.3, 2.4, d) + touch * mix(.008, .07, d)
            - vec2(0., scroll * mix(.03, .26, d)) + vec2(time * .003 * d, 0.) + k * 7.3;
     float n = fbm(q + fbm(q * 1.7 + 3.) * .8);
-    vec3 tint = mix(vec3(.09, .13, .33), vec3(.30, .14, .29), noise(q * .7 + 9. + k));
+    n = mix(n, 1. - abs(2. * fbm(q * 2.6 + 5.) - 1.), .35);   // some fine filaments
+    vec3 tint = mix(vec3(.10, .13, .24), vec3(.22, .14, .22), noise(q * .7 + 9. + k));
     float m = smoothstep(.5, .92, n);
-    col += tint * m * m * mix(.42, .26, d);
+    col += tint * m * m * mix(.30, .18, d);
     col *= 1. - .22 * d * smoothstep(.5, .2, n);   // nearer sheets also cast dark lanes
   }
   // four depths of stars: far = dense, faint, almost still; near = sparse, bright
@@ -131,7 +132,7 @@ void main(){
   // nearest of all: a few out-of-focus specks that move the most
   col += bokeh(px + vec2(time * 3., time * 1.2) + touch * 70. - vec2(0., scroll * 460.));
   float vig = smoothstep(1.0, .2, length(uv));
-  col *= .66 + .34 * vig;
+  col *= .5 + .5 * vig;
   col += (hash(gl_FragCoord.xy + fract(time)) - .5) / 255.;   // dither the gradients
   O = vec4(col, 1);
 }`;
