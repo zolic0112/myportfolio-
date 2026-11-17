@@ -6,7 +6,6 @@ import Footer from "@/components/Footer";
 import InteractiveLayer from "@/interactive/InteractiveLayer";
 import Starfield from "@/interactive/Starfield";
 import Parallax from "@/interactive/Parallax";
-import GlassLens from "@/interactive/GlassLens";
 import { getJunk, getProfile } from "@/lib/content";
 import { LANG_SCRIPT } from "@/lib/i18n";
 
@@ -43,7 +42,6 @@ export default async function SiteLayout({ children }: LayoutProps<"/">) {
           <Starfield />
         </div>
         <Parallax />
-        <GlassLens />
         {/* cool only: a quiet status line, like an instrument that is on */}
         <div className="status-bar cool-only" aria-hidden>
           <span className="live-dot" />
