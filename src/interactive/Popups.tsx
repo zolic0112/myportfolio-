@@ -97,7 +97,9 @@ export default function Popups({ links, reels, memes }: Props) {
     const big = !coarse && innerWidth >= 1024;
     const max = coarse ? 2 : big ? 6 : 4;
     let timer: ReturnType<typeof setTimeout>;
-    const spawn = () => {
+    // One popup now; `again` decides whether this call also books the next.
+    // (Only the main chain reschedules, so cleanup always has the one timer.)
+    const spawn = (again: boolean) => {
       const open = useInteractive.getState().popups;
       if (open.length < max) {
         const kind = pickKind(open, reels.length > 0, memes.length > 0);
@@ -105,11 +107,11 @@ export default function Popups({ links, reels, memes }: Props) {
         addPopup({ kind, size, ...spot(kind, size) });
         sound.play("ding");
       }
-      timer = setTimeout(spawn, coarse ? 10000 + Math.random() * 6000 : big ? 2600 + Math.random() * 3400 : 5000 + Math.random() * 5000);
+      if (again) timer = setTimeout(() => spawn(true), coarse ? 10000 + Math.random() * 6000 : big ? 2600 + Math.random() * 3400 : 5000 + Math.random() * 5000);
     };
-    timer = setTimeout(spawn, 1300);
+    timer = setTimeout(() => spawn(true), 1300);
     // big screens: a second one right behind the first, so it lands as a wall
-    const second = big ? setTimeout(spawn, 2100) : undefined;
+    const second = big ? setTimeout(() => spawn(false), 2100) : undefined;
     return () => {
       clearTimeout(timer);
       clearTimeout(second);
@@ -198,7 +200,7 @@ function PopupWindow({
     const touch = (e.nativeEvent as PointerEvent).pointerType === "touch";
     if (touch && dodges < maxDodges) {
       setDodges((d) => d + 1);
-      setPos(spot(p.kind));
+      setPos(spot(p.kind, p.size));
       // No hover on phones, so the hardest popup fights back by multiplying.
       if (p.kind === "premium") addPopup({ kind: "visitor", ...spot() });
       return;
@@ -223,7 +225,8 @@ function PopupWindow({
     error: "狗.exe",
   };
   const size = p.size ?? "m";
-  const width = popupWidth(p.kind, size);
+  // Reels sizes itself in CSS (nearly full screen on phones).
+  const width = p.kind === "reels" ? undefined : popupWidth(p.kind, size);
 
   return (
     <div

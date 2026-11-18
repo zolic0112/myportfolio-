@@ -28,7 +28,8 @@ export default function SpaceDog() {
   const canvas = useRef<HTMLCanvasElement>(null);
   const hit = useRef<HTMLDivElement>(null);
   const main = useRef<SpaceDogEngine | null>(null);
-  const [clones, setClones] = useState<number[]>([]);
+  // each clone keeps its own direction: it must not change (and respawn the clone) when the other one goes
+  const [clones, setClones] = useState<{ id: number; dir: number }[]>([]);
   const phase = useInteractive((s) => s.phase);
   // Clones go the moment the dog is caught (adjusted during render, not in an effect).
   const [seenPhase, setSeenPhase] = useState(phase);
@@ -88,7 +89,8 @@ export default function SpaceDog() {
       splits.current++;
       sound.play("pop");
       poof(w.x, w.y - 40, "×3!!");
-      setClones([Date.now(), Date.now() + 1]);
+      const now = Date.now();
+      setClones([{ id: now, dir: -1 }, { id: now + 1, dir: 1 }]);
     };
     t = setTimeout(attempt, splits.current ? SPLIT_AGAIN : SPLIT_AFTER);
     return () => clearTimeout(t);
@@ -99,12 +101,12 @@ export default function SpaceDog() {
       {/* only the real dog takes part in page transitions (names must be unique) */}
       <canvas ref={canvas} aria-hidden className="pet-canvas main" />
       <div ref={hit} className="pet-hit" aria-hidden />
-      {clones.map((id, i) => (
+      {clones.map(({ id, dir }) => (
         <Clone
           key={id}
           from={main}
-          dir={i === 0 ? -1 : 1}
-          gone={() => setClones((c) => c.filter((x) => x !== id))}
+          dir={dir}
+          gone={() => setClones((c) => c.filter((x) => x.id !== id))}
         />
       ))}
     </>
@@ -120,6 +122,7 @@ function Clone({ from, dir, gone }: { from: React.RefObject<SpaceDogEngine | nul
   });
   useEffect(() => {
     const getCage = () => document.getElementById("pet-cage");
+    let popped = false; // caught: it already went with a "fake!"
     const cb: EngineCallbacks = {
       onBump: () => {},
       onDodge: () => sound.play("squeak"),
@@ -128,6 +131,7 @@ function Clone({ from, dir, gone }: { from: React.RefObject<SpaceDogEngine | nul
       onVoice: (v) => Math.random() < 0.4 && sound.play(v),
       onGrab: () => {},
       onPoof: (x, y) => {
+        popped = true;
         sound.play("pop");
         poof(x, y - 30, "假的!");
         goneRef.current();
@@ -140,7 +144,7 @@ function Clone({ from, dir, gone }: { from: React.RefObject<SpaceDogEngine | nul
     return () => {
       // vanish with a puff when the real one is caught or the page tidies up
       const p = engine.where();
-      if (p.ready && Date.now() - born > 500) poof(p.x, p.y - 30, "💨");
+      if (!popped && p.ready && Date.now() - born > 500) poof(p.x, p.y - 30, "💨");
       engine.destroy();
     };
   }, [from, dir]);

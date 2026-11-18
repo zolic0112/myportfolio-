@@ -3433,3 +3433,13 @@ html:active-view-transition .skin-brand .bm-eyes {
     animation: none;
   }
 }
+
+/* long WordArt lines wrap instead of running out of a phone-width window */
+.popup .wordart {
+  overflow-wrap: anywhere;
+}
+@media (max-width: 639px) {
+  .popup .wordart {
+    font-size: 22px;
+  }
+}
