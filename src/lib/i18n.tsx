@@ -18,6 +18,7 @@ export const LANG_KEY = "sd-lang";
 export const LANG_SCRIPT = `(function(){try{var s=["zh","en","ja","es"],h={zh:"zh-Hant",en:"en",ja:"ja",es:"es"},l=localStorage.getItem("${LANG_KEY}");if(s.indexOf(l)<0){l="en";var n=navigator.languages||[navigator.language];for(var i=0;i<n.length;i++){var c=(n[i]||"").slice(0,2).toLowerCase();if(s.indexOf(c)>=0){l=c;break}}}var d=document.documentElement;d.dataset.lang=l;d.lang=h[l]}catch(e){}})()`;
 
 export const UI = {
+  home: { zh: "首頁", en: "Home", ja: "ホーム", es: "Inicio" },
   works: { zh: "作品", en: "Works", ja: "作品", es: "Obras" },
   contact: { zh: "聯絡", en: "Contact", ja: "連絡先", es: "Contacto" },
   allWorks: { zh: "所有作品", en: "All works", ja: "すべての作品", es: "Todas las obras" },

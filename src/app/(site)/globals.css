@@ -2677,3 +2677,311 @@ html.vt-lang::view-transition-new(site-header) {
     animation: none !important;
   }
 }
+
+
+/* ==========================================================================
+   Brand mark + the phone tab bar.
+   The mark is a viewfinder corner with a box tucked into it. It assembles
+   once on load, the two pieces breathe apart on hover, and the corner on
+   its own frames a work card when you point at it.
+   ========================================================================== */
+.brand-mark {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  overflow: visible;
+}
+.brand-mark path {
+  transform-box: view-box;
+  transition: transform 0.5s var(--m-out, ease-out);
+}
+.skin-brand .brand-mark .bm-corner {
+  animation: bm-corner-in 0.9s var(--m-out, ease-out) 0.15s both;
+}
+.skin-brand .brand-mark .bm-box {
+  animation: bm-box-in 0.9s var(--m-out, ease-out) 0.3s both;
+}
+@keyframes bm-corner-in {
+  from { transform: translate(-60px, -60px); opacity: 0; }
+}
+@keyframes bm-box-in {
+  from { transform: translate(70px, 70px); opacity: 0; }
+}
+.skin-brand:hover .bm-corner {
+  transform: translate(-22px, -22px);
+}
+.skin-brand:hover .bm-box {
+  transform: translate(10px, 10px);
+}
+[data-persona="cool"] .skin-brand .brand-mark {
+  color: var(--fg-strong, #eceef6);
+  filter: drop-shadow(0 0 6px rgb(255 255 255 / 0.18));
+}
+@media (max-width: 639px) {
+  .skin-brand {
+    font-size: 17px;
+  }
+}
+/* brain rot: the emoji window goes, the mark spins through every colour */
+[data-persona="rot"] .skin-brand::before {
+  content: none;
+}
+[data-persona="rot"] .skin-brand .brand-mark {
+  width: 24px;
+  height: 24px;
+  color: #ff00ff;
+  filter: drop-shadow(2px 2px 0 #000);
+  animation: bm-rainbow 2.4s steps(6) infinite;
+}
+@keyframes bm-rainbow {
+  to { filter: drop-shadow(2px 2px 0 #000) hue-rotate(360deg); }
+}
+.footer-mark {
+  display: block;
+  width: 18px;
+  height: 18px;
+  margin: 0 auto 14px;
+  opacity: 0.55;
+}
+
+/* ---------- viewfinder corner on work cards (cool) ---------- */
+.vf-corner {
+  position: absolute;
+  z-index: 3;
+  left: 12px;
+  top: 12px;
+  width: 18px;
+  height: 18px;
+  background: rgb(255 255 255 / 0.92);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='12 12 363 363'%3E%3Cpath d='M98.4286 14C98.4286 12.8954 97.5332 12 96.4286 12L42.8095 12C41.705 12 40.8095 12.8954 40.8095 14V40.8095H14C12.8954 40.8095 12 41.705 12 42.8095V96.4286C12 97.5331 12.8954 98.4286 14 98.4286H40.8095L40.8095 373C40.8095 374.105 41.705 375 42.8095 375H96.4286C97.5331 375 98.4286 374.105 98.4286 373L98.4286 98.4286H373C374.105 98.4286 375 97.5331 375 96.4286V42.8095C375 41.705 374.105 40.8095 373 40.8095H98.4286V14Z'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='12 12 363 363'%3E%3Cpath d='M98.4286 14C98.4286 12.8954 97.5332 12 96.4286 12L42.8095 12C41.705 12 40.8095 12.8954 40.8095 14V40.8095H14C12.8954 40.8095 12 41.705 12 42.8095V96.4286C12 97.5331 12.8954 98.4286 14 98.4286H40.8095L40.8095 373C40.8095 374.105 41.705 375 42.8095 375H96.4286C97.5331 375 98.4286 374.105 98.4286 373L98.4286 98.4286H373C374.105 98.4286 375 97.5331 375 96.4286V42.8095C375 41.705 374.105 40.8095 373 40.8095H98.4286V14Z'/%3E%3C/svg%3E") center / contain no-repeat;
+  filter: drop-shadow(0 1px 3px rgb(0 0 0 / 0.5));
+  opacity: 0;
+  transform: translate(-8px, -8px) scale(1.25);
+  transition: opacity 0.35s var(--m-out, ease-out), transform 0.5s var(--m-out, ease-out);
+  pointer-events: none;
+}
+.skin-card[data-size="lg"] .vf-corner {
+  left: 18px;
+  top: 18px;
+  width: 22px;
+  height: 22px;
+}
+[data-persona="cool"] .skin-card:hover .vf-corner,
+[data-persona="cool"] .skin-card:focus-visible .vf-corner {
+  opacity: 1;
+  transform: none;
+}
+
+/* ---------- phone tab bar ---------- */
+.tab-bar {
+  display: none;
+}
+@media (max-width: 639px) {
+  main {
+    padding-bottom: 76px;
+  }
+  .tab-bar {
+    position: fixed;
+    z-index: 46;
+    left: 12px;
+    bottom: max(12px, env(safe-area-inset-bottom));
+    display: flex;
+    align-items: center;
+  }
+  .tab-track {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(var(--tab-n), 1fr);
+    padding: 4px;
+    border-radius: 999px;
+    transition: width 0.5s var(--m-out, ease-out);
+  }
+  .tab {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    min-width: 62px;
+    height: 52px;
+    padding: 0 10px;
+    border-radius: 999px;
+    font-size: 10px;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+    -webkit-tap-highlight-color: transparent;
+    transition: color 0.3s, min-width 0.5s var(--m-out, ease-out), height 0.5s var(--m-out, ease-out);
+  }
+  .tab[aria-current="page"] {
+    color: var(--fg-strong, #fff);
+  }
+  .tab:active {
+    transform: scale(0.94);
+  }
+  .tab-icon {
+    width: 20px;
+    height: 20px;
+  }
+  .tab .brand-mark {
+    width: 17px;
+    height: 17px;
+    margin: 1px 0 2px;
+  }
+  .tab-label {
+    max-height: 14px;
+    overflow: hidden;
+    transition: max-height 0.4s var(--m-out, ease-out), opacity 0.25s;
+  }
+  /* the pill under the current tab slides between them */
+  .tab-thumb {
+    position: absolute;
+    z-index: 0;
+    top: 4px;
+    bottom: 4px;
+    left: 4px;
+    width: calc((100% - 8px) / var(--tab-n));
+    border-radius: 999px;
+    transform: translateX(calc(var(--tab-i) * 100%));
+    transition: transform 0.55s cubic-bezier(0.34, 1.4, 0.5, 1);
+  }
+  /* scrolled down: icons only, smaller */
+  .tab-bar[data-compact] .tab {
+    min-width: 50px;
+    height: 42px;
+  }
+  .tab-bar[data-compact] .tab-label {
+    max-height: 0;
+    opacity: 0;
+  }
+  .tab-tray {
+    display: none;
+  }
+
+  /* cool: clear glass capsule, same material as the top bar */
+  [data-persona="cool"] .tab-track {
+    background: rgb(255 255 255 / 0.05);
+    -webkit-backdrop-filter: blur(12px) saturate(180%);
+    backdrop-filter: blur(12px) saturate(180%);
+    box-shadow:
+      inset 0 0 0 0.5px rgb(255 255 255 / 0.1),
+      inset 0 -6px 10px -8px rgb(255 255 255 / 0.2),
+      0 14px 34px -12px rgb(0 0 0 / 0.7);
+  }
+  [data-persona="cool"] .tab-track::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: var(--rim-clear);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+    pointer-events: none;
+  }
+  [data-persona="cool"] .tab-thumb {
+    background: rgb(255 255 255 / 0.13);
+    box-shadow:
+      inset 0 0.5px 0 rgb(255 255 255 / 0.6),
+      inset 0 0 0 0.5px rgb(255 255 255 / 0.18),
+      0 2px 8px rgb(0 0 0 / 0.3);
+  }
+
+  /* brain rot: a Windows 95 taskbar across the bottom */
+  [data-persona="rot"] main {
+    padding-bottom: 60px;
+  }
+  [data-persona="rot"] .tab-bar {
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: calc(40px + env(safe-area-inset-bottom));
+    padding: 3px 4px env(safe-area-inset-bottom);
+    gap: 4px;
+    background: #c0c0c0;
+    border-top: 2px solid #fff;
+    box-shadow: inset 0 1px #dfdfdf;
+    font-family: var(--font-body);
+  }
+  [data-persona="rot"] .tab-track {
+    display: flex;
+    gap: 3px;
+    padding: 0;
+    flex: 1;
+    min-width: 0;
+  }
+  [data-persona="rot"] .tab-thumb {
+    display: none;
+  }
+  [data-persona="rot"] .tab,
+  [data-persona="rot"] .tab-bar[data-compact] .tab {
+    flex-direction: row;
+    gap: 5px;
+    min-width: 0;
+    height: 32px;
+    padding: 0 8px;
+    border-radius: 0;
+    font-size: 12px;
+    font-weight: 700;
+    color: #000;
+    text-decoration: none;
+    background: #c0c0c0;
+    box-shadow: inset -1px -1px #000, inset 1px 1px #fff, inset -2px -2px #808080, inset 2px 2px #dfdfdf;
+  }
+  [data-persona="rot"] .tab[aria-current="page"] {
+    background: repeating-conic-gradient(#c0c0c0 0 25%, #fff 0 50%) 0 0 / 2px 2px;
+    box-shadow: inset 1px 1px #000, inset -1px -1px #fff, inset 2px 2px #808080, inset -2px -2px #dfdfdf;
+  }
+  [data-persona="rot"] .tab-bar[data-compact] .tab-label {
+    max-height: 14px;
+    opacity: 1;
+  }
+  [data-persona="rot"] .tab .brand-mark {
+    color: #ff00ff;
+    animation: bm-rainbow 2.4s steps(6) infinite;
+  }
+  /* the first tab is the Start button */
+  [data-persona="rot"] .tab:first-of-type .tab-label::after {
+    content: " 開始";
+  }
+  [data-persona="rot"] .tab:first-of-type .tab-label > * {
+    display: none;
+  }
+  [data-persona="rot"] .tab-tray {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    height: 32px;
+    padding: 0 8px;
+    font-size: 12px;
+    color: #000;
+    box-shadow: inset 1px 1px #808080, inset -1px -1px #fff;
+  }
+  [data-persona="rot"] .tab-tray .win-button {
+    padding: 0 4px;
+    min-width: 0;
+  }
+  /* the cage and the exit hatch stand on the taskbar instead of under it */
+  [data-persona="rot"] .cage-pos {
+    bottom: calc(52px + env(safe-area-inset-bottom));
+  }
+  [data-persona="rot"] .hatch {
+    bottom: calc(52px + env(safe-area-inset-bottom));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brand-mark path,
+  [data-persona="rot"] .brand-mark,
+  [data-persona="rot"] .tab .brand-mark {
+    animation: none !important;
+    transition: none !important;
+  }
+  .tab-thumb,
+  .vf-corner {
+    transition: none !important;
+  }
+}

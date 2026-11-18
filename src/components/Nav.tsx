@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useInteractive, useJunkOn } from "@/interactive/store";
 import { T, UI } from "@/lib/i18n";
+import BrandMark from "./BrandMark";
 import LangSwitch from "./LangSwitch";
 
 export default function Nav({ name }: { name: string }) {
@@ -21,22 +22,25 @@ export default function Nav({ name }: { name: string }) {
   }, []);
   return (
     <header className="skin-nav sticky top-0 z-40" data-scrolled={scrolled ? "" : undefined}>
-      {/* Phones: brand + tools on the first row, page links on a second one,
-          so nothing wraps by accident whatever the language or name length. */}
-      <nav className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-5 gap-y-2 px-4 py-3 text-sm sm:flex-nowrap sm:px-6 sm:py-4">
-        <Link href="/" transitionTypes={["nav-back"]} className="skin-brand min-w-0 flex-1 truncate">
-          {name}
-          <span className="brand-sub cool-only"> / PORTFOLIO</span>
+      {/* Phones: one row, brand + language; the page links move to the
+          floating tab bar at the bottom (TabBar). */}
+      <nav className="mx-auto flex max-w-6xl items-center gap-x-5 px-4 py-3 text-sm sm:px-6 sm:py-4">
+        <Link href="/" transitionTypes={["nav-back"]} className="skin-brand flex min-w-0 flex-1 items-center gap-2.5" aria-label={name}>
+          <BrandMark />
+          <span className="truncate">
+            {name}
+            <span className="brand-sub cool-only"> / PORTFOLIO</span>
+          </span>
         </Link>
-        <ul className="order-last flex w-full items-center gap-x-5 sm:order-none sm:w-auto">
+        <ul className="hidden items-center gap-x-5 sm:flex">
           <li><Link href="/#works" transitionTypes={["nav-back"]}><T v={UI.works} /></Link></li>
           <li><Link href="/#contact" transitionTypes={["nav-back"]}><T v={UI.contact} /></Link></li>
           {junk && (
-            <li className="rot-only ml-auto sm:ml-0">
+            <li className="rot-only">
               <button className="win-button whitespace-nowrap" onClick={openPremium}>💎 去除廣告</button>
             </li>
           )}
-          {premium && <li className="rot-only ml-auto whitespace-nowrap font-bold sm:ml-0">⭐ PREMIUM</li>}
+          {premium && <li className="rot-only whitespace-nowrap font-bold">⭐ PREMIUM</li>}
         </ul>
         <ul className="flex shrink-0 items-center gap-x-3">
           <li><LangSwitch /></li>

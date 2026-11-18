@@ -25,6 +25,8 @@ export default function WorkCard({ work, size = "md", glass, className = "" }: P
       </div>
       {work.rotOnly && <span className="sticker">隱藏款!!</span>}
       <div className={`skin-media ${size === "lg" ? "min-h-56 flex-1" : "aspect-video"}`}>
+        {/* the brand mark's corner, framing the card like a viewfinder on hover */}
+        <span className="vf-corner cool-only" aria-hidden />
         {work.cover ? (
           <Image
             src={work.cover}

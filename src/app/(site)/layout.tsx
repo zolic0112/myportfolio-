@@ -3,6 +3,7 @@ import { Space_Grotesk, Instrument_Serif, IBM_Plex_Mono } from "next/font/google
 import "./globals.css";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
+import TabBar from "@/components/TabBar";
 import InteractiveLayer from "@/interactive/InteractiveLayer";
 import Starfield from "@/interactive/Starfield";
 import Parallax from "@/interactive/Parallax";
@@ -65,6 +66,7 @@ export default async function SiteLayout({ children }: LayoutProps<"/">) {
         </div>
         <main className="flex-1">{children}</main>
         <Footer name={profile.name} />
+        <TabBar />
         <InteractiveLayer links={links} reels={junk.reels} memes={junk.memes} sponsor={profile.sponsor} />
       </body>
     </html>
