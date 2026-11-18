@@ -61,6 +61,8 @@ export function CageFront() {
     if (phase !== "caged") return;
     drag.current = { x: e.clientX, id: e.pointerId };
     opened.current = false;
+    // keep the drag on the cage, so sliding the door never sweeps over text
+    e.currentTarget.setPointerCapture(e.pointerId);
   }
   function onPointerMove(e: React.PointerEvent) {
     const d = drag.current;

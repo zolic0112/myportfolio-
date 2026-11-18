@@ -656,6 +656,10 @@ html[data-persona="rot"][data-lang="es"] .lang-switch [data-set="es"] {
   pointer-events: none;
   touch-action: none;
   cursor: grab;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
 }
 .fx-layer {
   position: fixed;
@@ -668,6 +672,7 @@ html[data-persona="rot"][data-lang="es"] .lang-switch [data-set="es"] {
 html.grabbing,
 html.grabbing * {
   cursor: grabbing !important;
+  -webkit-user-select: none;
   user-select: none;
 }
 
@@ -699,6 +704,9 @@ html.grabbing * {
 }
 .cage-front {
   touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
   z-index: 80;
   cursor: grab;
   background: none;

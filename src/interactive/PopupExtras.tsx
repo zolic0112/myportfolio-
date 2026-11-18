@@ -28,7 +28,7 @@ function Whack({ done }: { done: () => void }) {
     setAt({ l: Math.random() * 82, t: Math.random() * 70 });
   };
   return (
-    <div className="grid gap-2">
+    <div className="grid select-none gap-2">
       <p>
         <b>抓到狗 {HITS} 次</b>才能關閉這個視窗。({hits}/{HITS})
       </p>

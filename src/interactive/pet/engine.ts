@@ -107,6 +107,8 @@ export class SpaceDogEngine {
 
   // pointer (viewport px)
   private ptr = { x: -9999, y: -9999, mouse: false, seen: false };
+  /** Until when (performance.now ms) a chase is on: text selection is held off. */
+  private chaseUntil = 0;
 
   // surfaces
   private perches: Element[] = [];
@@ -131,6 +133,9 @@ export class SpaceDogEngine {
     window.addEventListener("resize", this.resize);
     window.addEventListener("pointermove", this.onMove, { passive: true });
     window.addEventListener("pointerdown", this.onMove, { passive: true });
+    window.addEventListener("pointerdown", this.onAnyDown, { capture: true, passive: true });
+    document.addEventListener("selectstart", this.onSelectStart, { capture: true });
+    hit.addEventListener("contextmenu", this.onContextMenu);
     hit.addEventListener("pointerdown", this.onHitDown);
     hit.addEventListener("pointermove", this.onHitMove);
     hit.addEventListener("pointerup", this.onHitUp);
@@ -143,6 +148,9 @@ export class SpaceDogEngine {
     window.removeEventListener("resize", this.resize);
     window.removeEventListener("pointermove", this.onMove);
     window.removeEventListener("pointerdown", this.onMove);
+    window.removeEventListener("pointerdown", this.onAnyDown, { capture: true });
+    document.removeEventListener("selectstart", this.onSelectStart, { capture: true });
+    this.hit.removeEventListener("contextmenu", this.onContextMenu);
     this.hit.removeEventListener("pointerdown", this.onHitDown);
     this.hit.removeEventListener("pointermove", this.onHitMove);
     this.hit.removeEventListener("pointerup", this.onHitUp);
@@ -215,11 +223,34 @@ export class SpaceDogEngine {
     this.ptr.seen = true;
   };
 
+  // Chasing means clicking fast where the dog is (or just was): double and
+  // triple clicks and press-drags would select the text underneath. A press
+  // near a free dog starts a short "chase window" in which selection is held
+  // off; the window keeps renewing while you keep after it.
+  private onAnyDown = (e: PointerEvent) => {
+    if (this.mode !== "free") return;
+    if (this.grab || Math.hypot(e.clientX - this.x, e.clientY - this.y) < 170) this.startChase();
+  };
+
+  private startChase() {
+    this.chaseUntil = performance.now() + 1400;
+    const sel = getSelection();
+    if (sel && !sel.isCollapsed) sel.removeAllRanges();
+  }
+
+  private onSelectStart = (e: Event) => {
+    if (this.grab || performance.now() < this.chaseUntil) e.preventDefault();
+  };
+
+  /** Long-press on a phone would open the image / copy menu. */
+  private onContextMenu = (e: Event) => e.preventDefault();
+
   private onHitDown = (e: PointerEvent) => {
     if (this.mode !== "free" || this.grab) return;
     e.preventDefault();
     e.stopPropagation();
     this.onMove(e);
+    this.startChase();
     if (!this.tired && !this.reduce) {
       this.dodge();
       return;
