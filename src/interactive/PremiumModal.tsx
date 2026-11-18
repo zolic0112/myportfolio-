@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useT } from "@/lib/useLang";
+import { J } from "./junk-text";
 import { usePresence } from "./presence";
 import { useInteractive } from "./store";
 
@@ -8,9 +10,9 @@ import { useInteractive } from "./store";
 // back and says they paid gets premium, stored in this browser for good.
 
 const PLANS = [
-  { id: "free", name: "Free", price: "$0", perks: ["無限彈窗", "無限假叉叉", "狗"] },
-  { id: "premium", name: "Premium", price: "☕ ×1", perks: ["彈窗永久消失", "狗", "作者會很開心"] },
-  { id: "ultra", name: "Premium Ultra Max Pro", price: "☕ ×2", perks: ["內容跟 Premium 一樣", "但你會覺得自己比較有錢", "狗"] },
+  { id: "free", name: "Free", price: "$0" },
+  { id: "premium", name: "Premium", price: "☕ ×1" },
+  { id: "ultra", name: "Premium Ultra Max Pro", price: "☕ ×2" },
 ] as const;
 
 /** Where the money goes: Ko-fi for international visitors, ECPay for Taiwan. */
@@ -26,6 +28,7 @@ export default function PremiumModal({ sponsor }: { sponsor: Sponsor }) {
 
 function Modal({ sponsor, state }: { sponsor: Sponsor; state: "open" | "closed" }) {
   const premium = useInteractive((s) => s.premium);
+  const t = useT();
   const close = useInteractive((s) => s.closePremium);
   const subscribe = useInteractive((s) => s.subscribe);
   const cancelPremium = useInteractive((s) => s.cancelPremium);
@@ -60,30 +63,30 @@ function Modal({ sponsor, state }: { sponsor: Sponsor; state: "open" | "closed" 
   return (
     <div
       role="dialog"
-      aria-label="Premium 訂閱"
+      aria-label={t(J.pmLabel)}
       data-state={state}
       className="vt-backdrop fixed inset-0 z-[55] grid place-items-center overflow-y-auto bg-black/60 p-4"
       onClick={close}
     >
       <div data-state={state} className="vt-sheet popup !static !w-[min(760px,100%)]" onClick={(e) => e.stopPropagation()}>
         <div className="skin-titlebar">
-          <span className="t">💎 Space Dog Premium — 訂閱方案</span>
-          <button className="win-btn" onClick={close} aria-label="關閉">×</button>
+          <span className="t">{t(J.pmTitle)}</span>
+          <button className="win-btn" onClick={close} aria-label={t(J.close)}>×</button>
         </div>
         <div key={step} className="popup-body vt-step">
           {step === "plans" && (
             <>
-              <p className="wordart text-center">訂閱即可免廣告</p>
+              <p className="wordart text-center">{t(J.pmHead)}</p>
               <div className="mt-4 grid gap-3 sm:grid-cols-3">
                 {PLANS.map((p) => (
                   <div key={p.id} className="grid gap-2 border-2 border-black bg-white p-3">
                     <h3 className="font-bold">{p.name}</h3>
                     <p className="text-2xl font-black">{p.price}</p>
                     <ul className="list-disc pl-5 text-xs">
-                      {p.perks.map((x) => <li key={x}>{x}</li>)}
+                      {t(J.pmPerks[p.id]).map((x) => <li key={x}>{x}</li>)}
                     </ul>
                     <button className="win-button mt-auto" onClick={() => choose(p.id)}>
-                      {p.id === "free" ? "維持現狀" : "訂閱"}
+                      {t(p.id === "free" ? J.pmKeep : J.pmSub)}
                     </button>
                   </div>
                 ))}
@@ -92,68 +95,68 @@ function Modal({ sponsor, state }: { sponsor: Sponsor; state: "open" | "closed" 
           )}
           {step === "pay" && (
             <div className="grid gap-3 text-center">
-              <p className="text-lg font-bold">選一個付款方式 ☕</p>
+              <p className="text-lg font-bold">{t(J.pmPayHead)}</p>
               <div className="flex flex-wrap justify-center gap-2">
                 {sponsor.intl && (
                   <button className="win-button" onClick={() => pay(sponsor.intl!)}>🌏 International — Ko-fi</button>
                 )}
                 {sponsor.tw && (
-                  <button className="win-button" onClick={() => pay(sponsor.tw!)}>🇹🇼 台灣 — 綠界</button>
+                  <button className="win-button" onClick={() => pay(sponsor.tw!)}>{t(J.pmPayTw)}</button>
                 )}
               </div>
-              <button className="text-[11px] underline" onClick={() => setStep("paid")}>我不想付錢</button>
+              <button className="text-[11px] underline" onClick={() => setStep("paid")}>{t(J.pmNoPay)}</button>
             </div>
           )}
           {step === "paid" && (
             <div className="grid gap-3 text-center">
-              <p className="text-lg font-bold">付好了嗎?(信任制,我們不會檢查)</p>
-              {!sponsor.intl && !sponsor.tw && <p className="text-xs">(作者還沒設定贊助連結,所以你也付不了)</p>}
+              <p className="text-lg font-bold">{t(J.pmPaidQ)}</p>
+              {!sponsor.intl && !sponsor.tw && <p className="text-xs">{t(J.pmNoLinks)}</p>}
               <div className="flex flex-wrap justify-center gap-2">
-                <button className="win-button" onClick={done}>付好了 ✅</button>
-                <button className="win-button" onClick={done}>其實沒付,但我想要免廣告</button>
+                <button className="win-button" onClick={done}>{t(J.pmPaid)}</button>
+                <button className="win-button" onClick={done}>{t(J.pmLied)}</button>
               </div>
             </div>
           )}
           {step === "manage" && (
             <div className="grid gap-3 text-center">
-              <p className="text-lg font-bold">⭐ 我的訂閱</p>
+              <p className="text-lg font-bold">{t(J.pmMine)}</p>
               <div className="thanks-card justify-self-center">
                 <span className="thanks-dog" aria-hidden>🐶</span>
                 <div className="text-left">
                   <b>SPACE DOG PREMIUM</b>
                   <br />
-                  方案:彈窗永久消失
+                  {t(J.pmPlan)}
                   <br />
-                  <small>狀態:有效 ✅ · 下次扣款:永遠不會</small>
+                  <small>{t(J.pmStatus)}</small>
                 </div>
               </div>
               <div className="flex flex-wrap justify-center gap-2">
-                <button className="win-button" onClick={close}>繼續當有錢人</button>
-                <button className="win-button" onClick={() => setStep("cancel")}>取消訂閱</button>
+                <button className="win-button" onClick={close}>{t(J.pmStayRich)}</button>
+                <button className="win-button" onClick={() => setStep("cancel")}>{t(J.pmCancel)}</button>
               </div>
             </div>
           )}
           {step === "cancel" && (
             <div className="grid gap-3 text-center">
-              <p className="wordart">確定要取消嗎??</p>
-              <p>取消後所有彈窗、假叉叉、迴紋針小幫手都會回來 😈</p>
-              <p className="text-xs">(狗會很開心)</p>
+              <p className="wordart">{t(J.pmSure)}</p>
+              <p>{t(J.pmSureText)}</p>
+              <p className="text-xs">{t(J.pmDogHappy)}</p>
               <div className="flex flex-wrap justify-center gap-2">
-                <button className="win-button" onClick={bye}>確定取消,我想念廣告</button>
-                <button className="win-button" style={{ fontWeight: 700 }} onClick={() => setStep("manage")}>算了</button>
+                <button className="win-button" onClick={bye}>{t(J.pmYes)}</button>
+                <button className="win-button" style={{ fontWeight: 700 }} onClick={() => setStep("manage")}>{t(J.pmNever)}</button>
               </div>
             </div>
           )}
           {step === "bye" && (
             <div className="grid gap-2 text-center">
-              <p className="wordart">已取消訂閱</p>
-              <p>廣告正在回來的路上…… 📢📢📢</p>
+              <p className="wordart">{t(J.pmBye)}</p>
+              <p>{t(J.pmBack)}</p>
             </div>
           )}
           {step === "thanks" && (
             <div className="thanks">
               <div className="thanks-rays" aria-hidden />
-              <p className="wordart thanks-title">感謝訂閱 🎉</p>
+              <p className="wordart thanks-title">{t(J.pmThanks)}</p>
               <div className="thanks-card">
                 <span className="thanks-dog" aria-hidden>🐶</span>
                 <div>
@@ -161,10 +164,10 @@ function Modal({ sponsor, state }: { sponsor: Sponsor; state: "open" | "closed" 
                   <br />
                   MEMBER No. 000001
                   <br />
-                  <small>有效期限:永遠(存在這個瀏覽器裡)</small>
+                  <small>{t(J.pmValid)}</small>
                 </div>
               </div>
-              <p className="thanks-note">彈窗已全部消失 ✨ 你現在是很有錢的人 ✨</p>
+              <p className="thanks-note">{t(J.pmGone)}</p>
             </div>
           )}
         </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useT } from "@/lib/useLang";
 import Image from "next/image";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { games } from "@/games/registry";
@@ -92,7 +93,7 @@ export default function WorkMedia({ slug, title, cover, video, gallery, embed, m
     <div className="grid gap-3">
       <div className="skin-panel overflow-hidden">
         <div className="skin-titlebar">
-          <span className="t"><T v={title} /> — 媒體播放程式</span>
+          <span className="t"><T v={title} /> — <T v={UI.mediaPlayer} /></span>
           <span className="win-btn" aria-hidden>_</span>
           <span className="win-btn" aria-hidden>□</span>
           <span className="win-btn" aria-hidden>×</span>
@@ -120,6 +121,7 @@ export default function WorkMedia({ slug, title, cover, video, gallery, embed, m
 }
 
 function Gallery({ images }: { images: string[] }) {
+  const t = useT();
   const [open, setOpen] = useState<number | null>(null);
   const [shownIdx, setShownIdx] = useState(0);
   if (open !== null && open !== shownIdx) setShownIdx(open);
@@ -139,14 +141,14 @@ function Gallery({ images }: { images: string[] }) {
       <div className="flex snap-x gap-3 overflow-x-auto pb-2">
         {images.map((src, i) => (
           <button key={src} onClick={() => setOpen(i)} className="skin-media relative aspect-[4/3] w-40 flex-none snap-start overflow-hidden rounded-xl sm:w-52">
-            <Image src={src} alt={`圖 ${i + 1}`} fill className="object-cover" sizes="208px" />
+            <Image src={src} alt={`${t(UI.image)} ${i + 1}`} fill className="object-cover" sizes="208px" />
           </button>
         ))}
       </div>
       {mounted && (
-        <div role="dialog" aria-label="圖片" data-state={state} className="vt-backdrop fixed inset-0 z-[56] grid place-items-center bg-black/85 p-4" onClick={() => setOpen(null)}>
+        <div role="dialog" aria-label={t(UI.image)} data-state={state} className="vt-backdrop fixed inset-0 z-[56] grid place-items-center bg-black/85 p-4" onClick={() => setOpen(null)}>
           <div data-state={state} className="vt-sheet relative h-[85vh] w-full max-w-5xl">
-            <Image key={shownIdx} src={images[shownIdx]} alt={`圖 ${shownIdx + 1}`} fill className="vt-step object-contain" sizes="100vw" />
+            <Image key={shownIdx} src={images[shownIdx]} alt={`${t(UI.image)} ${shownIdx + 1}`} fill className="vt-step object-contain" sizes="100vw" />
           </div>
         </div>
       )}

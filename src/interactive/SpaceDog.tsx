@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { rig } from "./cage3d";
 import { SpaceDogEngine, type EngineCallbacks } from "./pet/engine";
+import { J } from "./junk-text";
 import { sound } from "./sound";
 import { on, useInteractive } from "./store";
 
@@ -133,7 +134,7 @@ function Clone({ from, dir, gone }: { from: React.RefObject<SpaceDogEngine | nul
       onPoof: (x, y) => {
         popped = true;
         sound.play("pop");
-        poof(x, y - 30, "假的!");
+        poof(x, y - 30, J.fake[(document.documentElement.dataset.lang as keyof typeof J.fake) || "zh"] ?? J.fake.zh);
         goneRef.current();
       },
     };

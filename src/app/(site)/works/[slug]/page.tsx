@@ -108,8 +108,8 @@ export default async function WorkPage({ params }: PageProps<"/works/[slug]">) {
           ));
         })}
       </article>
-      <aside aria-label="其他作品" className="grid content-start gap-4">
-        <h2 className="skin-eyebrow"><T v={UI.otherWorks} /></h2>
+      <aside aria-labelledby="others-h" className="grid content-start gap-4">
+        <h2 id="others-h" className="skin-eyebrow"><T v={UI.otherWorks} /></h2>
         {others.map((w) => (
           <WorkCard key={w.slug} work={w} />
         ))}

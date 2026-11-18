@@ -23,7 +23,7 @@ export default function WorkCard({ work, size = "md", glass, className = "" }: P
         <span className="win-btn" aria-hidden>□</span>
         <span className="win-btn" aria-hidden>×</span>
       </div>
-      {work.rotOnly && <span className="sticker">隱藏款!!</span>}
+      {work.rotOnly && <span className="sticker"><T v={UI.hidden} /></span>}
       <div className={`skin-media ${size === "lg" ? "min-h-56 flex-1" : "aspect-video"}`}>
         {/* the brand mark's corner, framing the card like a viewfinder on hover */}
         <span className="vf-corner cool-only" aria-hidden />

@@ -1,5 +1,7 @@
 "use client";
 
+import { useT } from "@/lib/useLang";
+import { J } from "./junk-text";
 import { useInteractive, useJunkOn } from "./store";
 
 // The free exit and the mute button: deliberately plain browser-default HTML,
@@ -10,11 +12,12 @@ export default function Hatch() {
   const toggleMute = useInteractive((s) => s.toggleMute);
   const giveUp = useInteractive((s) => s.giveUp);
   const junk = useJunkOn();
+  const t = useT();
   if (persona !== "rot") return null;
   return (
     <div className="hatch">
-      {junk && <button onClick={giveUp}>我放棄 😭</button>}
-      <button onClick={toggleMute}>{muted ? "🔇 開聲音" : "🔊 靜音"}</button>
+      {junk && <button onClick={giveUp}>{t(J.giveUp)}</button>}
+      <button onClick={toggleMute}>{t(muted ? J.unmute : J.mute)}</button>
     </div>
   );
 }

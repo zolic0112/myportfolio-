@@ -1,6 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useT } from "@/lib/useLang";
+import { J } from "./junk-text";
 import { sound } from "./sound";
 import { useInteractive } from "./store";
 
@@ -27,15 +29,14 @@ function Whack({ done }: { done: () => void }) {
     setHits(hits + 1);
     setAt({ l: Math.random() * 82, t: Math.random() * 70 });
   };
+  const t = useT();
   return (
     <div className="grid select-none gap-2">
-      <p>
-        <b>抓到狗 {HITS} 次</b>才能關閉這個視窗。({hits}/{HITS})
-      </p>
+      <p>{t(J.whack)(hits, HITS)}</p>
       <div className="relative h-32 border-2 border-black bg-[#39ff14]">
         <button
           onClick={hit}
-          aria-label="狗"
+          aria-label={t(J.dog)}
           className="absolute text-3xl leading-none transition-none"
           style={{ left: `${at.l}%`, top: `${at.t}%` }}
         >
@@ -70,10 +71,12 @@ function Captcha({ done }: { done: () => void }) {
     setPicked([]);
     setCells(newGrid());
   };
+  const t = useT();
   return (
     <div className="grid gap-2">
       <p>
-        <b>請證明你不是機器人:</b>選出所有的狗。{wrong && <span style={{ color: "red" }}> 錯了,再來。</span>}
+        {t(J.robot)}
+        {wrong && <span style={{ color: "red" }}>{t(J.robotWrong)}</span>}
       </p>
       <div className="grid grid-cols-3 gap-1">
         {cells.map((c, i) => (
@@ -88,7 +91,7 @@ function Captcha({ done }: { done: () => void }) {
           </button>
         ))}
       </div>
-      <button className="win-button justify-self-end" onClick={check}>驗證</button>
+      <button className="win-button justify-self-end" onClick={check}>{t(J.verify)}</button>
     </div>
   );
 }
@@ -106,6 +109,7 @@ function ytId(url: string) {
  * to the next one.
  */
 export function Reels({ urls }: { urls: string[] }) {
+  const t = useT();
   const ids = urls.map(ytId).filter((x): x is string => Boolean(x));
   const muted = useInteractive((s) => s.muted);
   const [i, setI] = useState(() => (Math.random() * Math.max(1, ids.length)) | 0);
@@ -138,7 +142,7 @@ export function Reels({ urls }: { urls: string[] }) {
     };
   }, []);
 
-  if (!ids.length) return <p>沒有影片。</p>;
+  if (!ids.length) return <p>{t(J.noVideos)}</p>;
   const id = ids[i % ids.length];
   const src = `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&mute=${muted ? 1 : 0}&controls=0&playsinline=1&rel=0&modestbranding=1&enablejsapi=1`;
 
@@ -168,13 +172,13 @@ export function Reels({ urls }: { urls: string[] }) {
         }}
       />
       <div className="reels-nav">
-        <button className="win-button" onClick={() => go(-1)} aria-label="上一支">▲</button>
-        <button className="win-button" onClick={() => go(1)} aria-label="下一支">▼</button>
+        <button className="win-button" onClick={() => go(-1)} aria-label={t(J.prevVideo)}>▲</button>
+        <button className="win-button" onClick={() => go(1)} aria-label={t(J.nextVideo)}>▼</button>
       </div>
       <div className="reels-side" aria-hidden>
         <span>❤️<br />9.9M</span>
         <span>💬<br />1</span>
-        <span>↪️<br />分享</span>
+        <span>↪️<br />{t(J.share)}</span>
       </div>
     </div>
   );

@@ -1,4 +1,4 @@
-import { T, type L } from "@/lib/i18n";
+import { T, UI, type L } from "@/lib/i18n";
 import PixelGif from "./PixelGif";
 
 type Props = { name: string; title: L; tagline: L };
@@ -11,7 +11,7 @@ export default function Hero({ name, title, tagline }: Props) {
       {tagline.zh && <p className="skin-lede mt-6 max-w-xl text-lg leading-8"><T v={tagline} /></p>}
       {/* brain rot only: the obligatory row of shaky "GIFs" */}
       <div className="rot-only mt-6 flex flex-wrap items-center gap-4">
-        <PixelGif glyph="🚧" motion="flash" label="施工中" />
+        <PixelGif glyph="🚧" motion="flash" label={<T v={UI.underConstruction} />} />
         <PixelGif glyph="🔥" motion="shake" label="HOT!!" />
         <PixelGif glyph="💀" motion="spin" />
         <PixelGif glyph="📧" motion="bounce" label="E-mail me" />

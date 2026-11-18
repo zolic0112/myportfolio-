@@ -297,7 +297,7 @@ html[data-persona="rot"][data-lang="es"] .lang-switch [data-set="es"] {
   font: 700 14px/1.9 "Courier New", monospace;
   border-bottom: 3px solid #ff00ff;
 }
-.marquee span {
+.marquee > span {
   display: inline-block;
   padding-left: 100%;
   animation: marquee 18s linear infinite;
@@ -3059,13 +3059,6 @@ html:active-view-transition .skin-brand .bm-eyes {
   [data-persona="rot"] .tab .brand-mark {
     color: #ff00ff;
     animation: bm-rainbow 2.4s steps(6) infinite;
-  }
-  /* the first tab is the Start button */
-  [data-persona="rot"] .tab:first-of-type .tab-label::after {
-    content: " 開始";
-  }
-  [data-persona="rot"] .tab:first-of-type .tab-label > * {
-    display: none;
   }
   [data-persona="rot"] .tab-tray {
     display: flex;

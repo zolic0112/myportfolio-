@@ -9,7 +9,7 @@ import Starfield from "@/interactive/Starfield";
 import Parallax from "@/interactive/Parallax";
 import MorphNames from "@/interactive/MorphNames";
 import { getJunk, getProfile } from "@/lib/content";
-import { LANG_SCRIPT } from "@/lib/i18n";
+import { LANG_SCRIPT, T, UI } from "@/lib/i18n";
 
 const grotesk = Space_Grotesk({ variable: "--font-grotesk", subsets: ["latin"], weight: ["300", "400", "500"] });
 const serif = Instrument_Serif({ variable: "--font-serif", subsets: ["latin"], weight: "400", style: ["normal", "italic"] });
@@ -61,7 +61,7 @@ export default async function SiteLayout({ children }: LayoutProps<"/">) {
         <Nav name={profile.name} />
         <div className="marquee rot-only" aria-hidden>
           <span>
-            🚧 網站施工中 🚧 歡迎光臨我的首頁!!! 🔥🔥🔥 本站最佳瀏覽解析度 800×600 💾 請用 IE 開啟 🤡 你是第 000,001 位訪客 🎉 狗跑出來了 請幫忙抓 🐶
+            <T v={UI.marquee} />
           </span>
         </div>
         <main className="flex-1">{children}</main>

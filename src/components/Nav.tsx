@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useInteractive, useJunkOn } from "@/interactive/store";
 import { T, UI } from "@/lib/i18n";
+import { useT } from "@/lib/useLang";
+import { J } from "@/interactive/junk-text";
 import BrandMark from "./BrandMark";
 import LangSwitch from "./LangSwitch";
 
@@ -11,6 +13,7 @@ export default function Nav({ name }: { name: string }) {
   const openPremium = useInteractive((s) => s.openPremium);
   const premium = useInteractive((s) => s.premium);
   const junk = useJunkOn();
+  const t = useT();
   // Cool side: the bar tightens once the page is scrolled, to give the room
   // back to the content (styled from data-scrolled).
   const [scrolled, setScrolled] = useState(false);
@@ -37,7 +40,7 @@ export default function Nav({ name }: { name: string }) {
           <li><Link href="/#contact" transitionTypes={["nav-back"]}><T v={UI.contact} /></Link></li>
           {junk && (
             <li className="rot-only">
-              <button className="win-button whitespace-nowrap" onClick={openPremium}>💎 去除廣告</button>
+              <button className="win-button whitespace-nowrap" onClick={openPremium}>{t(J.removeAds)}</button>
             </li>
           )}
           {premium && (

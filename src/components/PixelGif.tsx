@@ -16,7 +16,7 @@ export default function PixelGif({
   glyph: string;
   motion?: Motion;
   size?: number;
-  label?: string;
+  label?: React.ReactNode;
 }) {
   const ref = useRef<HTMLCanvasElement>(null);
 

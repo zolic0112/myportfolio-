@@ -56,7 +56,7 @@ export default function TabBar() {
 
   const active: Tab = path === "/" ? section : path.startsWith("/works") ? "works" : "home";
   const tabs: { id: Tab; href: string; label: React.ReactNode; icon: React.ReactNode }[] = [
-    { id: "home", href: "/", label: <T v={UI.home} />, icon: <BrandMark className="tab-icon" /> },
+    { id: "home", href: "/", label: <><span className="cool-only"><T v={UI.home} /></span><span className="rot-only"><T v={UI.start} /></span></>, icon: <BrandMark className="tab-icon" /> },
     { id: "works", href: "/#works", label: <T v={UI.works} />, icon: <GridIcon /> },
     { id: "contact", href: "/#contact", label: <T v={UI.contact} />, icon: <MailIcon /> },
   ];

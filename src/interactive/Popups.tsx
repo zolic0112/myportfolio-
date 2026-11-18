@@ -2,6 +2,8 @@
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { sound } from "./sound";
+import { useT } from "@/lib/useLang";
+import { J } from "./junk-text";
 import { MiniGame, Reels } from "./PopupExtras";
 import { useInteractive, useJunkOn, type Popup, type PopupKind, type PopupSize } from "./store";
 
@@ -208,22 +210,8 @@ function PopupWindow({
     done();
   };
 
-  const title: Record<PopupKind, string> = {
-    prize: "🎉 恭喜!!!.exe",
-    virus: "Windows 安全性警告",
-    download: "下載中… 請勿關閉",
-    visitor: "★ 特別通知 ★",
-    multix: "廣告 廣告 廣告",
-    premium: "💎 升級 Premium!!!",
-    game: nag ? "不行!!先玩完!!" : "🎮 玩完才能關",
-    reels: "📱 短影音 — 再滑一下就好",
-    meme: "funny.jpg.exe",
-    ad: "贊助內容 · 廣告",
-    cookie: "🍪 Cookie 設定",
-    captcha: "🤖 安全性驗證",
-    aura: "🗿 Aura 測驗.exe",
-    error: "狗.exe",
-  };
+  const t = useT();
+  const title = t(p.kind === "game" && nag ? J.title.gameNag : J.title[p.kind]);
   const size = p.size ?? "m";
   // Reels sizes itself in CSS (nearly full screen on phones).
   const width = p.kind === "reels" ? undefined : popupWidth(p.kind, size);
@@ -232,21 +220,21 @@ function PopupWindow({
     <div
       ref={ref}
       role="dialog"
-      aria-label={title[p.kind]}
+      aria-label={title}
       data-size={size}
       data-kind={p.kind}
       className={`popup ${p.kind === "reels" ? "popup-reels" : ""} ${sucked ? "sucked" : ""} ${leaving ? "leaving" : ""}`}
       style={{ left: pos.x, top: pos.y, width, zIndex: 45 + (p.id % 9), viewTransitionName: `popup-${p.id}`, viewTransitionClass: "keep" } as React.CSSProperties}
     >
       <div className="skin-titlebar" data-perch>
-        <span className="t">{title[p.kind]}</span>
+        <span className="t">{title}</span>
         {traits.decoy ? (
           <>
             {/* Phones: the real close hides on the left, a fat fake one waits for the thumb. */}
-            <button className="win-btn x-real" aria-label="關閉" onClick={onX} style={{ order: -1 }}>
+            <button className="win-btn x-real" aria-label={t(J.close)} onClick={onX} style={{ order: -1 }}>
               ×
             </button>
-            <button className="fake-x decoy" aria-label="關閉" onClick={() => { fake(); done(); }}>
+            <button className="fake-x decoy" aria-label={t(J.close)} onClick={() => { fake(); done(); }}>
               ✕
             </button>
           </>
@@ -256,7 +244,7 @@ function PopupWindow({
             <span className="win-btn" aria-hidden>□</span>
             <button
               className="win-btn x-real x-dodge"
-              aria-label="關閉"
+              aria-label={t(J.close)}
               onPointerEnter={onXEnter}
               onClick={onX}
               style={{ transform: `translateX(${xOff}px)` }}
@@ -298,15 +286,16 @@ function Body({
   fake: () => void;
   openPremium: () => void;
 }) {
+  const t = useT();
   switch (kind) {
     case "prize":
       return (
         <div className="grid gap-3 text-center">
-          <p className="wordart">你中了 100 萬!!!</p>
-          <p>你是今天被選中的幸運兒 🎰 點下方按鈕立即領取 💰💰💰</p>
+          <p className="wordart">{t(J.prizeBig)}</p>
+          <p>{t(J.prizeText)}</p>
           <Countdown />
           <button className="win-button justify-self-center" onClick={() => { fake(); done(); }}>
-            立即領取 $$$
+            {t(J.prizeBtn)}
           </button>
         </div>
       );
@@ -316,12 +305,12 @@ function Body({
           <div className="flex gap-3">
             <span className="text-3xl" aria-hidden>⚠️</span>
             <p>
-              偵測到 <b>3,721</b> 個病毒!你的電腦已經被 <b>brain rot</b> 感染。
+              {t(J.virusText)}
             </p>
           </div>
           <div className="flex justify-end gap-2">
-            <button className="win-button" onClick={() => { fake(); done(); }}>立即清除</button>
-            <button className="win-button" onClick={done}>忽略</button>
+            <button className="win-button" onClick={() => { fake(); done(); }}>{t(J.virusFix)}</button>
+            <button className="win-button" onClick={done}>{t(J.virusIgnore)}</button>
           </div>
         </div>
       );
@@ -330,12 +319,12 @@ function Body({
     case "visitor":
       return (
         <div className="grid gap-2 text-center">
-          <p className="wordart">恭喜!!</p>
+          <p className="wordart">{t(J.visitorBig)}</p>
           <p>
-            你是第 <b style={{ color: "red", fontSize: 20 }}>1,000,000</b> 位訪客
+            {t(J.visitorText)(<b style={{ color: "red", fontSize: 20 }}>1,000,000</b>)}
           </p>
-          <p className="text-xs">(每個人都是)</p>
-          <button className="win-button justify-self-center" onClick={done}>好喔</button>
+          <p className="text-xs">{t(J.visitorNote)}</p>
+          <button className="win-button justify-self-center" onClick={done}>{t(J.visitorOk)}</button>
         </div>
       );
     case "multix":
@@ -358,6 +347,7 @@ function Body({
 // A pre-roll ad you cannot skip for five seconds. Clicking the ad itself is
 // a fake link, like the real thing.
 function VideoAd({ done, fake }: { done: () => void; fake: () => void }) {
+  const t = useT();
   const [left, setLeft] = useState(5);
   useEffect(() => {
     if (left <= 0) return;
@@ -366,17 +356,17 @@ function VideoAd({ done, fake }: { done: () => void; fake: () => void }) {
   }, [left]);
   return (
     <div className="vad">
-      <button className="vad-screen" onClick={fake} aria-label="廣告">
-        <span className="vad-tag">廣告 · 1/3</span>
-        <span className="vad-big">設計師都在用的<br />神奇 AI 🤯</span>
-        <span className="vad-sub">一鍵生成作品集!!!不用設計!!!不用努力!!!</span>
-        <span className="vad-cta">了解詳情 ›</span>
+      <button className="vad-screen" onClick={fake} aria-label={t(J.ad)}>
+        <span className="vad-tag">{t(J.ad)} · 1/3</span>
+        <span className="vad-big">{t(J.vadBig)}</span>
+        <span className="vad-sub">{t(J.vadSub)}</span>
+        <span className="vad-cta">{t(J.vadCta)}</span>
         <i className="vad-bar" />
       </button>
       <div className="vad-foot">
-        <span>🔇 有聲廣告效果更好</span>
+        <span>{t(J.vadSound)}</span>
         <button className="win-button" disabled={left > 0} onClick={done}>
-          {left > 0 ? `${left} 秒後可略過廣告` : "略過廣告 ⏭"}
+          {left > 0 ? t(J.vadWait)(left) : t(J.vadSkip)}
         </button>
       </div>
     </div>
@@ -385,8 +375,9 @@ function VideoAd({ done, fake }: { done: () => void; fake: () => void }) {
 
 // Every option is "accept". "Manage" shows switches you cannot turn off.
 function Cookies({ done }: { done: () => void }) {
+  const t = useT();
   const [manage, setManage] = useState(false);
-  const kinds = ["必要的餅乾", "非常必要的餅乾", "追蹤你 aura 的餅乾", "狗想吃的餅乾"];
+  const kinds = t(J.cookieKinds);
   return manage ? (
     <div className="grid gap-2">
       {kinds.map((k) => (
@@ -395,18 +386,18 @@ function Cookies({ done }: { done: () => void }) {
           <input type="checkbox" checked disabled readOnly />
         </label>
       ))}
-      <p className="text-xs">(以上皆無法關閉)</p>
-      <button className="win-button justify-self-end" onClick={done}>儲存偏好設定</button>
+      <p className="text-xs">{t(J.cookieLocked)}</p>
+      <button className="win-button justify-self-end" onClick={done}>{t(J.cookieSave)}</button>
     </div>
   ) : (
     <div className="grid gap-3">
       <p>
-        本網站與 <b>1,337</b> 個合作夥伴使用 🍪 餅乾來追蹤你的 aura、記住你看過幾次狗,以及提供你根本不需要的個人化體驗。
+        {t(J.cookieText)}
       </p>
       <div className="flex flex-wrap justify-end gap-2">
-        <button className="text-[11px] underline" onClick={() => setManage(true)}>管理偏好設定</button>
-        <button className="win-button" onClick={done}>接受全部</button>
-        <button className="win-button" style={{ fontWeight: 700 }} onClick={done}>全部接受</button>
+        <button className="text-[11px] underline" onClick={() => setManage(true)}>{t(J.cookieManage)}</button>
+        <button className="win-button" onClick={done}>{t(J.cookieAcceptAll)}</button>
+        <button className="win-button" style={{ fontWeight: 700 }} onClick={done}>{t(J.cookieAllAccept)}</button>
       </div>
     </div>
   );
@@ -414,25 +405,26 @@ function Cookies({ done }: { done: () => void }) {
 
 // "Select every image with a dog." All of them are dogs.
 function Captcha({ done }: { done: () => void }) {
+  const t = useT();
   const tiles = ["🐶", "🐕", "🌭", "🐩", "🐶", "🦮", "🐕‍🦺", "🐶", "🐺"];
   const [picked, setPicked] = useState<number[]>([]);
   const [tries, setTries] = useState(0);
   const [msg, setMsg] = useState<string | null>(null);
   const verify = () => {
     if (tries >= 1) {
-      setMsg("✅ 驗證失敗,但我們決定放過你");
+      setMsg(t(J.capPass));
       setTimeout(done, 1100);
       return;
     }
     setTries(1);
     setPicked([]);
-    setMsg(picked.length === 9 ? "❌ 你選太多了。熱狗不是狗。" : "❌ 選錯了。答案:全部都是狗(包括你)");
+    setMsg(t(picked.length === 9 ? J.capTooMany : J.capWrong));
   };
   return (
     <div className="grid gap-2">
       <div className="captcha-head">
-        <span>選出所有包含<b>狗</b>的圖片</span>
-        <small>如果沒有了,請按「驗證」</small>
+        <span>{t(J.capHead)}</span>
+        <small>{t(J.capSub)}</small>
       </div>
       <div className="captcha-grid">
         {tiles.map((t, i) => (
@@ -446,25 +438,26 @@ function Captcha({ done }: { done: () => void }) {
         ))}
       </div>
       {msg && <p className="text-xs font-bold">{msg}</p>}
-      <button className="win-button justify-self-end" onClick={verify}>驗證</button>
+      <button className="win-button justify-self-end" onClick={verify}>{t(J.verify)}</button>
     </div>
   );
 }
 
 // Three answers, all the same. You win anyway.
 function Aura({ done }: { done: () => void }) {
+  const t = useT();
   const [res, setRes] = useState(false);
   return res ? (
     <div className="grid gap-2 text-center">
       <p className="wordart">Aura +∞ 🗿</p>
-      <p>恭喜你獲得 <b>Sigma 等級</b> 認證</p>
-      <p className="text-xs">(測驗結果僅供參考,但你真的很 sigma)</p>
-      <button className="win-button justify-self-center" onClick={done}>我知道我很 sigma</button>
+      <p>{t(J.auraRes)}</p>
+      <p className="text-xs">{t(J.auraNote)}</p>
+      <button className="win-button justify-self-center" onClick={done}>{t(J.auraOk)}</button>
     </div>
   ) : (
     <div className="grid gap-2">
-      <p className="font-bold">Q1 / 1:看到這個作品集,你的第一個反應是?</p>
-      {["A. 哇 好讚", "B. 哇 好讚", "C. 哇 好讚!!!"].map((a) => (
+      <p className="font-bold">{t(J.auraQ)}</p>
+      {t(J.auraA).map((a) => (
         <button key={a} className="win-button text-left" onClick={() => setRes(true)}>{a}</button>
       ))}
     </div>
@@ -473,6 +466,7 @@ function Aura({ done }: { done: () => void }) {
 
 // "OK" makes two more of it; only the title bar × really closes it.
 function ErrorCascade({ p, done }: { p: Popup; done: () => void }) {
+  const t = useT();
   const addPopup = useInteractive((s) => s.addPopup);
   const ok = () => {
     const depth = p.depth ?? 0;
@@ -494,28 +488,26 @@ function ErrorCascade({ p, done }: { p: Popup; done: () => void }) {
     <div className="grid gap-3">
       <div className="flex gap-3">
         <span className="text-3xl" aria-hidden>⛔</span>
-        <p>
-          狗.exe 已停止運作。
-          <br />
-          <small>錯誤代碼:0x00D06 — 狗跑出來了</small>
-        </p>
+        <p>{t(J.errText)}</p>
       </div>
-      <button className="win-button justify-self-end" onClick={ok}>確定</button>
+      <button className="win-button justify-self-end" onClick={ok}>{t(J.ok)}</button>
     </div>
   );
 }
 
 // "Offer ends in 00:59", forever.
 function Countdown() {
+  const tr = useT();
   const [t, setT] = useState(59);
   useEffect(() => {
     const id = setInterval(() => setT((v) => (v <= 1 ? 59 : v - 1)), 1000);
     return () => clearInterval(id);
   }, []);
-  return <p className="countdown">⏰ 限時領取 00:{String(t).padStart(2, "0")}</p>;
+  return <p className="countdown">{tr(J.countdown)} 00:{String(t).padStart(2, "0")}</p>;
 }
 
 function Download({ done }: { done: () => void }) {
+  const t = useT();
   const [pct, setPct] = useState(12);
   useEffect(() => {
     const id = setInterval(() => {
@@ -525,25 +517,26 @@ function Download({ done }: { done: () => void }) {
   }, []);
   return (
     <div className="grid gap-2">
-      <p>正在下載 FREE_RAM_2026_真的.exe</p>
+      <p>{t(J.downloading)}</p>
       <div className="progress">
         <i style={{ width: `${pct}%` }} />
       </div>
-      <p className="text-xs">剩餘時間:{pct > 90 ? "∞" : `${Math.round((100 - pct) / 3)} 分鐘`}</p>
-      <button className="win-button justify-self-end" onClick={done}>取消</button>
+      <p className="text-xs">{t(J.timeLeft)(pct > 90 ? "∞" : t(J.minutes)(Math.round((100 - pct) / 3)))}</p>
+      <button className="win-button justify-self-end" onClick={done}>{t(J.cancel)}</button>
     </div>
   );
 }
 
 // Several fake close buttons; only the small grey one is real.
 function MultiX({ done, fake }: { done: () => void; fake: () => void }) {
+  const t = useT();
   const [spots] = useState(() =>
     Array.from({ length: 5 }, () => ({ l: 8 + Math.random() * 80, t: 8 + Math.random() * 60 })),
   );
   return (
     <div className="relative h-36" style={{ background: "#fff200" }}>
       <p className="p-3 font-bold" style={{ fontFamily: "Impact, sans-serif", fontSize: 22, color: "#f00" }}>
-        辣妹在你附近 🔥 不對 是狗 🐶
+        {t(J.multixText)}
       </p>
       {spots.map((s, i) => (
         <button
@@ -551,7 +544,7 @@ function MultiX({ done, fake }: { done: () => void; fake: () => void }) {
           className="fake-x"
           style={{ left: `${s.l}%`, top: `${s.t}%` }}
           onClick={() => { fake(); done(); }}
-          aria-label="關閉"
+          aria-label={t(J.close)}
         >
           ✕
         </button>
@@ -559,7 +552,7 @@ function MultiX({ done, fake }: { done: () => void; fake: () => void }) {
       <button
         onClick={done}
         className="absolute bottom-0.5 right-1 text-[9px] text-neutral-500"
-        aria-label="真的關閉"
+        aria-label={t(J.reallyClose)}
       >
         close
       </button>
@@ -569,14 +562,15 @@ function MultiX({ done, fake }: { done: () => void; fake: () => void }) {
 
 // The hardest popup to close: three rounds of "are you sure?".
 function PremiumNag({ done, openPremium }: { done: () => void; openPremium: () => void }) {
+  const t = useT();
   const [step, setStep] = useState(0);
-  const lines = ["不了,謝謝", "你確定?", "真的確定??", "好啦 😢"];
+  const lines = t(J.nagNo);
   return (
     <div className="grid gap-3 text-center">
-      <p className="wordart">訂閱 Premium 即可免廣告!</p>
-      <p>只要一杯咖啡 ☕ 彈窗通通消失(真的)</p>
+      <p className="wordart">{t(J.nagBig)}</p>
+      <p>{t(J.nagText)}</p>
       <button className="win-button justify-self-center" onClick={openPremium} style={{ fontWeight: 700 }}>
-        💎 立即升級
+        {t(J.nagBtn)}
       </button>
       <button
         className="justify-self-center text-[11px] underline"
@@ -591,6 +585,7 @@ function PremiumNag({ done, openPremium }: { done: () => void; openPremium: () =
 // Brain rot's take on the paperclip helper: lives by the cage, every answer
 // is useless, but it does point at the real exit.
 function Clippy() {
+  const t = useT();
   const junk = useJunkOn();
   const addPopup = useInteractive((s) => s.addPopup);
   const [open, setOpen] = useState(false);
@@ -620,18 +615,18 @@ function Clippy() {
   };
   if (!junk || !open) return null;
   return (
-    <div className="clippy" role="dialog" aria-label="小幫手">
+    <div className="clippy" role="dialog" aria-label={t(J.clippyLabel)}>
       {reply ? (
         <>
           <p>{reply}</p>
-          <button className="win-button mt-2" onClick={shut}>好</button>
+          <button className="win-button mt-2" onClick={shut}>{t(J.clippyOk)}</button>
         </>
       ) : (
         <>
-          <p>📎 看起來你正在瀏覽作品集,需要幫忙嗎?</p>
+          <p>{t(J.clippyAsk)}</p>
           <div className="mt-2 grid gap-1">
-            <button className="win-button" onClick={() => setReply("自己抓 🙂 抓住狗、拖回這個籠子放開。")}>
-              幫我把狗抓回來
+            <button className="win-button" onClick={() => setReply(t(J.clippyCatchReply))}>
+              {t(J.clippyCatch)}
             </button>
             <button
               className="win-button"
@@ -640,9 +635,9 @@ function Clippy() {
                 shut();
               }}
             >
-              我想要更多彈窗
+              {t(J.clippyMore)}
             </button>
-            <button className="win-button" onClick={shut}>不用了</button>
+            <button className="win-button" onClick={shut}>{t(J.clippyNo)}</button>
           </div>
         </>
       )}

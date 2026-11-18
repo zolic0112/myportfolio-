@@ -3,12 +3,15 @@
 import { Suspense, useEffect, useState } from "react";
 import { games } from "@/games/registry";
 import { T, UI } from "@/lib/i18n";
+import { useT } from "@/lib/useLang";
+import { J } from "./junk-text";
 import { usePresence } from "./presence";
 import { useInteractive } from "./store";
 
 export default function GameOverlay() {
   const activeGame = useInteractive((s) => s.activeGame);
   const closeGame = useInteractive((s) => s.closeGame);
+  const t = useT();
 
   useEffect(() => {
     if (!activeGame) return;
@@ -40,7 +43,7 @@ export default function GameOverlay() {
       >
         <button
           onClick={closeGame}
-          aria-label="關閉"
+          aria-label={t(J.close)}
           className="absolute right-3 top-3 z-10 rounded-full px-3 py-1 text-sm opacity-60 hover:opacity-100"
         >
           ✕
