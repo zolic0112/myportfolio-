@@ -26,7 +26,7 @@ export default function Nav({ name }: { name: string }) {
           floating tab bar at the bottom (TabBar). */}
       <nav className="mx-auto flex max-w-6xl items-center gap-x-5 px-4 py-3 text-sm sm:px-6 sm:py-4">
         <Link href="/" transitionTypes={["nav-back"]} className="skin-brand flex min-w-0 flex-1 items-center gap-2.5" aria-label={name}>
-          <BrandMark />
+          <BrandMark follow />
           <span className="truncate">
             {name}
             <span className="brand-sub cool-only"> / PORTFOLIO</span>

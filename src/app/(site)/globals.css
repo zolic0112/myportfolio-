@@ -2682,37 +2682,138 @@ html.vt-lang::view-transition-new(site-header) {
 /* ==========================================================================
    Brand mark + the phone tab bar.
    The mark is a viewfinder corner with a box tucked into it. It assembles
-   once on load, the two pieces breathe apart on hover, and the corner on
+   on load (see the timeline below), reacts to hover and press, and the corner on
    its own frames a work card when you point at it.
    ========================================================================== */
+:root {
+  /* a spring that settles with one small overshoot */
+  --bm-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --bm-soft: cubic-bezier(0.25, 1.3, 0.5, 1);
+}
+@supports (transition-timing-function: linear(0, 1)) {
+  :root {
+    --bm-spring: linear(0, 0.009, 0.035 2.1%, 0.141, 0.281 6.7%, 0.723 12.9%, 0.938 16.7%, 1.017, 1.077, 1.121, 1.149 24.3%, 1.159, 1.163, 1.161, 1.154 29.9%, 1.129 32.8%, 1.051 39.6%, 1.017 43.1%, 0.991, 0.977 51%, 0.974 53.8%, 0.975 57.1%, 0.997 69.8%, 1.003 76.9%, 1);
+    --bm-soft: linear(0, 0.06 2.4%, 0.23 5.1%, 0.82 13.6%, 1.01 18.5%, 1.07 22.3%, 1.08 25.6%, 1.04 32%, 1 39%, 0.99 48%, 1);
+  }
+}
 .brand-mark {
   flex: none;
   width: 22px;
   height: 22px;
   overflow: visible;
+  transition: transform 0.4s var(--bm-soft);
 }
-.brand-mark path {
+.brand-mark .bm-corner,
+.brand-mark .bm-box,
+.brand-mark .bm-eyes {
   transform-box: view-box;
-  transition: transform 0.5s var(--m-out, ease-out);
 }
+.brand-mark .bm-corner {
+  stroke: currentColor;
+  stroke-width: 0;
+  stroke-dasharray: 1 1;
+  stroke-linejoin: round;
+  transition: transform 0.7s var(--bm-soft);
+}
+.brand-mark .bm-box {
+  transform-origin: 251px 248px;
+  transition: transform 0.7s var(--bm-soft);
+}
+.brand-mark .bm-eyes {
+  transform-origin: 251px 251px;
+  transform: translate(var(--lx, 0px), var(--ly, 0px));
+  transition: transform 0.45s var(--m-out, ease-out);
+}
+.brand-mark .bm-slot {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.bm-glint {
+  opacity: 0;
+}
+
+/* --- the header mark: builds itself on load -------------------------------
+   0.00s  the corner traces its outline, then fills in
+   0.40s  the box drops into the corner and settles on a spring
+   0.95s  the slots open, top then bottom, like eyes
+   1.35s  a light sweeps across (cool side)
+   then   a blink every few seconds, sometimes a double one */
 .skin-brand .brand-mark .bm-corner {
-  animation: bm-corner-in 0.9s var(--m-out, ease-out) 0.15s both;
+  animation:
+    bm-trace 0.7s cubic-bezier(0.65, 0, 0.35, 1) 0.1s backwards,
+    bm-fill 0.35s ease-out 0.55s backwards;
 }
 .skin-brand .brand-mark .bm-box {
-  animation: bm-box-in 0.9s var(--m-out, ease-out) 0.3s both;
+  animation: bm-drop 0.95s var(--bm-spring) 0.4s backwards;
 }
-@keyframes bm-corner-in {
-  from { transform: translate(-60px, -60px); opacity: 0; }
+.skin-brand .brand-mark .bm-slot-0 {
+  animation:
+    bm-open 0.45s var(--bm-spring) 0.95s backwards,
+    bm-blink 9s ease-in-out 4s infinite;
 }
-@keyframes bm-box-in {
-  from { transform: translate(70px, 70px); opacity: 0; }
+.skin-brand .brand-mark .bm-slot-1 {
+  animation:
+    bm-open 0.45s var(--bm-spring) 1.03s backwards,
+    bm-blink 9s ease-in-out 4.04s infinite;
 }
+[data-persona="cool"] .skin-brand .bm-glint {
+  animation: bm-glint 0.9s cubic-bezier(0.45, 0, 0.2, 1) 1.35s;
+}
+@keyframes bm-trace {
+  from { stroke-dashoffset: 1; }
+  to { stroke-dashoffset: 0; }
+}
+@keyframes bm-fill {
+  from { fill-opacity: 0; stroke-width: 14px; }
+  to { fill-opacity: 1; stroke-width: 0; }
+}
+@keyframes bm-drop {
+  from { transform: translate(110px, 110px) scale(0.55); opacity: 0; }
+  35% { opacity: 1; }
+}
+@keyframes bm-open {
+  from { transform: scaleY(0); }
+}
+@keyframes bm-blink {
+  0%, 44%, 47.5%, 92%, 94.5%, 96%, 98.5%, 100% { transform: scaleY(1); }
+  45.6% { transform: scaleY(0.08); }
+  93.2%, 97.2% { transform: scaleY(0.08); }
+}
+@keyframes bm-glint {
+  from { opacity: 1; transform: translateX(0); }
+  to { opacity: 1; transform: translateX(640px); }
+}
+
+/* hover: the corner steps back, the box leans out, the eyes go wide;
+   press: the two pieces snap shut onto each other */
 .skin-brand:hover .bm-corner {
-  transform: translate(-22px, -22px);
+  transform: translate(-20px, -20px);
 }
 .skin-brand:hover .bm-box {
-  transform: translate(10px, 10px);
+  transform: translate(9px, 9px);
 }
+.skin-brand:hover .bm-eyes {
+  transform: translate(var(--lx, 0px), var(--ly, 0px)) scale(1.06, 1.25);
+}
+.skin-brand:active .brand-mark {
+  transform: scale(0.88);
+  transition-duration: 0.12s;
+}
+.skin-brand:active .bm-corner,
+.skin-brand:active .bm-box {
+  transform: none;
+  transition-duration: 0.15s;
+}
+
+/* every page change (or language / filter switch) is a blink of the shutter */
+html:active-view-transition .skin-brand .bm-eyes {
+  animation: bm-shutter 0.42s ease-in-out;
+}
+@keyframes bm-shutter {
+  0%, 100% { transform: translate(var(--lx, 0px), var(--ly, 0px)) scaleY(1); }
+  45% { transform: translate(var(--lx, 0px), var(--ly, 0px)) scaleY(0.06); }
+}
+
 [data-persona="cool"] .skin-brand .brand-mark {
   color: var(--fg-strong, #eceef6);
   filter: drop-shadow(0 0 6px rgb(255 255 255 / 0.18));
@@ -2722,7 +2823,44 @@ html.vt-lang::view-transition-new(site-header) {
     font-size: 17px;
   }
 }
-/* brain rot: the emoji window goes, the mark spins through every colour */
+
+/* --- tab bar: the icon of a tab that becomes current pops; the home mark
+   re-assembles in miniature --- */
+.tab[aria-current="page"] .tab-icon {
+  animation: tab-pop 0.5s var(--bm-spring);
+}
+.tab[aria-current="page"] .brand-mark .bm-box {
+  animation: bm-drop 0.7s var(--bm-spring) backwards;
+}
+@keyframes tab-pop {
+  from { transform: scale(0.7); }
+}
+
+/* --- footer: the pieces come together as the footer scrolls in --- */
+@supports (animation-timeline: view()) {
+  .footer-mark {
+    view-timeline-name: --footer-mark;
+  }
+  .footer-mark .bm-corner {
+    animation: bm-footer-corner linear both;
+    animation-timeline: --footer-mark;
+    animation-range: entry 0% cover 40%;
+  }
+  .footer-mark .bm-box {
+    animation: bm-footer-box linear both;
+    animation-timeline: --footer-mark;
+    animation-range: entry 0% cover 40%;
+  }
+  @keyframes bm-footer-corner {
+    from { transform: translate(-90px, -90px); opacity: 0; }
+  }
+  @keyframes bm-footer-box {
+    from { transform: translate(120px, 120px); opacity: 0; }
+  }
+}
+
+/* --- brain rot: the mark glitches. Pieces jump out of place, the colour
+   channels split, the hue steps round --- */
 [data-persona="rot"] .skin-brand::before {
   content: none;
 }
@@ -2733,8 +2871,30 @@ html.vt-lang::view-transition-new(site-header) {
   filter: drop-shadow(2px 2px 0 #000);
   animation: bm-rainbow 2.4s steps(6) infinite;
 }
+[data-persona="rot"] .skin-brand .bm-corner {
+  animation: bm-glitch-a 2.2s steps(1) infinite;
+}
+[data-persona="rot"] .skin-brand .bm-box {
+  animation: bm-glitch-b 2.2s steps(1) infinite;
+}
+[data-persona="rot"] .skin-brand .bm-slot-0,
+[data-persona="rot"] .skin-brand .bm-slot-1 {
+  animation: bm-blink 1.6s steps(1) infinite;
+}
 @keyframes bm-rainbow {
   to { filter: drop-shadow(2px 2px 0 #000) hue-rotate(360deg); }
+}
+@keyframes bm-glitch-a {
+  0%, 30%, 36%, 70%, 74%, 100% { transform: none; }
+  31% { transform: translate(-40px, 10px); }
+  33% { transform: translate(30px, -20px); }
+  71% { transform: translate(-18px, -30px) skewX(-12deg); }
+}
+@keyframes bm-glitch-b {
+  0%, 30%, 36%, 70%, 74%, 100% { transform: none; filter: none; }
+  31% { transform: translate(50px, -10px); filter: drop-shadow(-30px 0 0 #00ffff) drop-shadow(30px 0 0 #ff0000); }
+  34% { transform: translate(-30px, 24px) scale(1.2, 0.8); }
+  72% { transform: translate(24px, 40px); filter: drop-shadow(-24px 0 0 #39ff14); }
 }
 .footer-mark {
   display: block;
@@ -2974,9 +3134,10 @@ html.vt-lang::view-transition-new(site-header) {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .brand-mark path,
-  [data-persona="rot"] .brand-mark,
-  [data-persona="rot"] .tab .brand-mark {
+  .brand-mark,
+  .brand-mark *,
+  .tab-icon,
+  html:active-view-transition .skin-brand .bm-eyes {
     animation: none !important;
     transition: none !important;
   }
