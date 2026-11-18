@@ -61,6 +61,15 @@ export const UI = {
     es: "Esta obra está encerrada.",
   },
   loading: { zh: "載入中…", en: "Loading…", ja: "読み込み中…", es: "Cargando…" },
+  cageTag: { zh: "請勿打開。", en: "Do not open.", ja: "開けないでください。", es: "No abrir." },
+  cageNote: { zh: "請把我抓回來 🥺", en: "Catch me, please 🥺", ja: "つかまえて 🥺", es: "¡Atrápame! 🥺" },
+  cageCool: { zh: "籠子(請勿打開)", en: "Cage (do not open)", ja: "ケージ(開けないでください)", es: "Jaula (no abrir)" },
+  cageRot: {
+    zh: "籠子:把狗抓回來放進去就能回到原本的網站",
+    en: "Cage: catch the dog and put it back to return to the normal site",
+    ja: "ケージ:犬をつかまえて戻すと元のサイトに戻ります",
+    es: "Jaula: atrapa al perro y devuélvelo para volver al sitio normal",
+  },
 } satisfies Record<string, L>;
 
 /** Fill missing translations with the source (Chinese) text. */

@@ -722,36 +722,17 @@ html.grabbing * {
 [data-persona="rot"] .cage-front {
   cursor: help;
 }
-.cage-bars,
-.cage-door {
-  stroke-width: var(--cage-w);
-  stroke-linecap: round;
-}
-.cage-bars .thin {
-  stroke-width: calc(var(--cage-w) * 0.6);
-}
-.cage-base {
-  fill: url(#cage-metal);
-}
-.latch {
-  fill: url(#cage-metal);
-}
-.cage-door {
-  transform-box: view-box;
-  transform-origin: 37px 50%;
-  transition: transform 0.25s cubic-bezier(0.3, 1.6, 0.5, 1);
-}
-.cage-front[data-open="1"] .cage-door,
-.cage-front[data-magnet="1"] .cage-door {
-  transform: perspective(200px) rotateY(-75deg);
-}
+
+
+
+
+
+
 .cage-front[data-magnet="1"] svg {
   filter: drop-shadow(0 0 10px #fff200) drop-shadow(0 0 22px #ff00ff);
   animation: wobble 0.25s ease-in-out infinite alternate;
 }
-.latch-sheen {
-  animation: sheen 4.2s ease-in-out infinite;
-}
+
 .cage-front.bump svg {
   animation: cage-bump 0.32s ease-out;
 }
@@ -2113,13 +2094,8 @@ html[data-persona="cool"][data-lang="ja"] .skin-card-title {
   -webkit-backdrop-filter: blur(14px) saturate(1.6);
   backdrop-filter: blur(14px) saturate(1.6);
 }
-[data-persona="cool"] .cage-back svg path {
-  opacity: 0.35; /* the frost does the darkening now */
-}
-[data-persona="cool"] .cage-jar,
-[data-persona="cool"] .cage-base-ring {
-  display: inline;
-}
+
+
 .cage-spec {
   fill: none;
   stroke: #fff;
@@ -2129,41 +2105,14 @@ html[data-persona="cool"][data-lang="ja"] .skin-card-title {
   filter: blur(0.6px);
 }
 /* bars become faint ribs behind the glass; the door keeps a clear edge */
-[data-persona="cool"] .cage-bars {
-  stroke: url(#cage-ring);
-  stroke-width: 0.7;
-  opacity: 0.4;
-}
-[data-persona="cool"] .cage-bars > circle,
-[data-persona="cool"] .cage-bars > line:first-of-type {
-  opacity: 1;
-}
-[data-persona="cool"] .cage-door {
-  stroke: url(#cage-ring);
-  stroke-width: 1;
-}
-[data-persona="cool"] .cage-door line {
-  stroke-width: 0.6;
-  opacity: 0.45;
-}
-[data-persona="cool"] .cage-door rect:first-child {
-  fill: rgb(255 255 255 / 0.035);
-}
-[data-persona="cool"] .latch {
-  fill: rgb(255 255 255 / 0.86);
-  stroke: none;
-  rx: 5px;
-  filter: drop-shadow(0 0 4px rgb(255 255 255 / 0.5));
-}
-[data-persona="cool"] .cage-base {
-  fill: rgb(28 28 36 / 0.78);
-  rx: 6px;
-}
-.cage-base-ring {
-  fill: none;
-  stroke: url(#cage-ring);
-  stroke-width: 1.2;
-}
+
+
+
+
+
+
+
+
 [data-persona="cool"] .cage-front svg {
   filter: drop-shadow(0 14px 22px rgb(2 4 14 / 0.7));
 }
@@ -3153,4 +3102,177 @@ html:active-view-transition .skin-brand .bm-eyes {
   .vf-corner {
     transition: none !important;
   }
+}
+
+/* ==========================================================================
+   Cage, 3D (geometry and motion: interactive/cage3d.ts).
+   Far bars and hoops sit behind the dog, near ones in front. Each bar gets
+   --d = its depth (-1 at the back … 1 facing you): thicker and brighter in
+   front, thinner and dimmer behind, which is most of the depth cue.
+   ========================================================================== */
+:root {
+  --cage-bar-3: #9a9eac;
+  --plinth-1: #0b0c12;
+  --plinth-2: #1d1f2a;
+  --plinth-3: #575b6b;
+  --plinth-top-1: #2c2f3c;
+  --plinth-top-2: #0f1017;
+  --cage-rim: #d9dce6;
+}
+[data-persona="rot"] {
+  --cage-bar-1: #a3009a;
+  --cage-bar-2: #ff8cff;
+  --cage-bar-3: #ff00ff;
+  --plinth-1: #a85d00;
+  --plinth-2: #ff9d00;
+  --plinth-3: #fff27a;
+  --plinth-top-1: #fff27a;
+  --plinth-top-2: #ffb000;
+  --cage-rim: #fff;
+}
+.c3-bar,
+.c3-hoop,
+.c3-door-frame,
+.c3-door-bars,
+.c3-stem,
+.c3-ring {
+  stroke: url(#cage-metal);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+}
+.c3-bar {
+  stroke-width: calc(var(--cage-w) * (0.8 + 0.3 * var(--d, 1)));
+}
+.c3-far .c3-bar {
+  opacity: calc(0.5 + 0.35 * (1 + var(--d, -1)));
+}
+.c3-far .c3-hoop {
+  opacity: 0.55;
+}
+.c3-hoop {
+  stroke-width: calc(var(--cage-w) * 0.9);
+}
+.c3-hoop.h2 {
+  stroke-width: calc(var(--cage-w) * 1.25);
+}
+.c3-hoop.h1,
+.c3-hoop.h3 {
+  stroke-width: calc(var(--cage-w) * 0.6);
+}
+.c3-door-frame {
+  stroke-width: calc(var(--cage-w) * 1.05);
+}
+.c3-door-bars {
+  stroke-width: calc(var(--cage-w) * 0.85);
+}
+.c3-latch {
+  fill: var(--cage-bar-2);
+  stroke: var(--cage-bar-1);
+  stroke-width: 0.6;
+}
+.c3-stem {
+  stroke-width: calc(var(--cage-w) * 0.9);
+}
+.c3-ring {
+  stroke-width: calc(var(--cage-w) * 0.8);
+}
+.c3-hl {
+  display: none;
+}
+.c3-rim {
+  fill: none;
+  stroke: var(--cage-rim);
+  stroke-width: 0.8;
+  opacity: 0.55;
+}
+.c3-glass {
+  display: none;
+}
+.cage-spec.dim {
+  opacity: 0.16;
+}
+
+/* cool: a glass specimen jar, silver hoops, hairline bars, a dark plinth */
+[data-persona="cool"] {
+  --cage-w: 0.95;
+  --cage-bar-1: #50545f;
+  --cage-bar-2: #f3f4f8;
+  --cage-bar-3: #b2b6c3;
+}
+[data-persona="cool"] .c3-glass {
+  display: inline;
+}
+[data-persona="cool"] .c3-bar {
+  opacity: 0.85;
+}
+[data-persona="cool"] .c3-far .c3-bar {
+  opacity: calc(0.2 + 0.25 * (1 + var(--d, -1)));
+}
+[data-persona="cool"] .c3-hoop.h0,
+[data-persona="cool"] .c3-hoop.h2 {
+  stroke-width: 1.5;
+}
+[data-persona="cool"] .c3-latch {
+  fill: rgb(255 255 255 / 0.9);
+  stroke: none;
+  filter: drop-shadow(0 0 3px rgb(255 255 255 / 0.6));
+}
+[data-persona="cool"] .c3-plinth-side {
+  stroke: rgb(255 255 255 / 0.08);
+  stroke-width: 0.5;
+}
+[data-persona="cool"] .cage-frost {
+  left: 13.33%;
+  top: 14.67%;
+  width: 73.33%;
+  height: 79.2%;
+  border-radius: 50% 50% 50% 50% / 33.7% 33.7% 7.4% 7.4%;
+}
+
+/* brain rot: a chunky toy cage, cel-shaded: the hard black offset shadow
+   on the whole front, dark far bars, a white glint along each near bar */
+[data-persona="rot"] .c3-hl {
+  display: inline;
+  fill: none;
+  stroke: #fff;
+  stroke-width: 0.9;
+  stroke-linecap: round;
+  opacity: 0.85;
+  transform: translate(-0.9px, 0);
+}
+[data-persona="rot"] .c3-far .c3-bar {
+  opacity: 0.9;
+  stroke: #7a0074;
+}
+[data-persona="rot"] .c3-far .c3-hoop {
+  opacity: 0.9;
+  stroke: #7a0074;
+}
+[data-persona="rot"] .c3-plinth-side,
+[data-persona="rot"] .c3-plinth-top {
+  stroke: #000;
+  stroke-width: 1.4;
+}
+[data-persona="rot"] .c3-rim {
+  stroke-width: 1.4;
+  opacity: 0.9;
+}
+[data-persona="rot"] .c3-latch {
+  fill: #00ffff;
+  stroke: #000;
+  stroke-width: 1;
+}
+[data-persona="rot"] .c3-knob {
+  stroke: #000;
+  stroke-width: 0.8;
+}
+[data-persona="rot"] .cage-spec {
+  display: none;
+}
+
+/* the tag hangs off the cage's left side whatever its language's length */
+.cage-tag {
+  left: auto;
+  right: calc(100% - 14px);
 }

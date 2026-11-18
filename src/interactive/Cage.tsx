@@ -1,44 +1,94 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { T, UI } from "@/lib/i18n";
+import { BASE_Y, CX, INTERIOR, PLINTH_H, PLINTH_R, R, rig, SHOULDER_Y, DOME_H, SILHOUETTE, TILT } from "./cage3d";
 import { sound } from "./sound";
 import { emit, useInteractive } from "./store";
 
 // The cage floats in the same corner on both personas and is never covered
 // by popups. It is drawn in two layers so the dog canvas can sit between the
-// dark interior (back) and the bars (front).
+// back half (interior, far bars, plinth) and the front half (near bars, door,
+// glass). The geometry is a real 3D model projected by cage3d.ts, which also
+// turns it: idle sway, a lean toward the pointer, a rock when the dog bumps it.
 
-const W = 120;
-const DOME_Y = 44;
-const BASE_Y = 132;
-const BARS = Array.from({ length: 9 }, (_, i) => 14 + i * 11.5);
-const DOOR = [37, 83] as const;
+const BARS = 16;
+const HOOPS = 4;
+const n = (k: number) => Array.from({ length: k }, (_, i) => i);
 
-// y of the dome (a half-ellipse) at x.
-function domeY(x: number) {
-  const cx = W / 2;
-  const rx = 46;
-  const ry = 36;
-  const u = (x - cx) / rx;
-  return DOME_Y - ry * Math.sqrt(Math.max(0, 1 - u * u));
+const PY = BASE_Y + PLINTH_H; // bottom of the plinth
+const PRY = PLINTH_R * TILT;
+const plinthSide = `M${CX - PLINTH_R},${BASE_Y} L${CX - PLINTH_R},${PY} A${PLINTH_R},${PRY} 0 0 0 ${CX + PLINTH_R},${PY} L${CX + PLINTH_R},${BASE_Y} A${PLINTH_R},${PRY} 0 0 1 ${CX - PLINTH_R},${BASE_Y} Z`;
+const plinthRim = `M${CX - PLINTH_R},${BASE_Y} A${PLINTH_R},${PRY} 0 0 0 ${CX + PLINTH_R},${BASE_Y}`;
+const TOP_Y = SHOULDER_Y - DOME_H;
+
+function useLayer(kind: "back" | "front") {
+  const bars = useRef<(SVGPathElement | null)[]>([]);
+  const hoops = useRef<(SVGPathElement | null)[]>([]);
+  const hl = useRef<(SVGPathElement | null)[]>([]);
+  const frame = useRef<SVGPathElement>(null);
+  const doorBars = useRef<SVGPathElement>(null);
+  const latch = useRef<SVGPathElement>(null);
+  useEffect(() => {
+    rig[kind] = {
+      bars: bars.current as SVGPathElement[],
+      hoops: hoops.current as SVGPathElement[],
+      hl: kind === "front" ? (hl.current as SVGPathElement[]) : undefined,
+      door: kind === "front" ? { frame: frame.current!, bars: doorBars.current!, latch: latch.current! } : undefined,
+    };
+    rig.start();
+    rig.draw();
+    return () => {
+      rig[kind] = null;
+      rig.stop();
+    };
+  }, [kind]);
+  return { bars, hoops, hl, frame, doorBars, latch };
 }
 
-const domePath = `M14,${DOME_Y} A46,36 0 0 1 106,${DOME_Y} L106,${BASE_Y} L14,${BASE_Y} Z`;
-
 export function CageBack() {
+  const L = useLayer("back");
   return (
     <div className="cage-pos cage-back" aria-hidden>
       {/* cool side: frosts whatever is behind the jar (the dog is in front of this) */}
       <div className="cage-frost" />
       <svg viewBox="0 0 120 150">
         <defs>
-          <radialGradient id="cage-dark" cx="50%" cy="70%" r="70%">
+          <radialGradient id="cage-dark" cx="50%" cy="72%" r="70%">
             <stop offset="0" stopColor="var(--cage-in-1)" />
             <stop offset="1" stopColor="var(--cage-in-2)" />
           </radialGradient>
+          {/* a turned cylinder: light from the upper left */}
+          <linearGradient id="c3-plinth" gradientUnits="userSpaceOnUse" x1={CX - PLINTH_R} x2={CX + PLINTH_R} y1="0" y2="0">
+            <stop offset="0" stopColor="var(--plinth-1)" />
+            <stop offset=".22" stopColor="var(--plinth-3)" />
+            <stop offset=".5" stopColor="var(--plinth-2)" />
+            <stop offset=".85" stopColor="var(--plinth-1)" />
+            <stop offset="1" stopColor="var(--plinth-2)" />
+          </linearGradient>
+          <radialGradient id="c3-top" cx="40%" cy="35%" r="75%">
+            <stop offset="0" stopColor="var(--plinth-top-1)" />
+            <stop offset="1" stopColor="var(--plinth-top-2)" />
+          </radialGradient>
+          <radialGradient id="c3-floor" cx="50%" cy="50%" r="50%">
+            <stop offset="0" stopColor="#000" stopOpacity=".55" />
+            <stop offset="1" stopColor="#000" stopOpacity="0" />
+          </radialGradient>
         </defs>
-        <ellipse cx="60" cy="146" rx="58" ry="7" className="cage-glow" />
-        <path d={domePath} fill="url(#cage-dark)" />
+        <ellipse cx={CX} cy={PY + 3} rx={PLINTH_R + 8} ry={PRY + 3} className="cage-glow" />
+        <path d={plinthSide} fill="url(#c3-plinth)" className="c3-plinth-side" />
+        <ellipse cx={CX} cy={BASE_Y} rx={PLINTH_R} ry={PRY} fill="url(#c3-top)" className="c3-plinth-top" />
+        <path d={plinthRim} className="c3-rim" />
+        <path d={INTERIOR} fill="url(#cage-dark)" className="c3-interior" />
+        <ellipse cx={CX} cy={BASE_Y} rx={R * 0.9} ry={R * TILT * 0.9} fill="url(#c3-floor)" />
+        <g className="c3-far" fill="none">
+          {n(HOOPS).map((i) => (
+            <path key={i} ref={(e) => void (L.hoops.current[i] = e)} className={`c3-hoop h${i}`} />
+          ))}
+          {n(BARS).map((i) => (
+            <path key={i} ref={(e) => void (L.bars.current[i] = e)} className="c3-bar" />
+          ))}
+        </g>
       </svg>
     </div>
   );
@@ -49,13 +99,24 @@ export function CageFront() {
   const persona = useInteractive((s) => s.persona);
   const release = useInteractive((s) => s.release);
   const open = phase === "escaping";
+  const L = useLayer("front");
+  const host = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    rig.host = host.current;
+    return () => void (rig.host = null);
+  }, []);
 
   // Dragging the latch sideways opens the cage too (it follows the finger and
   // lets go past the end of its slot); a plain tap or click still works.
   const drag = useRef<{ x: number; id: number } | null>(null);
   const opened = useRef(false);
-  const [slide, setSlide] = useState(0);
+  const [, setSlide] = useState(0);
   const SLOT = 12;
+  const slideTo = (v: number) => {
+    rig.slide = v;
+    rig.draw();
+    setSlide(v);
+  };
 
   function onPointerDown(e: React.PointerEvent) {
     if (phase !== "caged") return;
@@ -68,17 +129,17 @@ export function CageFront() {
     const d = drag.current;
     if (!d || d.id !== e.pointerId || phase !== "caged") return;
     const dx = Math.abs(e.clientX - d.x);
-    setSlide(Math.min(SLOT, dx / 2.5));
+    slideTo(Math.min(SLOT * 0.6, dx / 4));
     if (dx > SLOT * 2.5) {
       drag.current = null;
       opened.current = true;
-      setSlide(0);
+      slideTo(0);
       release();
     }
   }
   function onPointerEnd() {
     drag.current = null;
-    setSlide(0);
+    slideTo(0);
   }
 
   function onClick(e: React.MouseEvent) {
@@ -96,6 +157,7 @@ export function CageFront() {
 
   return (
     <button
+      ref={host}
       id="pet-cage"
       type="button"
       onClick={onClick}
@@ -104,86 +166,73 @@ export function CageFront() {
       onPointerUp={onPointerEnd}
       onPointerCancel={onPointerEnd}
       data-open={open ? "1" : ""}
-      aria-label={persona === "cool" ? "籠子(請勿打開)" : "籠子:把狗抓回來放進去就能回到原本的網站"}
       className="cage-pos cage-front"
     >
+      <span className="sr-only">
+        <T v={persona === "cool" ? UI.cageCool : UI.cageRot} />
+      </span>
       <svg viewBox="0 0 120 150" aria-hidden>
         <defs>
           {/* user-space units: a vertical bar has a zero-width box, and a
-              bounding-box gradient on it would not paint at all */}
-          <linearGradient id="cage-metal" gradientUnits="userSpaceOnUse" x1="8" y1="0" x2="112" y2="0">
+              bounding-box gradient on it would not paint at all. The light
+              comes from the upper left, so bars darken toward the right. */}
+          <linearGradient id="cage-metal" gradientUnits="userSpaceOnUse" x1={CX - R} y1="0" x2={CX + R} y2="0">
             <stop offset="0" stopColor="var(--cage-bar-1)" />
-            <stop offset=".5" stopColor="var(--cage-bar-2)" />
+            <stop offset=".3" stopColor="var(--cage-bar-2)" />
+            <stop offset=".62" stopColor="var(--cage-bar-1)" />
+            <stop offset=".9" stopColor="var(--cage-bar-3)" />
             <stop offset="1" stopColor="var(--cage-bar-1)" />
-          </linearGradient>
-          <linearGradient id="cage-sheen" x1="0" x2="1">
-            <stop offset="0" stopColor="#fff" stopOpacity="0" />
-            <stop offset=".5" stopColor="#fff" stopOpacity=".95" />
-            <stop offset="1" stopColor="#fff" stopOpacity="0" />
           </linearGradient>
           <radialGradient id="cage-shade" cx="50%" cy="62%" r="62%">
             <stop offset="0" stopColor="#04050a" stopOpacity=".28" />
             <stop offset=".55" stopColor="#04050a" stopOpacity=".62" />
             <stop offset="1" stopColor="#04050a" stopOpacity=".94" />
           </radialGradient>
-          <linearGradient id="cage-glass" x1="0" y1="0" x2="1" y2="1">
+          {/* glass: brighter at the rims, where you look through more of it */}
+          <linearGradient id="c3-glass" gradientUnits="userSpaceOnUse" x1={CX - R} x2={CX + R} y1="0" y2="0">
             <stop offset="0" stopColor="#fff" stopOpacity=".2" />
-            <stop offset=".3" stopColor="#fff" stopOpacity="0" />
+            <stop offset=".12" stopColor="#fff" stopOpacity=".05" />
+            <stop offset=".5" stopColor="#fff" stopOpacity=".01" />
+            <stop offset=".88" stopColor="#fff" stopOpacity=".04" />
+            <stop offset="1" stopColor="#fff" stopOpacity=".16" />
           </linearGradient>
-          <linearGradient id="cage-ring" gradientUnits="userSpaceOnUse" x1="14" y1="8" x2="106" y2="144">
-            <stop offset="0" stopColor="#f6f7fa" />
-            <stop offset=".1" stopColor="#9da1b0" />
-            <stop offset=".3" stopColor="#3a3d48" />
-            <stop offset=".5" stopColor="#b4b8c4" />
-            <stop offset=".68" stopColor="#30333d" />
-            <stop offset=".9" stopColor="#e2e4eb" />
-            <stop offset="1" stopColor="#6b6f7d" />
-          </linearGradient>
-          <linearGradient id="cage-pane" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stopColor="#fff" stopOpacity=".16" />
-            <stop offset=".25" stopColor="#fff" stopOpacity=".03" />
-            <stop offset="1" stopColor="#fff" stopOpacity=".07" />
-          </linearGradient>
-          <clipPath id="latch-clip">
-            <rect x="80" y="82" width="14" height="10" rx="2" />
-          </clipPath>
+          <radialGradient id="c3-knob" cx="35%" cy="30%" r="70%">
+            <stop offset="0" stopColor="var(--cage-bar-2)" />
+            <stop offset="1" stopColor="var(--cage-bar-1)" />
+          </radialGradient>
         </defs>
         {/* cool side: the dog stays in the dark, only its glow reads */}
-        <path d={domePath} fill="url(#cage-shade)" className="cage-shade" />
-        <path d={domePath} fill="url(#cage-glass)" className="cage-shade" />
-        {/* cool side: the jar itself, glass with the brushed-silver ring */}
-        <g className="cage-jar">
-          <path d={domePath} fill="url(#cage-pane)" />
-          <path d={domePath} fill="none" stroke="url(#cage-ring)" strokeWidth="1.2" />
-          <path d={`M21,${DOME_Y + 40} L21,${DOME_Y} A39,30 0 0 1 44,17`} className="cage-spec" />
-        </g>
-        <g className="cage-bars" stroke="url(#cage-metal)" fill="none">
-          {/* hanging ring */}
-          <circle cx="60" cy="5" r="4" />
-          <line x1="60" y1="9" x2="60" y2="12" />
-          <path d={`M14,${DOME_Y} A46,36 0 0 1 106,${DOME_Y}`} />
-          <line x1="14" y1={DOME_Y} x2="106" y2={DOME_Y} className="thin" />
-          {BARS.filter((x) => x < DOOR[0] || x > DOOR[1]).map((x) => (
-            <line key={x} x1={x} y1={domeY(x)} x2={x} y2={BASE_Y} />
+        <path d={SILHOUETTE} fill="url(#cage-shade)" className="cage-shade" />
+        <path d={SILHOUETTE} fill="url(#c3-glass)" className="c3-glass" />
+        <g className="c3-near" fill="none">
+          {n(HOOPS).map((i) => (
+            <path key={i} ref={(e) => void (L.hoops.current[i] = e)} className={`c3-hoop h${i}`} />
           ))}
-          <line x1="14" y1="90" x2={DOOR[0]} y2="90" className="thin" />
-          <line x1={DOOR[1]} y1="90" x2="106" y2="90" className="thin" />
-        </g>
-        {/* door swings on its left hinge */}
-        <g className="cage-door" stroke="url(#cage-metal)" fill="none">
-          <rect x={DOOR[0]} y={DOME_Y + 4} width={DOOR[1] - DOOR[0]} height={BASE_Y - DOME_Y - 6} rx="2" />
-          {BARS.filter((x) => x > DOOR[0] && x < DOOR[1]).map((x) => (
-            <line key={x} x1={x} y1={DOME_Y + 4} x2={x} y2={BASE_Y - 2} />
+          {n(BARS).map((i) => (
+            <path key={i} ref={(e) => void (L.bars.current[i] = e)} className="c3-bar" />
           ))}
-          <line x1="78" y1="87" x2="98" y2="87" className="thin" />
-          <rect x="80" y="82" width="14" height="10" rx="2" className="latch" transform={`translate(${-slide} 0)`} />
-          <rect className="latch-sheen" x="70" y="80" width="8" height="14" fill="url(#cage-sheen)" stroke="none" clipPath="url(#latch-clip)" />
+          {n(BARS).map((i) => (
+            <path key={i} ref={(e) => void (L.hl.current[i] = e)} className="c3-hl" />
+          ))}
         </g>
-        <rect x="8" y={BASE_Y} width="104" height="12" rx="3" className="cage-base" />
-        <rect x="8.6" y={BASE_Y + 0.6} width="102.8" height="10.8" rx="5.4" className="cage-base-ring" />
+        <g className="c3-door" fill="none">
+          <path ref={L.frame} className="c3-door-frame" />
+          <path ref={L.doorBars} className="c3-door-bars" />
+          <path ref={L.latch} className="c3-latch" />
+        </g>
+        {/* finial and hanging ring on top of the dome */}
+        <g className="c3-top">
+          <path d={`M${CX},${TOP_Y - 3} L${CX},${TOP_Y - 7}`} className="c3-stem" />
+          <circle cx={CX} cy={TOP_Y - 11} r="4.2" className="c3-ring" />
+          <ellipse cx={CX} cy={TOP_Y - 1} rx="5" ry="3" fill="url(#c3-knob)" className="c3-knob" />
+        </g>
+        {/* fixed reflections: they stay put while the bars turn, which is
+            most of what makes it read as a round glass object */}
+        <path d={`M${CX - R + 6},${BASE_Y - 8} L${CX - R + 6},${SHOULDER_Y} A${R - 6},${DOME_H - 4} 0 0 1 ${CX - 12},${TOP_Y + 6}`} className="cage-spec" />
+        <path d={`M${CX + R - 4},${BASE_Y - 14} L${CX + R - 4},${SHOULDER_Y + 10}`} className="cage-spec dim" />
       </svg>
-      <span className="cage-tag cool-only" aria-hidden>請勿打開。</span>
-      <span className="cage-note rot-only" aria-hidden>請把我抓回來 🥺</span>
+      <span className="cage-tag cool-only" aria-hidden><T v={UI.cageTag} /></span>
+      <span className="cage-note rot-only" aria-hidden><T v={UI.cageNote} /></span>
     </button>
   );
 }

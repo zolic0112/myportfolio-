@@ -1,5 +1,6 @@
 "use client";
 
+import { rig } from "./cage3d";
 import { useEffect, useRef } from "react";
 import { SpaceDogEngine } from "./pet/engine";
 import { sound } from "./sound";
@@ -18,6 +19,7 @@ export default function SpaceDog() {
         c.classList.remove("bump");
         void c.offsetWidth; // restart the shake animation
         c.classList.add("bump");
+        rig.kick(Math.random() < 0.5 ? -1 : 1);
       },
       onDodge: () => sound.play("squeak"),
       onLand: (hard) => hard && sound.play("boing"),
