@@ -100,6 +100,7 @@ export function CageFront() {
   const release = useInteractive((s) => s.release);
   const open = phase === "escaping";
   const L = useLayer("front");
+  const { frame, doorBars, latch } = L;
   const host = useRef<HTMLButtonElement>(null);
   useEffect(() => {
     rig.host = host.current;
@@ -216,9 +217,9 @@ export function CageFront() {
           ))}
         </g>
         <g className="c3-door" fill="none">
-          <path ref={L.frame} className="c3-door-frame" />
-          <path ref={L.doorBars} className="c3-door-bars" />
-          <path ref={L.latch} className="c3-latch" />
+          <path ref={frame} className="c3-door-frame" />
+          <path ref={doorBars} className="c3-door-bars" />
+          <path ref={latch} className="c3-latch" />
         </g>
         {/* finial and hanging ring on top of the dome */}
         <g className="c3-top">

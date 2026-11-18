@@ -26,6 +26,8 @@ export type EngineCallbacks = {
   onGrab: (grabbing: boolean) => void;
   /** Dog made a noise on its own: a bark while roaming, a whine when worn out. */
   onVoice: (kind: "bark" | "whine") => void;
+  /** A clone was caught: it was a fake and vanishes (clones only). */
+  onPoof?: (x: number, y: number) => void;
 };
 
 type Mode = "caged" | "free" | "sucking";
@@ -126,6 +128,8 @@ export class SpaceDogEngine {
     private hit: HTMLElement,
     private getCage: () => HTMLElement | null,
     private cb: EngineCallbacks,
+    /** A clone from the big-screen split: never caged, vanishes when caught. */
+    private clone = false,
   ) {
     this.ctx = cv.getContext("2d")!;
     for (const k of chainOrder) this.pose[k] = { r: 0, x: 0, y: 0, sx: 1, sy: 1 };
@@ -193,6 +197,31 @@ export class SpaceDogEngine {
     this.hit.style.pointerEvents = "auto";
   }
 
+  /** Where the dog is, for spawning clones from it. `ready` = free and not held. */
+  where() {
+    return { x: this.x, y: this.y, ready: this.mode === "free" && !this.grab };
+  }
+
+  /** Clones: appear at (x, y) mid-leap, already loose and already brain rot. */
+  spawnFree(x: number, y: number, dir: number) {
+    this.persona = "rot";
+    this.fx = "pixel";
+    this.mode = "free";
+    this.x = x;
+    this.y = y;
+    this.S = this.freeScale();
+    this.airborne = true;
+    this.air = "jump";
+    this.surface = null;
+    this.vx = dir * rand(420, 700);
+    this.vy = rand(-1200, -900);
+    this.thv += dir * 12;
+    this.qv -= 5;
+    this.stamina = 1;
+    this.tired = false;
+    this.hit.style.pointerEvents = "auto";
+  }
+
   /** Keyboard path back to the cage (the chase needs a pointer). */
   recall() {
     if (this.mode !== "free") return;
@@ -253,6 +282,12 @@ export class SpaceDogEngine {
     this.startChase();
     if (!this.tired && !this.reduce) {
       this.dodge();
+      return;
+    }
+    if (this.clone) {
+      // Caught a fake: it pops.
+      this.hit.style.pointerEvents = "none";
+      this.cb.onPoof?.(this.x, this.y);
       return;
     }
     this.grab = true;

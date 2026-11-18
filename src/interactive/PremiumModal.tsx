@@ -28,7 +28,15 @@ function Modal({ sponsor, state }: { sponsor: Sponsor; state: "open" | "closed" 
   const premium = useInteractive((s) => s.premium);
   const close = useInteractive((s) => s.closePremium);
   const subscribe = useInteractive((s) => s.subscribe);
-  const [step, setStep] = useState<"plans" | "pay" | "paid" | "thanks">(premium ? "thanks" : "plans");
+  const cancelPremium = useInteractive((s) => s.cancelPremium);
+  // Members land on their account page, where they can also cancel.
+  const [step, setStep] = useState<"plans" | "pay" | "paid" | "thanks" | "manage" | "cancel" | "bye">(
+    premium ? "manage" : "plans",
+  );
+  const bye = () => {
+    setStep("bye");
+    setTimeout(cancelPremium, 1400);
+  };
 
   useEffect(() => {
     if (step !== "thanks") return;
@@ -104,6 +112,42 @@ function Modal({ sponsor, state }: { sponsor: Sponsor; state: "open" | "closed" 
                 <button className="win-button" onClick={done}>付好了 ✅</button>
                 <button className="win-button" onClick={done}>其實沒付,但我想要免廣告</button>
               </div>
+            </div>
+          )}
+          {step === "manage" && (
+            <div className="grid gap-3 text-center">
+              <p className="text-lg font-bold">⭐ 我的訂閱</p>
+              <div className="thanks-card justify-self-center">
+                <span className="thanks-dog" aria-hidden>🐶</span>
+                <div className="text-left">
+                  <b>SPACE DOG PREMIUM</b>
+                  <br />
+                  方案:彈窗永久消失
+                  <br />
+                  <small>狀態:有效 ✅ · 下次扣款:永遠不會</small>
+                </div>
+              </div>
+              <div className="flex flex-wrap justify-center gap-2">
+                <button className="win-button" onClick={close}>繼續當有錢人</button>
+                <button className="win-button" onClick={() => setStep("cancel")}>取消訂閱</button>
+              </div>
+            </div>
+          )}
+          {step === "cancel" && (
+            <div className="grid gap-3 text-center">
+              <p className="wordart">確定要取消嗎??</p>
+              <p>取消後所有彈窗、假叉叉、迴紋針小幫手都會回來 😈</p>
+              <p className="text-xs">(狗會很開心)</p>
+              <div className="flex flex-wrap justify-center gap-2">
+                <button className="win-button" onClick={bye}>確定取消,我想念廣告</button>
+                <button className="win-button" style={{ fontWeight: 700 }} onClick={() => setStep("manage")}>算了</button>
+              </div>
+            </div>
+          )}
+          {step === "bye" && (
+            <div className="grid gap-2 text-center">
+              <p className="wordart">已取消訂閱</p>
+              <p>廣告正在回來的路上…… 📢📢📢</p>
             </div>
           )}
           {step === "thanks" && (

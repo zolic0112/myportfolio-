@@ -40,7 +40,12 @@ export default function Nav({ name }: { name: string }) {
               <button className="win-button whitespace-nowrap" onClick={openPremium}>💎 去除廣告</button>
             </li>
           )}
-          {premium && <li className="rot-only whitespace-nowrap font-bold">⭐ PREMIUM</li>}
+          {premium && (
+            <li className="rot-only">
+              {/* members can open their "account" here, and cancel */}
+              <button className="win-button whitespace-nowrap font-bold" onClick={openPremium}>⭐ PREMIUM</button>
+            </li>
+          )}
         </ul>
         <ul className="flex shrink-0 items-center gap-x-3">
           <li><LangSwitch /></li>

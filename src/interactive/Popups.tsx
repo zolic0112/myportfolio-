@@ -3,7 +3,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { sound } from "./sound";
 import { MiniGame, Reels } from "./PopupExtras";
-import { useInteractive, useJunkOn, type Popup, type PopupKind } from "./store";
+import { useInteractive, useJunkOn, type Popup, type PopupKind, type PopupSize } from "./store";
 
 // Junk popup system (brief §5). Most popups close in one click; a few make
 // you work for it. Fake close buttons open one of the profile links in a new
@@ -21,9 +21,32 @@ const WEIGHTS: [PopupKind, number][] = [
   ["game", 1.5],
   ["reels", 1.5],
   ["meme", 2],
+  ["ad", 1.5],
+  ["cookie", 1.2],
+  ["captcha", 1.5],
+  ["aura", 1.5],
+  ["error", 1.5],
 ];
 // At most one of each of these at a time.
-const SINGLE: PopupKind[] = ["premium", "game", "reels"];
+const SINGLE: PopupKind[] = ["premium", "game", "reels", "ad", "cookie"];
+// These always come at one size; the rest vary.
+const FIXED: Partial<Record<PopupKind, PopupSize>> = { game: "m", reels: "m", meme: "m", error: "s", ad: "l", cookie: "l" };
+
+function pickSize(kind: PopupKind): PopupSize {
+  if (FIXED[kind]) return FIXED[kind]!;
+  const r = Math.random();
+  return r < 0.25 ? "s" : r < 0.65 ? "m" : "l";
+}
+
+/** Window width: phones get (nearly) the full width; big screens get real estate. */
+export function popupWidth(kind: PopupKind, size: PopupSize = "m") {
+  if (innerWidth < 640) return Math.min(320, innerWidth - 32);
+  if (kind === "ad") return Math.min(760, innerWidth * 0.6);
+  if (kind === "cookie") return Math.min(620, innerWidth - 64);
+  if (kind === "reels") return 320;
+  const w = { s: 300, m: 400, l: 500 }[size];
+  return Math.min(w, innerWidth - 64);
+}
 
 function pickKind(open: Popup[], hasReels: boolean, hasMemes: boolean): PopupKind {
   const pool = WEIGHTS.filter(
@@ -39,10 +62,10 @@ function pickKind(open: Popup[], hasReels: boolean, hasMemes: boolean): PopupKin
 
 // Random spot that keeps clear of the cage (bottom-right) and the escape
 // door (bottom-left), so neither is ever covered.
-function spot(kind?: PopupKind) {
-  const w = Math.min(320, innerWidth - 32);
-  // Reels is a tall 9:16 window; everything else is roughly this high.
-  const h = kind === "reels" ? Math.min(innerHeight * 0.62, 540) + 34 : 230;
+function spot(kind: PopupKind = "visitor", size: PopupSize = "m") {
+  const w = popupWidth(kind, size);
+  // Reels is a tall 9:16 window; the video ad is 16:9; the rest are roughly this high.
+  const h = kind === "reels" ? Math.min(innerHeight * 0.62, 540) + 34 : kind === "ad" ? w * 0.5625 + 90 : w * 0.62 + 40;
   for (let i = 0; i < 12; i++) {
     const x = 16 + Math.random() * Math.max(0, innerWidth - w - 32);
     const y = 80 + Math.random() * Math.max(0, innerHeight - h - 92);
@@ -70,19 +93,27 @@ export default function Popups({ links, reels, memes }: Props) {
   useEffect(() => {
     if (!junk) return;
     const coarse = matchMedia("(pointer: coarse)").matches || innerWidth < 640;
-    const max = coarse ? 2 : 4;
+    // Big screens get a proper blizzard; phones are left with enough page to use.
+    const big = !coarse && innerWidth >= 1024;
+    const max = coarse ? 2 : big ? 6 : 4;
     let timer: ReturnType<typeof setTimeout>;
     const spawn = () => {
       const open = useInteractive.getState().popups;
       if (open.length < max) {
         const kind = pickKind(open, reels.length > 0, memes.length > 0);
-        addPopup({ kind, ...spot(kind) });
+        const size = pickSize(kind);
+        addPopup({ kind, size, ...spot(kind, size) });
         sound.play("ding");
       }
-      timer = setTimeout(spawn, (coarse ? 10000 : 5000) + Math.random() * (coarse ? 6000 : 5000));
+      timer = setTimeout(spawn, coarse ? 10000 + Math.random() * 6000 : big ? 2600 + Math.random() * 3400 : 5000 + Math.random() * 5000);
     };
     timer = setTimeout(spawn, 1300);
-    return () => clearTimeout(timer);
+    // big screens: a second one right behind the first, so it lands as a wall
+    const second = big ? setTimeout(spawn, 2100) : undefined;
+    return () => {
+      clearTimeout(timer);
+      clearTimeout(second);
+    };
   }, [junk, addPopup, reels.length, memes.length]);
 
   const sucking = phase === "returning";
@@ -185,15 +216,24 @@ function PopupWindow({
     game: nag ? "不行!!先玩完!!" : "🎮 玩完才能關",
     reels: "📱 短影音 — 再滑一下就好",
     meme: "funny.jpg.exe",
+    ad: "贊助內容 · 廣告",
+    cookie: "🍪 Cookie 設定",
+    captcha: "🤖 安全性驗證",
+    aura: "🗿 Aura 測驗.exe",
+    error: "狗.exe",
   };
+  const size = p.size ?? "m";
+  const width = popupWidth(p.kind, size);
 
   return (
     <div
       ref={ref}
       role="dialog"
       aria-label={title[p.kind]}
+      data-size={size}
+      data-kind={p.kind}
       className={`popup ${p.kind === "reels" ? "popup-reels" : ""} ${sucked ? "sucked" : ""} ${leaving ? "leaving" : ""}`}
-      style={{ left: pos.x, top: pos.y, zIndex: 45 + (p.id % 9), viewTransitionName: `popup-${p.id}`, viewTransitionClass: "keep" } as React.CSSProperties}
+      style={{ left: pos.x, top: pos.y, width, zIndex: 45 + (p.id % 9), viewTransitionName: `popup-${p.id}`, viewTransitionClass: "keep" } as React.CSSProperties}
     >
       <div className="skin-titlebar" data-perch>
         <span className="t">{title[p.kind]}</span>
@@ -235,7 +275,7 @@ function PopupWindow({
             <img src={traits.meme} alt="" />
           </div>
         ) : (
-          <Body kind={p.kind} done={done} fake={fake} openPremium={() => { openPremium(); done(); }} />
+          <Body p={p} kind={p.kind} done={done} fake={fake} openPremium={() => { openPremium(); done(); }} />
         )}
       </div>
     </div>
@@ -243,11 +283,13 @@ function PopupWindow({
 }
 
 function Body({
+  p,
   kind,
   done,
   fake,
   openPremium,
 }: {
+  p: Popup;
   kind: Exclude<PopupKind, "game" | "reels" | "meme">;
   done: () => void;
   fake: () => void;
@@ -259,6 +301,7 @@ function Body({
         <div className="grid gap-3 text-center">
           <p className="wordart">你中了 100 萬!!!</p>
           <p>你是今天被選中的幸運兒 🎰 點下方按鈕立即領取 💰💰💰</p>
+          <Countdown />
           <button className="win-button justify-self-center" onClick={() => { fake(); done(); }}>
             立即領取 $$$
           </button>
@@ -296,7 +339,177 @@ function Body({
       return <MultiX done={done} fake={fake} />;
     case "premium":
       return <PremiumNag done={done} openPremium={openPremium} />;
+    case "ad":
+      return <VideoAd done={done} fake={fake} />;
+    case "cookie":
+      return <Cookies done={done} />;
+    case "captcha":
+      return <Captcha done={done} />;
+    case "aura":
+      return <Aura done={done} />;
+    case "error":
+      return <ErrorCascade p={p} done={done} />;
   }
+}
+
+// A pre-roll ad you cannot skip for five seconds. Clicking the ad itself is
+// a fake link, like the real thing.
+function VideoAd({ done, fake }: { done: () => void; fake: () => void }) {
+  const [left, setLeft] = useState(5);
+  useEffect(() => {
+    if (left <= 0) return;
+    const id = setTimeout(() => setLeft((v) => v - 1), 1000);
+    return () => clearTimeout(id);
+  }, [left]);
+  return (
+    <div className="vad">
+      <button className="vad-screen" onClick={fake} aria-label="廣告">
+        <span className="vad-tag">廣告 · 1/3</span>
+        <span className="vad-big">設計師都在用的<br />神奇 AI 🤯</span>
+        <span className="vad-sub">一鍵生成作品集!!!不用設計!!!不用努力!!!</span>
+        <span className="vad-cta">了解詳情 ›</span>
+        <i className="vad-bar" />
+      </button>
+      <div className="vad-foot">
+        <span>🔇 有聲廣告效果更好</span>
+        <button className="win-button" disabled={left > 0} onClick={done}>
+          {left > 0 ? `${left} 秒後可略過廣告` : "略過廣告 ⏭"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// Every option is "accept". "Manage" shows switches you cannot turn off.
+function Cookies({ done }: { done: () => void }) {
+  const [manage, setManage] = useState(false);
+  const kinds = ["必要的餅乾", "非常必要的餅乾", "追蹤你 aura 的餅乾", "狗想吃的餅乾"];
+  return manage ? (
+    <div className="grid gap-2">
+      {kinds.map((k) => (
+        <label key={k} className="flex items-center justify-between gap-3 border-b border-neutral-400 pb-1">
+          <span>🍪 {k}</span>
+          <input type="checkbox" checked disabled readOnly />
+        </label>
+      ))}
+      <p className="text-xs">(以上皆無法關閉)</p>
+      <button className="win-button justify-self-end" onClick={done}>儲存偏好設定</button>
+    </div>
+  ) : (
+    <div className="grid gap-3">
+      <p>
+        本網站與 <b>1,337</b> 個合作夥伴使用 🍪 餅乾來追蹤你的 aura、記住你看過幾次狗,以及提供你根本不需要的個人化體驗。
+      </p>
+      <div className="flex flex-wrap justify-end gap-2">
+        <button className="text-[11px] underline" onClick={() => setManage(true)}>管理偏好設定</button>
+        <button className="win-button" onClick={done}>接受全部</button>
+        <button className="win-button" style={{ fontWeight: 700 }} onClick={done}>全部接受</button>
+      </div>
+    </div>
+  );
+}
+
+// "Select every image with a dog." All of them are dogs.
+function Captcha({ done }: { done: () => void }) {
+  const tiles = ["🐶", "🐕", "🌭", "🐩", "🐶", "🦮", "🐕‍🦺", "🐶", "🐺"];
+  const [picked, setPicked] = useState<number[]>([]);
+  const [tries, setTries] = useState(0);
+  const [msg, setMsg] = useState<string | null>(null);
+  const verify = () => {
+    if (tries >= 1) {
+      setMsg("✅ 驗證失敗,但我們決定放過你");
+      setTimeout(done, 1100);
+      return;
+    }
+    setTries(1);
+    setPicked([]);
+    setMsg(picked.length === 9 ? "❌ 你選太多了。熱狗不是狗。" : "❌ 選錯了。答案:全部都是狗(包括你)");
+  };
+  return (
+    <div className="grid gap-2">
+      <div className="captcha-head">
+        <span>選出所有包含<b>狗</b>的圖片</span>
+        <small>如果沒有了,請按「驗證」</small>
+      </div>
+      <div className="captcha-grid">
+        {tiles.map((t, i) => (
+          <button
+            key={i}
+            aria-pressed={picked.includes(i)}
+            onClick={() => setPicked((v) => (v.includes(i) ? v.filter((x) => x !== i) : [...v, i]))}
+          >
+            {t}
+          </button>
+        ))}
+      </div>
+      {msg && <p className="text-xs font-bold">{msg}</p>}
+      <button className="win-button justify-self-end" onClick={verify}>驗證</button>
+    </div>
+  );
+}
+
+// Three answers, all the same. You win anyway.
+function Aura({ done }: { done: () => void }) {
+  const [res, setRes] = useState(false);
+  return res ? (
+    <div className="grid gap-2 text-center">
+      <p className="wordart">Aura +∞ 🗿</p>
+      <p>恭喜你獲得 <b>Sigma 等級</b> 認證</p>
+      <p className="text-xs">(測驗結果僅供參考,但你真的很 sigma)</p>
+      <button className="win-button justify-self-center" onClick={done}>我知道我很 sigma</button>
+    </div>
+  ) : (
+    <div className="grid gap-2">
+      <p className="font-bold">Q1 / 1:看到這個作品集,你的第一個反應是?</p>
+      {["A. 哇 好讚", "B. 哇 好讚", "C. 哇 好讚!!!"].map((a) => (
+        <button key={a} className="win-button text-left" onClick={() => setRes(true)}>{a}</button>
+      ))}
+    </div>
+  );
+}
+
+// "OK" makes two more of it; only the title bar × really closes it.
+function ErrorCascade({ p, done }: { p: Popup; done: () => void }) {
+  const addPopup = useInteractive((s) => s.addPopup);
+  const ok = () => {
+    const depth = p.depth ?? 0;
+    if (depth < 2) {
+      for (let i = 1; i <= 2; i++) {
+        addPopup({
+          kind: "error",
+          size: "s",
+          depth: depth + 1,
+          x: Math.min(innerWidth - 320, p.x + 26 * i),
+          y: Math.min(innerHeight - 200, p.y + 26 * i),
+        });
+      }
+    }
+    sound.play("error");
+    done();
+  };
+  return (
+    <div className="grid gap-3">
+      <div className="flex gap-3">
+        <span className="text-3xl" aria-hidden>⛔</span>
+        <p>
+          狗.exe 已停止運作。
+          <br />
+          <small>錯誤代碼:0x00D06 — 狗跑出來了</small>
+        </p>
+      </div>
+      <button className="win-button justify-self-end" onClick={ok}>確定</button>
+    </div>
+  );
+}
+
+// "Offer ends in 00:59", forever.
+function Countdown() {
+  const [t, setT] = useState(59);
+  useEffect(() => {
+    const id = setInterval(() => setT((v) => (v <= 1 ? 59 : v - 1)), 1000);
+    return () => clearInterval(id);
+  }, []);
+  return <p className="countdown">⏰ 限時領取 00:{String(t).padStart(2, "0")}</p>;
 }
 
 function Download({ done }: { done: () => void }) {

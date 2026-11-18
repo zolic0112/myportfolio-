@@ -83,7 +83,7 @@ export default function TabBar() {
       {/* brain rot: the tray at the right of the taskbar */}
       <div className="tab-tray rot-only">
         {junk && <button className="win-button" onClick={openPremium}>💎</button>}
-        {premium && <span>⭐</span>}
+        {premium && <button className="win-button" onClick={openPremium} aria-label="Premium">⭐</button>}
         <Clock />
       </div>
     </nav>

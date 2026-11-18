@@ -20,9 +20,16 @@ export type PopupKind =
   | "premium"
   | "game"
   | "meme"
-  | "reels";
+  | "reels"
+  | "ad"
+  | "cookie"
+  | "captcha"
+  | "aura"
+  | "error";
 
-export type Popup = { id: number; kind: PopupKind; x: number; y: number };
+/** s / m / l: how much of a big screen it takes (phones: always full width). */
+export type PopupSize = "s" | "m" | "l";
+export type Popup = { id: number; kind: PopupKind; x: number; y: number; size?: PopupSize; depth?: number };
 
 // One-shot events the canvas layers (dog engine, confetti) react to.
 type BusEvent = "release" | "suck" | "thanks" | "recall";
@@ -77,6 +84,7 @@ type State = {
   openPremium: () => void;
   closePremium: () => void;
   subscribe: () => void;
+  cancelPremium: () => void;
   addPopup: (p: Omit<Popup, "id">) => void;
   closePopup: (id: number) => void;
   launchGame: (id: string) => void;
@@ -133,6 +141,13 @@ export const useInteractive = create<State>((set, get) => ({
   },
   openPremium: () => set({ premiumOpen: true }),
   closePremium: () => set({ premiumOpen: false }),
+  cancelPremium: () => {
+    try {
+      localStorage.removeItem(PREMIUM_KEY);
+    } catch {}
+    set({ premium: false, premiumOpen: false, gaveUp: false });
+    sound.play("error");
+  },
   subscribe: () => {
     try {
       localStorage.setItem(PREMIUM_KEY, "1");
