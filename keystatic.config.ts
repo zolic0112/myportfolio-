@@ -105,6 +105,15 @@ export default config({
             description: "會出現在迷因彈窗裡,網站會自動加上 deep-fried 效果。清單是空的就不會出現。注意版權。",
           },
         ),
+        gifs: fields.array(
+          fields.url({ label: "GIPHY 連結" }),
+          {
+            label: "GIPHY 動圖",
+            description:
+              "在 giphy.com 打開喜歡的 GIF,直接複製網址列的連結貼上即可(分享連結、媒體連結也可以)。會和上面的迷因圖一起輪播,旁邊自動標示 via GIPHY。",
+            itemLabel: (p) => p.value ?? "",
+          },
+        ),
       },
     }),
   },

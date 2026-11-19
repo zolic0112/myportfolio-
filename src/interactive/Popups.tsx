@@ -260,10 +260,12 @@ function PopupWindow({
         ) : p.kind === "reels" ? (
           <Reels urls={reels} />
         ) : p.kind === "meme" ? (
-          // Your own brain rot memes, deep-fried by CSS.
+          // Your own brain rot memes and picked GIPHY GIFs, deep-fried by CSS.
           <div className="skin-media meme">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={traits.meme} alt="" />
+            <img src={traits.meme} alt="" referrerPolicy="no-referrer" />
+            {/* GIPHY asks for attribution next to its GIFs */}
+            {traits.meme.startsWith("https://i.giphy.com/") && <span className="via-giphy">via GIPHY</span>}
           </div>
         ) : (
           <Body p={p} kind={p.kind} done={done} fake={fake} openPremium={() => { openPremium(); done(); }} />

@@ -63,8 +63,31 @@ export async function getWorks(): Promise<WorkCard[]> {
 }
 
 /** Hand-curated brain rot material: shorts for the Reels popup, images for the meme popup. */
+/**
+ * Any GIPHY link → the GIF itself (animated WebP, smaller than .gif).
+ * Accepts page links (giphy.com/gifs/some-title-ID), short links
+ * (gph.is is not resolvable offline, so not supported), and media links
+ * (media*.giphy.com/media/[v1.xxx/]ID/giphy.gif, i.giphy.com/ID.gif).
+ */
+export function giphyMedia(url: string): string | null {
+  let u: URL;
+  try {
+    u = new URL(url.trim());
+  } catch {
+    return null;
+  }
+  if (!/(^|\.)giphy\.com$/.test(u.hostname)) return null;
+  const parts = u.pathname.split("/").filter(Boolean);
+  let id: string | undefined;
+  if (u.hostname === "i.giphy.com") id = parts[0]?.replace(/\.\w+$/, "");
+  else if (parts[0] === "media") id = parts.slice(1).find((p) => !p.startsWith("v1."));
+  else if (["gifs", "stickers", "embed"].includes(parts[0] ?? "")) id = parts[1]?.split("-").pop();
+  return id && /^[A-Za-z0-9]{5,40}$/.test(id) ? `https://i.giphy.com/${id}.webp` : null;
+}
+
 export async function getJunk() {
   const r = await reader.singletons.reels.read();
   const keep = (xs?: readonly (string | null)[]) => (xs ?? []).filter((u): u is string => Boolean(u));
-  return { reels: keep(r?.videos), memes: keep(r?.memes) };
+  const gifs = keep(r?.gifs).map(giphyMedia).filter((u): u is string => Boolean(u));
+  return { reels: keep(r?.videos), memes: [...keep(r?.memes), ...gifs] };
 }

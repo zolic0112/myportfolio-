@@ -3436,3 +3436,15 @@ html:active-view-transition .skin-brand .bm-eyes {
     font-size: 22px;
   }
 }
+
+.via-giphy {
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
+  padding: 1px 5px;
+  font: 700 10px/1.4 Arial, sans-serif;
+  letter-spacing: 0.04em;
+  color: #fff;
+  background: rgb(0 0 0 / 0.65);
+  pointer-events: none;
+}
