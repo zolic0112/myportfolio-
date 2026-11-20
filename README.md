@@ -67,7 +67,7 @@ public/games/               獨立建置的遊戲,用 iframe 嵌入
 ### 四語(中 / 英 / 日 / 西)
 
 - 沒有語言路由:每段要翻的文字在 DOM 裡各語言一份,由 `<html data-lang>` 決定顯示哪一份。`layout.tsx` 裡的 inline script 在第一次繪製前決定語言(記住的選擇 → 瀏覽器語言 → 英文),所以不會閃,頁面也維持靜態。導覽列有手動切換鈕。
-- 只翻正經內容(導覽、功能 UI、作品標題與說明)。Brain rot 垃圾刻意不翻。UI 字串在 `src/lib/i18n.tsx`。
+- UI 字串在 `src/lib/i18n.tsx`;Brain rot 的彈窗、Premium 視窗等垃圾文字在 `src/interactive/junk-text.tsx`,四語各自手寫在地化(是梗,不是直譯)。執行中才決定的文字用 `useT()`(`src/lib/useLang.ts`)。
 - 作品與個人資料在後台各有「翻譯」欄位(English / 日本語 / Español),留空就顯示中文。每個語言有「已校對」勾選。
 - **自動翻譯**:內容一有變動(例如在線上後台存檔),`.github/workflows/translate.yml` 會在 GitHub 的主機上跑開源模型 M2M100(MIT 授權),把還沒校對、還空著的欄位翻好再 commit 回來。不需要金鑰,也不用錢。只在預設分支上執行。已校對的語言不會被動到。
 
@@ -89,10 +89,7 @@ public/games/               獨立建置的遊戲,用 iframe 嵌入
 
 ## 需要你提供的東西
 
-- 籠子正式造型(目前是程式畫的暫代版)
-- 實際作品內容與封面
-- 素材:後台「Brain rot 素材」填 YouTube Shorts 網址(Reels 彈窗)和迷因圖(迷因彈窗),清單是空的那種彈窗就不會出現。注意版權
-- 贊助連結(Ko-fi、綠界)
+見 [`docs/TODO.md`](docs/TODO.md)(內容、翻譯校對、真機測試、上線、版權)。迷因彈窗除了上傳圖片,也可以在後台貼 GIPHY 連結(不需要 API key)。
 
 ## 部署(Vercel)
 
