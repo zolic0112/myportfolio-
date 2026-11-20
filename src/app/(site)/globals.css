@@ -2801,12 +2801,12 @@ html:active-view-transition .skin-brand .bm-eyes {
   .footer-mark .bm-corner {
     animation: bm-footer-corner linear both;
     animation-timeline: --footer-mark;
-    animation-range: entry 0% cover 40%;
+    animation-range: entry 0% entry 100%;
   }
   .footer-mark .bm-box {
     animation: bm-footer-box linear both;
     animation-timeline: --footer-mark;
-    animation-range: entry 0% cover 40%;
+    animation-range: entry 0% entry 100%;
   }
   @keyframes bm-footer-corner {
     from { transform: translate(-90px, -90px); opacity: 0; }
@@ -3447,4 +3447,22 @@ html:active-view-transition .skin-brand .bm-eyes {
   color: #fff;
   background: rgb(0 0 0 / 0.65);
   pointer-events: none;
+}
+
+/* 404 */
+.nf-mark {
+  width: 44px;
+  height: 44px;
+  color: var(--fg-strong, #eceef6);
+  opacity: 0.85;
+}
+/* the slots stay shut: the mark is "asleep" on the lost page */
+.nf-mark .bm-slot {
+  transform: scaleY(0.12);
+}
+.nf-rot {
+  font-size: clamp(36px, 8vw, 88px);
+  line-height: 1.05;
+  overflow-wrap: anywhere;
+  animation: wobble 0.4s ease-in-out infinite alternate;
 }

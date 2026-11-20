@@ -22,7 +22,15 @@ const mono = IBM_Plex_Mono({ variable: "--font-mono-face", subsets: ["latin"], w
 
 export async function generateMetadata(): Promise<Metadata> {
   const profile = await getProfile();
-  return { title: `${profile.name} | 作品集`, description: profile.tagline.en };
+  const site = process.env.NEXT_PUBLIC_SITE_URL;
+  return {
+    // Absolute URLs for the share image. On Vercel this falls back to the
+    // project's production URL by itself; set NEXT_PUBLIC_SITE_URL for a custom domain.
+    metadataBase: site ? new URL(site) : undefined,
+    title: `${profile.name} | Portfolio`,
+    description: profile.tagline.en,
+    openGraph: { type: "website", title: profile.name, description: profile.tagline.en },
+  };
 }
 
 export default async function SiteLayout({ children }: LayoutProps<"/">) {
