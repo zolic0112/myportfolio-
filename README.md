@@ -93,6 +93,8 @@ public/games/               獨立建置的遊戲,用 iframe 嵌入
 
 ## 部署(Vercel)
 
-1. 在 Vercel 匯入此 repo
+沒設定 GitHub 模式之前,正式環境的 `/keystatic` 與它的 API 會直接回 404(`src/lib/cms.ts`),網站本身照常運作;內容就在本機用後台改、commit、push。
+
+1. 在 Vercel 匯入此 repo,Production Branch 設成放最新程式的分支
 2. 依 [Keystatic GitHub mode 說明](https://keystatic.com/docs/github-mode) 建立 GitHub App,並設定它要求的環境變數
 3. 設定 `NEXT_PUBLIC_KEYSTATIC_STORAGE=github`
