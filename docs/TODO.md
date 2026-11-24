@@ -45,8 +45,11 @@
 
 ## 4. 上線(需要你的帳號)
 
-- [ ] **合併到主分支**:目前所有改動都在 `claude/new-session-l9d633`。要我開 PR 就說一聲
-- [ ] **Vercel**:匯入 repo、部署
+- [x] **建立 `main` 分支**:`main` 就是正式網站,Vercel 從它部署。之後的修改我在開發分支做完,再合併進 `main` 上線
+- [ ] GitHub repo Settings → General → Default branch 改成 `main`(自動翻譯只在預設分支上跑)
+- [ ] 確認網站正常後,可刪掉舊分支 `claude/portfolio-site-setup-clmcue`
+- [x] **Vercel**:匯入 repo、部署
+- [ ] Vercel Settings → Environments → Production → Branch Tracking 設成 `main`
 - [ ] **線上後台(Keystatic GitHub 模式)**:照 README「部署」一節建立 GitHub App,在 Vercel 設定它要的環境變數與 `NEXT_PUBLIC_KEYSTATIC_STORAGE=github`
 - [ ] **自動翻譯**:合併到主分支後,到 GitHub repo 的 Actions 頁面確認 `Translate content` 有跑、有權限 commit(Settings → Actions → Workflow permissions 要是 Read and write)
 - [ ] **網域**(選填):買好後在 Vercel 綁定
