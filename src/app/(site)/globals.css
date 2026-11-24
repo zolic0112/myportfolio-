@@ -642,7 +642,7 @@ html[data-persona="rot"][data-lang="es"] .lang-switch [data-set="es"] {
 .pet-canvas {
   position: fixed;
   left: 0;
-  top: 0;
+  bottom: 0; /* bottom-anchored like the cage: see engine.ts render() */
   z-index: 70;
   pointer-events: none;
   image-rendering: pixelated;
@@ -651,7 +651,7 @@ html[data-persona="rot"][data-lang="es"] .lang-switch [data-set="es"] {
 .pet-hit {
   position: fixed;
   left: 0;
-  top: 0;
+  bottom: 0;
   z-index: 71;
   pointer-events: none;
   touch-action: none;
@@ -3465,4 +3465,13 @@ html:active-view-transition .skin-brand .bm-eyes {
   line-height: 1.05;
   overflow-wrap: anywhere;
   animation: wobble 0.4s ease-in-out infinite alternate;
+}
+
+/* No rubber-band bounce at the ends of the page. On iOS the bounce shifts
+   every fixed layer, and the dog (positioned from the cage's on-screen
+   rectangle) would get that shift twice and pop out of its cage. Scrolling
+   inside popups and the reels feed is unaffected. */
+html,
+body {
+  overscroll-behavior-y: none;
 }

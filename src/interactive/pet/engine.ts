@@ -814,14 +814,20 @@ export class SpaceDogEngine {
       ox = Math.round(ox / cell) * cell;
       oy = Math.round(oy / cell) * cell;
     }
-    this.cv.style.transform = `translate3d(${ox}px,${oy}px,0)`;
+    // Both layers are anchored to the bottom of the viewport (see .pet-canvas),
+    // like the cage. When a phone's toolbar collapses mid-scroll the viewport
+    // grows, and the browser moves bottom-anchored layers together without
+    // waiting for script, so the dog never lags behind its cage.
+    const vh = innerHeight;
+    this.cv.style.transform = `translate3d(${ox}px,${oy - vh + size}px,0)`;
 
     // Hit box for grabbing (only live while the dog is free).
     const hx0 = xd + (HIT[0] - G[0]) * this.S;
     const hy0 = yd + (HIT[1] - G[1]) * this.S;
-    this.hit.style.transform = `translate3d(${hx0}px,${hy0}px,0)`;
+    const hh = (HIT[3] - HIT[1]) * this.S;
+    this.hit.style.transform = `translate3d(${hx0}px,${hy0 - vh + hh}px,0)`;
     this.hit.style.width = (HIT[2] - HIT[0]) * this.S + "px";
-    this.hit.style.height = (HIT[3] - HIT[1]) * this.S + "px";
+    this.hit.style.height = hh + "px";
 
     if (pixel) this.renderPixel(cell, fx, ox, oy);
     else this.renderSmooth(ox, oy);

@@ -32,7 +32,7 @@ const WEIGHTS: [PopupKind, number][] = [
 // At most one of each of these at a time.
 const SINGLE: PopupKind[] = ["premium", "game", "reels", "ad", "cookie"];
 // These always come at one size; the rest vary.
-const FIXED: Partial<Record<PopupKind, PopupSize>> = { game: "m", reels: "m", meme: "m", error: "s", ad: "l", cookie: "l" };
+const FIXED: Partial<Record<PopupKind, PopupSize>> = { game: "m", reels: "m", meme: "m", error: "s", ad: "l", cookie: "l", captcha: "s" };
 
 function pickSize(kind: PopupKind): PopupSize {
   if (FIXED[kind]) return FIXED[kind]!;
@@ -67,7 +67,8 @@ function pickKind(open: Popup[], hasReels: boolean, hasMemes: boolean): PopupKin
 function spot(kind: PopupKind = "visitor", size: PopupSize = "m") {
   const w = popupWidth(kind, size);
   // Reels is a tall 9:16 window; the video ad is 16:9; the rest are roughly this high.
-  const h = kind === "reels" ? Math.min(innerHeight * 0.62, 540) + 34 : kind === "ad" ? w * 0.5625 + 90 : w * 0.62 + 40;
+  // the captcha is a square grid plus a header, so it is taller than wide
+  const h = kind === "reels" ? Math.min(innerHeight * 0.62, 540) + 34 : kind === "ad" ? w * 0.5625 + 90 : kind === "captcha" ? w + 160 : w * 0.62 + 40;
   for (let i = 0; i < 12; i++) {
     const x = 16 + Math.random() * Math.max(0, innerWidth - w - 32);
     const y = 80 + Math.random() * Math.max(0, innerHeight - h - 92);
