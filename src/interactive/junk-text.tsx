@@ -250,6 +250,13 @@ export const J = {
 
   // ---- hatch, nav, tab bar, fx
   giveUp: { zh: "我放棄 😭", en: "I give up 😭", ja: "もう無理 😭", es: "Me rindo 😭" } as S,
+  giveUpNote: { zh: "好啦,不吵你了 😢", en: "Fine, I'll stop 😢", ja: "わかったよ、もう出さない 😢", es: "Vale, ya paro 😢" } as S,
+  giveUpHint: {
+    zh: "(只限這次,重新整理就會回來喔)",
+    en: "(this visit only. Refresh and they're back)",
+    ja: "(今回だけ。再読み込みすると戻ってきます)",
+    es: "(solo esta visita. Si recargas, vuelven)",
+  } as S,
   mute: { zh: "🔊 靜音", en: "🔊 Mute", ja: "🔊 ミュート", es: "🔊 Silenciar" } as S,
   unmute: { zh: "🔇 開聲音", en: "🔇 Sound on", ja: "🔇 音を出す", es: "🔇 Activar sonido" } as S,
   removeAds: { zh: "💎 去除廣告", en: "💎 Remove ads", ja: "💎 広告を消す", es: "💎 Quitar anuncios" } as S,

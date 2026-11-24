@@ -15,7 +15,8 @@ export type SoundName =
   | "tada"
   | "error"
   | "bark"
-  | "whine";
+  | "whine"
+  | "sad";
 
 class Sound {
   private ctx: AudioContext | null = null;
@@ -96,6 +97,11 @@ class Sound {
       case "whine":
         this.tone("sine", [900, 1500], 0, 0.18, 0.12);
         this.tone("sine", [1500, 700], 0.18, 0.3, 0.12);
+        break;
+      case "sad":
+        // wah, wah, wah, waaah
+        [[392, 370], [370, 349], [349, 330]].forEach(([a, b], i) => this.tone("sawtooth", [a, b], i * 0.32, 0.28, 0.12));
+        this.tone("sawtooth", [330, 262], 0.96, 0.9, 0.12);
         break;
       case "error":
         this.tone("square", [220, 200], 0, 0.15, 0.2);

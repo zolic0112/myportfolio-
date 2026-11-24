@@ -126,7 +126,7 @@ export default function Popups({ links, reels, memes }: Props) {
   return (
     <>
       {popups.map((p) => (
-        <PopupWindow key={p.id} p={p} links={links} reels={reels} memes={memes} sucked={sucking} />
+        <PopupWindow key={p.id} p={p} order={popups.indexOf(p)} links={links} reels={reels} memes={memes} sucked={sucking} />
       ))}
       <Clippy />
     </>
@@ -135,6 +135,7 @@ export default function Popups({ links, reels, memes }: Props) {
 
 function PopupWindow({
   p,
+  order,
   links,
   reels,
   memes,
@@ -145,6 +146,7 @@ function PopupWindow({
   reels: string[];
   memes: string[];
   sucked: boolean;
+  order: number;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   // Aim the suck-in animation at the cage centre.
@@ -184,6 +186,18 @@ function PopupWindow({
     const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
     setTimeout(() => close(p.id), reduce ? 0 : 160);
   };
+
+  // "I give up": every open window closes itself, one after another.
+  const gaveUp = useInteractive((s) => s.gaveUp);
+  const doneRef = useRef(done);
+  useEffect(() => {
+    doneRef.current = done;
+  });
+  useEffect(() => {
+    if (!gaveUp) return;
+    const id = setTimeout(() => doneRef.current(), 120 + order * 110);
+    return () => clearTimeout(id);
+  }, [gaveUp, order]);
 
   // Cat-Mario close button: runs from a hovering mouse; on touch the whole
   // window jumps somewhere else instead.

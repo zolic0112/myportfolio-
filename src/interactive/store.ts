@@ -133,7 +133,11 @@ export const useInteractive = create<State>((set, get) => ({
     }, SUCK_MS);
   },
 
-  giveUp: () => set({ gaveUp: true, popups: [] }),
+  // The open windows close themselves one by one (Popups.tsx watches gaveUp).
+  giveUp: () => {
+    set({ gaveUp: true });
+    sound.play("sad");
+  },
   toggleMute: () => {
     const muted = !get().muted;
     sound.setMuted(muted);
