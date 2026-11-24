@@ -93,8 +93,20 @@ public/games/               獨立建置的遊戲,用 iframe 嵌入
 
 ## 部署(Vercel)
 
+正式網站:https://myportfolio-pi-three-36.vercel.app/ ,Vercel 從 `main` 分支自動部署。
+
 沒設定 GitHub 模式之前,正式環境的 `/keystatic` 與它的 API 會直接回 404(`src/lib/cms.ts`),網站本身照常運作;內容就在本機用後台改、commit、push。
 
-1. 在 Vercel 匯入此 repo,Production Branch 設成放最新程式的分支
-2. 依 [Keystatic GitHub mode 說明](https://keystatic.com/docs/github-mode) 建立 GitHub App,並設定它要求的環境變數
-3. 設定 `NEXT_PUBLIC_KEYSTATIC_STORAGE=github`
+### 線上後台(Keystatic GitHub 模式)
+
+在網站上直接改內容,存檔會變成 `main` 上的一個 commit,Vercel 接著自動重新部署。設定一次就好:
+
+1. 本機專案資料夾建立 `.env.local`,內容一行:`NEXT_PUBLIC_KEYSTATIC_STORAGE=github`
+2. `npm run dev`,打開 http://localhost:3000/keystatic ,會出現設定頁
+3. 「Deployed App URL」填正式網址,按建立 GitHub App。GitHub 會開新頁,App 名稱要全 GitHub 唯一,改一個後按 Create
+4. 回到本機後,Keystatic 會把四個值寫進專案根目錄的 `.env`:`KEYSTATIC_GITHUB_CLIENT_ID`、`KEYSTATIC_GITHUB_CLIENT_SECRET`、`KEYSTATIC_SECRET`、`NEXT_PUBLIC_KEYSTATIC_GITHUB_APP_SLUG`(`.env*` 已在 `.gitignore`,不會被 commit;這些是密鑰,不要貼到任何地方)
+5. 照畫面指示把這個 GitHub App 安裝到 `zolic0112/myportfolio-`(只選這個 repo)
+6. Vercel → Settings → Environment Variables:把上面四個加上 `NEXT_PUBLIC_KEYSTATIC_STORAGE=github` 一起加進去(五個要一次加齊,缺一個建置會失敗),然後重新部署
+7. 打開 `正式網址/keystatic`,用 GitHub 登入就能編輯
+
+之後本機想回到「直接改檔案」的模式,把 `.env.local` 那一行刪掉即可。OAuth callback 網址(Keystatic 會自動設定):`/api/keystatic/github/oauth/callback`。
