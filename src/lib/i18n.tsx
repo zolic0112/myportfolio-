@@ -101,22 +101,35 @@ export const UI = {
   },
 } satisfies Record<string, L>;
 
+/**
+ * lang attribute for text that is not translated (the person's name): a
+ * name in Chinese characters stays in Chinese glyphs and font metrics when
+ * the page switches to Japanese, so it doesn't change size or shape.
+ */
+export const nameLang = (s: string) => (/[\u3400-\u9fff]/.test(s) ? "zh-Hant" : "en");
+
 /** Fill missing translations with the source (Chinese) text. */
 export function withFallback(zh: string, t?: Partial<Record<Lang, string | null | undefined>>): L {
   return { zh, en: t?.en || zh, ja: t?.ja || zh, es: t?.es || zh };
 }
 
-/** Translated inline text. Works in server and client components. */
-export function T({ v }: { v: L }) {
+/**
+ * Translated inline text. Works in server and client components.
+ *
+ * `stack`: lay every language over the others in one grid cell, the inactive
+ * ones invisible but still taking space. The box is then as big as the
+ * longest translation whatever the language, so switching language never
+ * moves what comes after it. Use it for lines whose length differs a lot
+ * between languages (headlines, ledes): "block" for a paragraph of its own,
+ * "inline" inside a line.
+ */
+export function T({ v, stack }: { v: L; stack?: "block" | "inline" }) {
   // Same text in every language: nothing to switch.
   if (v.en === v.zh && v.ja === v.zh && v.es === v.zh) return <>{v.zh}</>;
-  return (
-    <>
-      {LANGS.map((l) => (
-        <span key={l} data-l={l} lang={HTML_LANG[l]}>
-          {v[l]}
-        </span>
-      ))}
-    </>
-  );
+  const spans = LANGS.map((l) => (
+    <span key={l} data-l={l} lang={HTML_LANG[l]}>
+      {v[l]}
+    </span>
+  ));
+  return stack ? <span className={`t-stack ${stack}`}>{spans}</span> : <>{spans}</>;
 }

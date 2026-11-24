@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useInteractive, useJunkOn } from "@/interactive/store";
-import { T, UI } from "@/lib/i18n";
+import { nameLang, T, UI } from "@/lib/i18n";
 import { useT } from "@/lib/useLang";
 import { J } from "@/interactive/junk-text";
 import BrandMark from "./BrandMark";
@@ -31,7 +31,7 @@ export default function Nav({ name }: { name: string }) {
         <Link href="/" transitionTypes={["nav-back"]} className="skin-brand flex min-w-0 flex-1 items-center gap-2.5" aria-label={name}>
           <BrandMark follow />
           <span className="truncate">
-            {name}
+            <span lang={nameLang(name)}>{name}</span>
             <span className="brand-sub cool-only"> / PORTFOLIO</span>
           </span>
         </Link>

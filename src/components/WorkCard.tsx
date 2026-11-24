@@ -47,8 +47,9 @@ export default function WorkCard({ work, size = "md", glass, className = "" }: P
           {work.year ? ` · ${work.year}` : ""}
           {work.playable && <> · ▶ <T v={UI.playable} /></>}
         </p>
-        <h3 className={`skin-card-title mt-2 ${size === "lg" ? "sm:text-3xl" : ""}`}><T v={work.title} /></h3>
-        <p className="mt-2 line-clamp-2 text-sm text-muted"><T v={work.summary} /></p>
+        <h3 className={`skin-card-title mt-2 ${size === "lg" ? "sm:text-3xl" : ""}`}><T v={work.title} stack="block" /></h3>
+        {/* always two lines tall, so cards keep their height in every language */}
+        <p className="mt-2 line-clamp-2 min-h-[2lh] text-sm text-muted"><T v={work.summary} /></p>
       </div>
     </Link>
   );

@@ -85,6 +85,26 @@ html[data-lang="ja"] [data-l]:not([data-l="ja"]),
 html[data-lang="es"] [data-l]:not([data-l="es"]) {
   display: none !important;
 }
+/* <T stack>: all languages in one cell, the others hidden but sized */
+.t-stack {
+  display: grid;
+}
+.t-stack.inline {
+  display: inline-grid;
+}
+.t-stack > [data-l] {
+  grid-area: 1 / 1;
+}
+html[data-lang="zh"] .t-stack > [data-l]:not([data-l="zh"]),
+html[data-lang="en"] .t-stack > [data-l]:not([data-l="en"]),
+html[data-lang="ja"] .t-stack > [data-l]:not([data-l="ja"]),
+html[data-lang="es"] .t-stack > [data-l]:not([data-l="es"]) {
+  display: block !important;
+  visibility: hidden;
+}
+html[data-lang] .t-stack.inline > [data-l] {
+  display: inline !important;
+}
 .lang-switch {
   display: inline-flex;
   border: 1px solid var(--border);
@@ -2012,18 +2032,20 @@ html[data-persona="cool"][data-lang="es"] .lang-switch [data-set="es"] {
   letter-spacing: 0;
   color: rgb(255 255 255 / 0.6);
 }
-/* CJK does not take negative tracking: open it up a touch instead */
-html[data-persona="cool"][data-lang="zh"] .skin-h1,
-html[data-persona="cool"][data-lang="ja"] .skin-h1 {
+/* CJK does not take negative tracking: open it up a touch instead.
+   Keyed on the text's own language (:lang), not the page's, so the name,
+   which is the same in every language, keeps one size when you switch. */
+html[data-persona="cool"] .skin-h1:lang(zh),
+html[data-persona="cool"] .skin-h1:lang(ja) {
   letter-spacing: 0.02em;
   line-height: 1.12;
 }
-html[data-persona="cool"][data-lang="zh"] .skin-h2,
-html[data-persona="cool"][data-lang="ja"] .skin-h2 {
+html[data-persona="cool"] .skin-h2:lang(zh),
+html[data-persona="cool"] .skin-h2:lang(ja) {
   letter-spacing: 0.02em;
 }
-html[data-persona="cool"][data-lang="zh"] .skin-card-title,
-html[data-persona="cool"][data-lang="ja"] .skin-card-title {
+html[data-persona="cool"] .skin-card-title:lang(zh),
+html[data-persona="cool"] .skin-card-title:lang(ja) {
   letter-spacing: 0;
 }
 [data-persona="cool"] .ph span {
@@ -3500,4 +3522,42 @@ body {
 @keyframes giveup-fade {
   0%, 90% { opacity: 1; }
   100% { opacity: 0; }
+}
+
+/* Filtering the works changes how tall the list is. Everything after it
+   (contact, footer) glides to its new place with the cards instead of
+   jumping there. Only for that transition type (React passes it along). */
+html:active-view-transition-type(works-filter) #contact {
+  view-transition-name: wb-after;
+}
+html:active-view-transition-type(works-filter) .skin-footer {
+  view-transition-name: wb-footer;
+}
+::view-transition-group(wb-after),
+::view-transition-group(wb-footer) {
+  animation-duration: 520ms;
+  animation-timing-function: var(--m-out, ease-out);
+}
+::view-transition-old(wb-after),
+::view-transition-old(wb-footer) {
+  display: none;
+}
+::view-transition-new(wb-after),
+::view-transition-new(wb-footer) {
+  animation: none;
+}
+
+/* An eyebrow whose text is a language stack: the "//" stays beside it and
+   the text wraps inside its own column (a hanging indent), instead of the
+   whole box dropping under the "//" on narrow screens. */
+.skin-eyebrow:has(> .t-stack) {
+  display: flex;
+  align-items: baseline;
+}
+[data-persona="cool"] .skin-eyebrow:has(> .t-stack)::before {
+  flex: none;
+  white-space: pre;
+}
+.skin-eyebrow > .t-stack.inline {
+  min-width: 0;
 }

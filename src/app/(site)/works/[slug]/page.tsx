@@ -81,8 +81,8 @@ export default async function WorkPage({ params }: PageProps<"/works/[slug]">) {
           {work.year ? ` · ${work.year}` : ""}
           {work.role && <> · <T v={role} /></>}
         </p>
-        <h1 className="skin-h1 work-title mt-3 text-5xl sm:text-6xl" data-vt="work-title" style={{ viewTransitionName: "work-title" }}><T v={title} /></h1>
-        <p className="skin-lede mt-4 text-lg leading-8"><T v={summary} /></p>
+        <h1 className="skin-h1 work-title mt-3 text-5xl sm:text-6xl" data-vt="work-title" style={{ viewTransitionName: "work-title" }}><T v={title} stack="block" /></h1>
+        <p className="skin-lede mt-4 text-lg leading-8"><T v={summary} stack="block" /></p>
         {work.tags.length > 0 && (
           <ul className="mt-5 flex flex-wrap gap-2">
             {work.tags.map((tag) => (
