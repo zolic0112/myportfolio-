@@ -10,6 +10,11 @@
 
 :root {
   --font-sans-tc: "Noto Sans TC";
+  /* the old per-role faces (no longer downloaded): the cool side points
+     them all at Zev Hei; these are only fallbacks for anything else */
+  --font-grotesk: system-ui, sans-serif;
+  --font-serif: serif;
+  --font-mono-face: ui-monospace, monospace;
 }
 :root,
 [data-persona="cool"] {
@@ -3560,4 +3565,120 @@ html:active-view-transition-type(works-filter) .skin-footer {
 }
 .skin-eyebrow > .t-stack.inline {
   min-width: 0;
+}
+
+/* ==========================================================================
+   Cool side type system: one family, Zev Hei TC (宙黑體, variant N), for
+   Chinese, Japanese and Latin alike (its Latin is Mona Sans). Hierarchy comes
+   from size and weight only. The weight axis runs 200–900:
+
+     display    h1               200   very large, tight
+     heading    h2               300
+     title      card / work      500
+     body       text, lede       350   lede one step lighter in colour
+     label      eyebrow, meta    500   small, uppercase Latin, wide tracking
+     control    nav, buttons     500
+     numeral    years, metrics   500   tabular figures
+
+   All the older font variables point at it here, so every rule that named
+   Space Grotesk, Instrument Serif or IBM Plex Mono now gets Zev Hei. The
+   brain rot side keeps its deliberately ugly system fonts.
+   ========================================================================== */
+html[data-persona="cool"] {
+  --font-zev: "ZevHeiTC-N Web", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
+  --font-grotesk: var(--font-zev);
+  --font-serif: var(--font-zev);
+  --font-mono-face: var(--font-zev);
+  --font-sans-tc: "ZevHeiTC-N Web";
+  --font-display: var(--font-zev);
+  --font-body: var(--font-zev);
+  font-family: var(--font-zev);
+  font-weight: 350;
+  font-kerning: normal;
+}
+html[data-persona="cool"] body {
+  font-family: var(--font-zev);
+  font-weight: 350;
+}
+
+/* display / headings / titles */
+html[data-persona="cool"] .skin-h1 {
+  font-family: var(--font-zev);
+  font-weight: 200;
+  letter-spacing: -0.025em;
+  line-height: 1.04;
+}
+html[data-persona="cool"] .skin-h2 {
+  font-family: var(--font-zev);
+  font-weight: 300;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+}
+html[data-persona="cool"] .skin-card-title {
+  font-family: var(--font-zev);
+  font-weight: 500;
+  letter-spacing: -0.005em;
+}
+/* CJK: no negative tracking, a little more leading */
+html[data-persona="cool"] .skin-h1:lang(zh),
+html[data-persona="cool"] .skin-h1:lang(ja) {
+  letter-spacing: 0.01em;
+  line-height: 1.12;
+}
+html[data-persona="cool"] .skin-h2:lang(zh),
+html[data-persona="cool"] .skin-h2:lang(ja),
+html[data-persona="cool"] .skin-card-title:lang(zh),
+html[data-persona="cool"] .skin-card-title:lang(ja) {
+  letter-spacing: 0.02em;
+}
+
+/* body */
+html[data-persona="cool"] .skin-lede {
+  font-family: var(--font-zev);
+  font-weight: 300;
+  letter-spacing: 0;
+}
+html[data-persona="cool"] .skin-prose {
+  font-family: var(--font-zev);
+  font-weight: 350;
+  line-height: 1.85;
+}
+html[data-persona="cool"] .skin-prose :is(h2, h3, strong, b) {
+  font-weight: 600;
+}
+
+/* labels: small, medium weight, uppercase Latin, wide tracking */
+html[data-persona="cool"] :is(.skin-eyebrow, .skin-meta, .skin-tag, .metric-chip dt, .status-bar, .cage-tag, .skin-footer) {
+  font-family: var(--font-zev);
+  font-weight: 500;
+  font-style: normal;
+}
+html[data-persona="cool"] :is(.skin-eyebrow, .skin-meta) {
+  letter-spacing: 0.22em;
+}
+html[data-persona="cool"] .skin-footer {
+  letter-spacing: 0.28em;
+}
+
+/* controls */
+html[data-persona="cool"] :is(.skin-nav a, .skin-btn, .skin-chip, .lang-switch button, .tab) {
+  font-family: var(--font-zev);
+  font-weight: 500;
+}
+html[data-persona="cool"] .skin-brand {
+  font-family: var(--font-zev);
+  font-weight: 500;
+  letter-spacing: 0.06em;
+}
+html[data-persona="cool"] .brand-sub {
+  font-weight: 350;
+}
+
+/* numerals line up */
+html[data-persona="cool"] :is(.num, .metric-chip dd, .skin-meta, .skin-eyebrow) {
+  font-variant-numeric: tabular-nums;
+}
+html[data-persona="cool"] .metric-chip dd {
+  font-family: var(--font-zev);
+  font-weight: 500;
 }

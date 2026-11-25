@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Space_Grotesk, Instrument_Serif, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
@@ -11,14 +10,11 @@ import MorphNames from "@/interactive/MorphNames";
 import { getJunk, getProfile } from "@/lib/content";
 import { LANG_SCRIPT, T, UI } from "@/lib/i18n";
 
-const grotesk = Space_Grotesk({ variable: "--font-grotesk", subsets: ["latin"], weight: ["300", "400", "500"] });
-const serif = Instrument_Serif({ variable: "--font-serif", subsets: ["latin"], weight: "400", style: ["normal", "italic"] });
-// CJK glyphs for the thin display headings (Space Grotesk is Latin only).
-// Noto Sans TC is loaded by the browser from Google Fonts instead of through
-// next/font: it comes in ~100 unicode-range slices per weight, and having the
-// build download all of them fails on slow or filtered networks.
-const SANS_TC_CSS = "https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500&display=swap";
-const mono = IBM_Plex_Mono({ variable: "--font-mono-face", subsets: ["latin"], weight: ["300", "400", "500"] });
+// The site typeface: Zev Hei TC (宙黑體, variant N), self-hosted in
+// public/fonts/zev-hei (SIL OFL 1.1). Its CSS splits the font into ~150
+// unicode-range slices, so a page downloads only the slices for the
+// characters it shows.
+const ZEV_HEI_CSS = "/fonts/zev-hei/css/zevheitc_n.css";
 
 export async function generateMetadata(): Promise<Metadata> {
   const profile = await getProfile();
@@ -43,12 +39,10 @@ export default async function SiteLayout({ children }: LayoutProps<"/">) {
       data-lang="en"
       data-persona="cool"
       suppressHydrationWarning
-      className={`${grotesk.variable} ${serif.variable} ${mono.variable} h-full antialiased`}
+      className="h-full antialiased"
     >
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-        <link rel="stylesheet" href={SANS_TC_CSS} />
+        <link rel="stylesheet" href={ZEV_HEI_CSS} />
       </head>
       <body className="flex min-h-full flex-col">
         {/* Pick the language before first paint (see lib/i18n). */}
