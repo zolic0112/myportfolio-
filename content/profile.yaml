@@ -1,15 +1,13 @@
-name: 你的名字
-title: 互動設計師
-tagline: 我做會動、會玩、會回應你的介面。
-email: you@example.com
+name: LiamZ
+title: 數位設計師
+tagline: 我做各種亂七八糟的東西
+email: kchow348@gmail.com
 links:
   - label: GitHub
     url: https://github.com/zolic0112
-sponsorUrl:
-sponsorUrlTw:
 i18n:
   en:
-    title: Interaction designer
+    title: Digital designer
     tagline: I make interfaces that move, play, and answer back.
     reviewed: false
   ja:
