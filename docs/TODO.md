@@ -50,7 +50,7 @@
 - [x] 確認網站正常後,可刪掉舊分支 `claude/portfolio-site-setup-clmcue`
 - [x] **Vercel**:匯入 repo、部署 → https://myportfolio-pi-three-36.vercel.app/
 - [x] Vercel Settings → Environments → Production → Branch Tracking 設成 `main`
-- [ ] **線上後台(Keystatic GitHub 模式)**:照 README「部署」一節建立 GitHub App,在 Vercel 設定它要的環境變數與 `NEXT_PUBLIC_KEYSTATIC_STORAGE=github`
+- [x] **線上後台(Keystatic GitHub 模式)**:照 README「部署」一節建立 GitHub App,在 Vercel 設定它要的環境變數與 `NEXT_PUBLIC_KEYSTATIC_STORAGE=github`
 - [ ] **自動翻譯**:合併到主分支後,到 GitHub repo 的 Actions 頁面確認 `Translate content` 有跑、有權限 commit(Settings → Actions → Workflow permissions 要是 Read and write)
 - [ ] **網域**(選填):買好後在 Vercel 綁定
 - [ ] 綁了自己的網域的話,在 Vercel 加環境變數 `NEXT_PUBLIC_SITE_URL=https://你的網域`,分享連結時的預覽圖才會指向正確網址
