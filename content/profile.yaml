@@ -8,13 +8,13 @@ links:
 i18n:
   en:
     title: Digital designer
-    tagline: I make interfaces that move, play, and answer back.
+    tagline: I make all kinds of chaotic stuff.
     reviewed: false
   ja:
-    title: インタラクションデザイナー
-    tagline: 動いて、遊べて、応えてくれるインターフェースを作っています。
+    title: デジタルデザイナー
+    tagline: いろんなハチャメチャなものを作っています。
     reviewed: false
   es:
-    title: Diseñador de interacción
-    tagline: Hago interfaces que se mueven, juegan y te responden.
+    title: Diseñador digital
+    tagline: Hago todo tipo de cosas caóticas.
     reviewed: false

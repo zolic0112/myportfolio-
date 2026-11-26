@@ -6,8 +6,18 @@
 //   npm run translate              only empty fields
 //   npm run translate -- --force   redo every unreviewed translation
 //   npm run translate -- --dry     just list what's missing
+//   npm run translate -- --adopt   take the existing translations as up to
+//                                  date (record their source, translate
+//                                  nothing): for translations written by hand
 //
 // A language marked "已校對" (reviewed: true) in the CMS is never touched.
+//
+// Changing the Chinese re-translates: content/.translation-sources.json
+// remembers which version of the Chinese each machine translation was made
+// from (a short hash per entry, language and field). When the Chinese no
+// longer matches, the unreviewed translation is redone. A field with no
+// record yet is treated as stale too. Reviewed languages are left alone but
+// listed in the log when their Chinese has changed, so you know to re-check.
 // The site only ever reads the saved text, so layout is unaffected.
 //
 // Engine: M2M100 (418M, MIT licence), an open model that runs locally through
@@ -15,6 +25,7 @@
 // (a few hundred MB) into node_modules/.cache. To try another engine, replace
 // translateText() below; TRANSLATE_MODEL overrides the model id.
 
+import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import * as yaml from "js-yaml";
@@ -24,7 +35,14 @@ const MODEL = process.env.TRANSLATE_MODEL || "Xenova/m2m100_418M";
 const args = new Set(process.argv.slice(2));
 const DRY = args.has("--dry");
 const FORCE = args.has("--force");
+const ADOPT = args.has("--adopt");
 const root = path.resolve(import.meta.dirname, "..", "content");
+
+// which Chinese each translation was made from
+const sourcesPath = path.join(root, ".translation-sources.json");
+const sources = fs.existsSync(sourcesPath) ? JSON.parse(fs.readFileSync(sourcesPath, "utf8")) : {};
+const seen = new Set();
+const hash = (s) => crypto.createHash("sha1").update(String(s).trim()).digest("hex").slice(0, 12);
 
 let pipe;
 /** Translate one piece of Chinese text. Paragraphs go through one at a time. */
@@ -62,8 +80,18 @@ async function fillEntry(name, data, source) {
   const todo = {};
   for (const lang of LANGS) {
     const t = (data.i18n[lang] ??= {});
-    if (t.reviewed) continue;
-    const missing = Object.keys(source).filter((k) => source[k] && (FORCE || !t[k]));
+    for (const k of Object.keys(source)) if (source[k]) seen.add(`${name}:${lang}:${k}`);
+    const stale = (k) => sources[`${name}:${lang}:${k}`] !== hash(source[k]);
+    if (t.reviewed) {
+      const changedSrc = Object.keys(source).filter((k) => source[k] && t[k] && sources[`${name}:${lang}:${k}`] && stale(k));
+      if (changedSrc.length) console.log(`${name}: ${lang} is marked reviewed, but its Chinese changed (${changedSrc.join(", ")}). Re-check it in /keystatic.`);
+      continue;
+    }
+    if (ADOPT) {
+      for (const k of Object.keys(source)) if (source[k] && t[k]) sources[`${name}:${lang}:${k}`] ??= hash(source[k]);
+      continue;
+    }
+    const missing = Object.keys(source).filter((k) => source[k] && (FORCE || !t[k] || stale(k)));
     if (missing.length) todo[lang] = missing;
   }
   const langs = Object.keys(todo);
@@ -74,6 +102,7 @@ async function fillEntry(name, data, source) {
     for (const k of todo[lang]) {
       const src = String(source[k]);
       data.i18n[lang][k] = needsTranslation(src) ? await translateText(src, lang) : src;
+      sources[`${name}:${lang}:${k}`] = hash(src);
     }
     data.i18n[lang].reviewed = false;
   }
@@ -107,6 +136,14 @@ for (const file of fs.readdirSync(worksDir).filter((f) => f.endsWith(".mdoc")).s
   });
   if (n) fs.writeFileSync(full, `---\n${dump(data)}---\n${m[2]}`);
   changed += n;
+}
+
+// remember the sources; forget entries that no longer exist
+if (!DRY) {
+  if (ADOPT) console.log("Adopted the existing translations as up to date.");
+  const kept = Object.fromEntries(Object.entries(sources).filter(([k]) => seen.has(k)).sort(([a], [b]) => a.localeCompare(b)));
+  const next = JSON.stringify(kept, null, 2) + "\n";
+  if (!fs.existsSync(sourcesPath) || fs.readFileSync(sourcesPath, "utf8") !== next) fs.writeFileSync(sourcesPath, next);
 }
 
 console.log(DRY ? "Dry run: nothing written." : changed ? `Done: ${changed} translation(s) written. Review them in /keystatic.` : "Everything is already translated.");
