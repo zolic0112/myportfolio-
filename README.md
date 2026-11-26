@@ -77,7 +77,9 @@ public/games/               獨立建置的遊戲,用 iframe 嵌入
   npm run translate
   ```
 
-  `--force` 重翻所有未校對的,`--dry` 只列出缺什麼。M2M100 的品質只算堪用,口語和專有名詞常翻錯,翻完請到後台檢查並勾「已校對」。要換引擎改 `scripts/translate.mjs` 的 `translateText()`,或設 `TRANSLATE_MODEL`。
+  **中文改了會自動重翻**:`content/.translation-sources.json` 記住每段翻譯是根據哪一版中文翻的(每個作品、語言、欄位一個短雜湊)。中文變了,沒勾「已校對」的語言就會重翻;勾了的不會被動到,但記錄裡會提醒你回頭檢查。這個檔案由腳本維護,不用手動改。
+
+  `--force` 重翻所有未校對的,`--dry` 只列出缺什麼,`--adopt` 把現有翻譯直接登記為「與目前中文一致」(手寫翻譯後用)。M2M100 的品質只算堪用,口語和專有名詞常翻錯,翻完請到後台檢查並勾「已校對」。要換引擎改 `scripts/translate.mjs` 的 `translateText()`,或設 `TRANSLATE_MODEL`。
 
 ### 贊助(Premium 訂閱頁)
 

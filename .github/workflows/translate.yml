@@ -38,7 +38,8 @@ jobs:
       - run: npm run translate
       - name: Commit translations
         run: |
-          if git diff --quiet -- content; then
+          # status, not diff: also sees new files (the translation-sources record)
+          if [ -z "$(git status --porcelain -- content)" ]; then
             echo "Nothing to translate."
             exit 0
           fi
