@@ -1,10 +1,11 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useState } from "react";
 import { games } from "@/games/registry";
 import { T, UI } from "@/lib/i18n";
 import { useT } from "@/lib/useLang";
 import { J } from "./junk-text";
+import ModalDialog from "./ModalDialog";
 import { usePresence } from "./presence";
 import { useInteractive } from "./store";
 
@@ -12,13 +13,6 @@ export default function GameOverlay() {
   const activeGame = useInteractive((s) => s.activeGame);
   const closeGame = useInteractive((s) => s.closeGame);
   const t = useT();
-
-  useEffect(() => {
-    if (!activeGame) return;
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && closeGame();
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [activeGame, closeGame]);
 
   // Remember the last game so the window can animate out after it is closed.
   const [last, setLast] = useState(activeGame);
@@ -29,12 +23,11 @@ export default function GameOverlay() {
   const Game = entry.component;
 
   return (
-    <div
-      role="dialog"
-      aria-label={entry.title}
-      data-state={state}
-      className="vt-backdrop fixed inset-0 z-[56] flex items-center justify-center bg-black/60 p-4"
-      onClick={closeGame}
+    <ModalDialog
+      label={entry.title}
+      state={state}
+      onClose={closeGame}
+      className="vt-backdrop flex items-center justify-center bg-black/60 p-4"
     >
       <div
         data-state={state}
@@ -52,6 +45,6 @@ export default function GameOverlay() {
           <Game onExit={closeGame} />
         </Suspense>
       </div>
-    </div>
+    </ModalDialog>
   );
 }

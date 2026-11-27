@@ -8,6 +8,7 @@ import { useInteractive, useJunkOn } from "@/interactive/store";
 import { T, UI, type L } from "@/lib/i18n";
 import { placeholderHue } from "@/lib/labels";
 import AdGate from "./AdGate";
+import ModalDialog from "@/interactive/ModalDialog";
 import { usePresence } from "@/interactive/presence";
 
 type Embed =
@@ -129,7 +130,6 @@ function Gallery({ images }: { images: string[] }) {
   useEffect(() => {
     if (open === null) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(null);
       if (e.key === "ArrowRight") setOpen((i) => (i! + 1) % images.length);
       if (e.key === "ArrowLeft") setOpen((i) => (i! - 1 + images.length) % images.length);
     };
@@ -146,11 +146,12 @@ function Gallery({ images }: { images: string[] }) {
         ))}
       </div>
       {mounted && (
-        <div role="dialog" aria-label={t(UI.image)} data-state={state} className="vt-backdrop fixed inset-0 z-[56] grid place-items-center bg-black/85 p-4" onClick={() => setOpen(null)}>
-          <div data-state={state} className="vt-sheet relative h-[85vh] w-full max-w-5xl">
+        <ModalDialog label={t(UI.image)} state={state} onClose={() => setOpen(null)} className="vt-backdrop grid place-items-center bg-black/85 p-4">
+          {/* clicking the picture closes it too, as before */}
+          <div data-state={state} className="vt-sheet relative h-[85vh] w-full max-w-5xl" onClick={() => setOpen(null)}>
             <Image key={shownIdx} src={images[shownIdx]} alt={`${t(UI.image)} ${shownIdx + 1}`} fill className="vt-step object-contain" sizes="100vw" />
           </div>
-        </div>
+        </ModalDialog>
       )}
     </>
   );

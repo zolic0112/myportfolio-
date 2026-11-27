@@ -5,6 +5,8 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useInteractive, useJunkOn } from "@/interactive/store";
 import { T, UI } from "@/lib/i18n";
+import { useT } from "@/lib/useLang";
+import { J } from "@/interactive/junk-text";
 import BrandMark from "./BrandMark";
 
 type Tab = "home" | "works" | "contact";
@@ -16,6 +18,7 @@ export default function TabBar() {
   const path = usePathname();
   const openPremium = useInteractive((s) => s.openPremium);
   const premium = useInteractive((s) => s.premium);
+  const tr = useT();
   const junk = useJunkOn();
   const [section, setSection] = useState<Tab>("home");
   const [compact, setCompact] = useState(false);
@@ -82,7 +85,7 @@ export default function TabBar() {
       </div>
       {/* brain rot: the tray at the right of the taskbar */}
       <div className="tab-tray rot-only">
-        {junk && <button className="win-button" onClick={openPremium}>💎</button>}
+        {junk && <button className="win-button" onClick={openPremium} aria-label={tr(J.removeAds)}>💎</button>}
         {premium && <button className="win-button" onClick={openPremium} aria-label="Premium">⭐</button>}
         <Clock />
       </div>

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useT } from "@/lib/useLang";
 import { J } from "./junk-text";
+import ModalDialog from "./ModalDialog";
 import { usePresence } from "./presence";
 import { useInteractive } from "./store";
 
@@ -61,12 +62,11 @@ function Modal({ sponsor, state }: { sponsor: Sponsor; state: "open" | "closed" 
   };
 
   return (
-    <div
-      role="dialog"
-      aria-label={t(J.pmLabel)}
-      data-state={state}
-      className="vt-backdrop fixed inset-0 z-[55] grid place-items-center overflow-y-auto bg-black/60 p-4"
-      onClick={close}
+    <ModalDialog
+      label={t(J.pmLabel)}
+      state={state}
+      onClose={close}
+      className="vt-backdrop grid place-items-center overflow-y-auto bg-black/60 p-4"
     >
       <div data-state={state} className="vt-sheet popup !static !w-[min(760px,100%)]" onClick={(e) => e.stopPropagation()}>
         <div className="skin-titlebar">
@@ -172,6 +172,6 @@ function Modal({ sponsor, state }: { sponsor: Sponsor; state: "open" | "closed" 
           )}
         </div>
       </div>
-    </div>
+    </ModalDialog>
   );
 }
